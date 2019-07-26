@@ -278,6 +278,7 @@
   "https://github.com/apple/swift-nio-transport-services.git",
   "https://github.com/apple/swift-nio.git",
   "https://github.com/apple/swift-protobuf.git",
+  "https://github.com/armadsen/ORSSerialPort.git",
   "https://github.com/arn00s/caralho.git",
   "https://github.com/arn00s/cariocamenu.git",
   "https://github.com/artman/Signals.git",
