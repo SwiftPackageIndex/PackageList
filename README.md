@@ -12,3 +12,8 @@ e.g. like so:
 ```shell
 jq -e . packages.json  > /dev/null
 ```
+
+Make sure the list is in alphabetical order before merging with the master:
+```shell
+echo "$(jq -e 'sort' packages.json)" > packages.json
+```
