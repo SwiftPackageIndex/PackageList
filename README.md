@@ -6,6 +6,8 @@ Please fork this repository, add any libraries that support **Swift 4.0 or later
 
 If you plan to submit a set of packages, there is no need to submit each package in a separate PR. Please feel free to bundle multiple in a single.
 
+**Note:** There's no gatekeeping or quality threshold to be included in this list. As long as your package has a Package.swift file, supports Swift 4 (or greater) and is open source, it'll be included.
+
 To validate the JSON in your submission you can use
 [jq](https://stedolan.github.io/jq/),
 e.g. like so:
