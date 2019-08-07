@@ -10,6 +10,7 @@ Please do submit your own, or other people's repositories to this list. There ar
 
 * Packages must have a Package.swift file (obviously?) in the root of the repository.
 * Packages must be written in **Swift 4.0 or later**.
+* Packages should compile without errors. Actually, this isn't a strict requirement but it's probably a good idea since you're about to add it to a package directory.
 * Packages should output valid JSON when `swift package dump-package` is run with the latest version of the Swift tools. Please check that you can execute this command in the root of the package directory before submitting.
 * The full HTTPS clone URL for the repository should be submitted, including the .git extension.
 * Packages can be on *any* publicly available git repository, not just GitHub. Just add the full HTTPS clone URL.
@@ -25,7 +26,7 @@ It's simple. Just fork this repository, edit the JSON, and submit a pull request
 Please validate and sort the JSON before submitting packages for inclusion. You can use [jq](https://stedolan.github.io/jq/) to easily do this. To validate:
 
 ```shell
-jq -e . packages.json  > /dev/null
+jq -e . packages.json > /dev/null
 ```
 
 Them, to sort:
