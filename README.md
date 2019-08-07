@@ -29,7 +29,7 @@ Please validate and sort the JSON before submitting packages for inclusion. You 
 jq -e . packages.json > /dev/null
 ```
 
-Them, to sort:
+Then, to sort:
 
 ```shell
 echo "$(jq 'sort_by(ascii_downcase)' packages.json)" > packages.json
