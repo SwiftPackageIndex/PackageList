@@ -1,3 +1,5 @@
+Do you maintain a Swift package? [I'd love to get your opinion on an idea](https://iosdevweekly.typeform.com/to/ucVOvf).
+
 # The SwiftPM Library
 
 This repository powers the list of packages indexed and monitored by the [SwiftPM Library](https://swiftpm.co). The intention of this repository is to build a *complete* list of packages that support the Swift Package Manager.
