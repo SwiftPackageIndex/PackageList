@@ -6,3 +6,4 @@ script:
   - jq -e . packages.json > /dev/null
   - echo "$(jq 'sort_by(ascii_downcase)' packages.json)" > packages.sorted.json
   - diff packages.json packages.sorted.json
+  
