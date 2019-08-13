@@ -1007,5 +1007,6 @@
   "https://github.com/zhengbomo/UpgradeManager.git",
   "https://github.com/zonble/ActiveDays.git",
   "https://github.com/zonble/ZBSimplePluginManager.git",
-  "https://github.com/zoul/generic-json-swift.git"
+  "https://github.com/zoul/generic-json-swift.git",
+  "https://github.com/cmtrounce/SwURL"
 ]
