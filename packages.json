@@ -149,6 +149,7 @@
   "https://github.com/ckanchan/CDKOraccInterface.git",
   "https://github.com/ckanchan/CDKSwiftOracc.git",
   "https://github.com/cloudant/swift-cloudant.git",
+  "https://github.com/cmtrounce/SwURL.git",
   "https://github.com/coinbase/coinbase-ios-sdk.git",
   "https://github.com/commercetools/commercetools-ios-sdk.git",
   "https://github.com/contentful/contentful-persistence.swift.git",
@@ -1007,6 +1008,5 @@
   "https://github.com/zhengbomo/UpgradeManager.git",
   "https://github.com/zonble/ActiveDays.git",
   "https://github.com/zonble/ZBSimplePluginManager.git",
-  "https://github.com/zoul/generic-json-swift.git",
-  "https://github.com/cmtrounce/SwURL.git"
+  "https://github.com/zoul/generic-json-swift.git"
 ]
