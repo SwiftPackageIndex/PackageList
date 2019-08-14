@@ -1031,5 +1031,9 @@
   "https://github.com/zhengbomo/UpgradeManager.git",
   "https://github.com/zonble/ActiveDays.git",
   "https://github.com/zonble/ZBSimplePluginManager.git",
-  "https://github.com/zoul/generic-json-swift.git"
+  "https://github.com/zoul/generic-json-swift.git",
+  "https://github.com/Adorkable/swift-log-format-and-pipe.git",
+  "https://github.com/fanpyi/UICollectionViewLeftAlignedLayout-Swift.git",
+  "https://github.com/thii/FontAwesome.swift.git",
+  "https://github.com/Adorkable/Eunomia.git"
 ]
