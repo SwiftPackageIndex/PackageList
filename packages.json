@@ -16,6 +16,8 @@
   "https://github.com/abdullahselek/TakeASelfie.git",
   "https://github.com/aciidb0mb3r/SwiftMQTT.git",
   "https://github.com/AckeeCZ/Tezos-iOS-Dev-Kit.git",
+  "https://github.com/Adorkable/Eunomia.git",
+  "https://github.com/Adorkable/swift-log-format-and-pipe.git",
   "https://github.com/AFathi/ARVideoKit.git",
   "https://github.com/ahti/SQLele.git",
   "https://github.com/ahti/SQLeleCoder.git",
@@ -284,6 +286,7 @@
   "https://github.com/FabioTacke/RingSig.git",
   "https://github.com/FabrizioBrancati/BFKit-Swift.git",
   "https://github.com/FabrizioBrancati/Queuer.git",
+  "https://github.com/fanpyi/UICollectionViewLeftAlignedLayout-Swift.git",
   "https://github.com/fassko/MeteoLVProvider.git",
   "https://github.com/fassko/TartuWeatherProvider.git",
   "https://github.com/FitnessKit/AntMessageProtocol.git",
@@ -911,6 +914,7 @@
   "https://github.com/thefuntasty/CellKit.git",
   "https://github.com/thefuntasty/FTAPIKit.git",
   "https://github.com/thefuntasty/FuntastyKit.git",
+  "https://github.com/thii/FontAwesome.swift.git",
   "https://github.com/thii/HTTPMethod.git",
   "https://github.com/thii/SwiftHEXColors.git",
   "https://github.com/thii/Unxip.git",
@@ -1031,9 +1035,5 @@
   "https://github.com/zhengbomo/UpgradeManager.git",
   "https://github.com/zonble/ActiveDays.git",
   "https://github.com/zonble/ZBSimplePluginManager.git",
-  "https://github.com/zoul/generic-json-swift.git",
-  "https://github.com/Adorkable/swift-log-format-and-pipe.git",
-  "https://github.com/fanpyi/UICollectionViewLeftAlignedLayout-Swift.git",
-  "https://github.com/thii/FontAwesome.swift.git",
-  "https://github.com/Adorkable/Eunomia.git"
+  "https://github.com/zoul/generic-json-swift.git"
 ]
