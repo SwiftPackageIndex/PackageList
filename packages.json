@@ -8,6 +8,7 @@
   "https://github.com/1fr3dg/TextFormater.git",
   "https://github.com/3lvis/Networking.git",
   "https://github.com/417-72KI/SwiftUtilities.git",
+  "https://github.com/AaronBratcher/ALBNoSQLDB.git",
   "https://github.com/abdullahselek/ASCollectionView.git",
   "https://github.com/abdullahselek/Lighty.git",
   "https://github.com/abdullahselek/Swifty360Player.git",
@@ -1047,6 +1048,5 @@
   "https://github.com/zhengbomo/UpgradeManager.git",
   "https://github.com/zonble/ActiveDays.git",
   "https://github.com/zonble/ZBSimplePluginManager.git",
-  "https://github.com/zoul/generic-json-swift.git",
-  "https://github.com/AaronBratcher/ALBNoSQLDB.git"
+  "https://github.com/zoul/generic-json-swift.git"
 ]
