@@ -550,7 +550,6 @@
   "https://github.com/lightstep/opentracing-swift.git",
   "https://github.com/Liquidsoul/Sourcery-AutoJSONSerializable.git",
   "https://github.com/ljcoder2015/LJTool.git",
-  "https://gitlab.com/llvs/llvs.git",
   "https://github.com/loopwxservices/WXKDarkSky.git",
   "https://github.com/lorentey/GlueKit.git",
   "https://github.com/lostatseajoshua/SwiftExpression.git",
@@ -1051,5 +1050,6 @@
   "https://github.com/zhengbomo/UpgradeManager.git",
   "https://github.com/zonble/ActiveDays.git",
   "https://github.com/zonble/ZBSimplePluginManager.git",
-  "https://github.com/zoul/generic-json-swift.git"
+  "https://github.com/zoul/generic-json-swift.git",
+  "https://gitlab.com/llvs/llvs.git",
 ]
