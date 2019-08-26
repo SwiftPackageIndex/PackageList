@@ -12,6 +12,7 @@ Please do submit your own, or other people's repositories to this list. There ar
 
 * Packages must have a Package.swift file (obviously?) in the root of the repository.
 * Packages must be written in **Swift 4.0 or later**.
+* Packages should declare at least one product in the Package.swift file. This can be either a library product, or an executable product. Packages can of course declare more than one product!
 * Packages must have at least one release. A release is defined as a git tag that conforms to the [semantic version](https://semver.org) spec. This can be a [beta or a pre-release](https://semver.org/#spec-item-9) semantic version, it does not necessarily need to be stable.
 * Packages should compile without errors. Actually, this isn't a strict requirement but it's probably a good idea since you're about to add it to a package directory.
 * Packages should output valid JSON when `swift package dump-package` is run with the latest version of the Swift tools. Please check that you can execute this command in the root of the package directory before submitting.
