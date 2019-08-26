@@ -1,7 +1,5 @@
 [![Build Status](https://travis-ci.org/daveverwer/SwiftPMLibrary.svg?branch=master)](https://travis-ci.org/daveverwer/SwiftPMLibrary)
 
-Do you maintain a Swift package? [I'd love to get your opinion on an idea](https://iosdevweekly.typeform.com/to/ucVOvf). The [results from this survey are also available here](https://iosdevweekly.typeform.com/report/ucVOvf/Xs0iw7DLiAiGoVeZ).
-
 # The SwiftPM Library
 
 This repository powers the list of packages indexed and monitored by the [SwiftPM Library](https://swiftpm.co). The intention of this repository is to build a *complete* list of packages that support the Swift Package Manager.
