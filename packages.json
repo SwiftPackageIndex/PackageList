@@ -197,6 +197,9 @@
   "https://github.com/Cosmo/HackMan.git",
   "https://github.com/cristik/Suture.git",
   "https://github.com/crossroadlabs/Regex.git",
+  "https://github.com/crspybits/CredentialsDropbox.git",
+  "https://github.com/crspybits/SwiftyAWSSNS.git",
+  "https://github.com/crspybits/SyncServerII.git",
   "https://github.com/cszatma/DiscreteMathematics.git",
   "https://github.com/cszatma/SwiftySweetness.git",
   "https://github.com/CUITCHE/UserCaches.git",
@@ -1095,8 +1098,5 @@
   "https://github.com/zhengbomo/UpgradeManager.git",
   "https://github.com/zonble/ActiveDays.git",
   "https://github.com/zonble/ZBSimplePluginManager.git",
-  "https://github.com/zoul/generic-json-swift.git",
-  "https://github.com/crspybits/SyncServerII.git",
-  "https://github.com/crspybits/CredentialsDropbox.git",
-  "https://github.com/crspybits/SwiftyAWSSNS.git"
+  "https://github.com/zoul/generic-json-swift.git"
 ]
