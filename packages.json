@@ -1013,6 +1013,8 @@
   "https://github.com/typelift/SwiftCheck.git",
   "https://github.com/typelift/Swiftx.git",
   "https://github.com/typelift/Swiftz.git",
+  "https://github.com/uias/Pageboy.git",
+  "https://github.com/uias/Tabman.git",
   "https://github.com/ukitaka/XCTAssertUnrecoverable.git",
   "https://github.com/uraimo/Bitter.git",
   "https://github.com/uraimo/SwiftyGPIO.git",
@@ -1098,7 +1100,5 @@
   "https://github.com/zhengbomo/UpgradeManager.git",
   "https://github.com/zonble/ActiveDays.git",
   "https://github.com/zonble/ZBSimplePluginManager.git",
-  "https://github.com/zoul/generic-json-swift.git",
-  "https://github.com/uias/Tabman.git",
-  "https://github.com/uias/Pageboy.git"
+  "https://github.com/zoul/generic-json-swift.git"
 ]
