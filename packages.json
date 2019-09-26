@@ -656,6 +656,7 @@
   "https://github.com/mcfedr/DNS.git",
   "https://github.com/Meniny/Parade.git",
   "https://github.com/Meniny/Zipper.git",
+  "https://github.com/mentalfaculty/LLVS.git",
   "https://github.com/metova/MetovaJSONCodable.git",
   "https://github.com/mgrebenets/SwiftScriptRunner.git",
   "https://github.com/michaelhenry/RxRetroSwift.git",
@@ -1121,6 +1122,5 @@
   "https://github.com/zhengbomo/UpgradeManager.git",
   "https://github.com/zonble/ActiveDays.git",
   "https://github.com/zonble/ZBSimplePluginManager.git",
-  "https://github.com/zoul/generic-json-swift.git",
-  "https://gitlab.com/llvs/llvs.git"
+  "https://github.com/zoul/generic-json-swift.git"
 ]
