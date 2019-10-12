@@ -2575,6 +2575,7 @@
   "https://github.com/serhii-londar/BaseAPI.git",
   "https://github.com/serhii-londar/cimgswift.git",
   "https://github.com/serhii-londar/GithubAPI.git",
+  "https://github.com/serjooo/SwiftyCountry.git",
   "https://github.com/sersoft-gmbh/semver.git",
   "https://github.com/sersoft-gmbh/xmlwrangler.git",
   "https://github.com/seznam/swift-unisocket.git",
@@ -3411,6 +3412,5 @@
   "https://github.com/zonble/ZBSimplePluginManager.git",
   "https://github.com/zoogeny/social-network.git",
   "https://github.com/zoul/generic-json-swift.git",
-  "https://github.com/zweigraf/fakebundle.git",
-  "https://github.com/serjooo/SwiftyCountry.git"
+  "https://github.com/zweigraf/fakebundle.git"
 ]
