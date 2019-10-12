@@ -190,6 +190,7 @@
   "https://github.com/apple/example-package-fisheryates.git",
   "https://github.com/apple/example-package-playingcard.git",
   "https://github.com/apple/swift-corelibs-xctest.git",
+  "https://github.com/apple/swift-driver.git",
   "https://github.com/apple/swift-llbuild.git",
   "https://github.com/apple/swift-log.git",
   "https://github.com/apple/swift-metrics.git",
