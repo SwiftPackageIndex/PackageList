@@ -40,3 +40,11 @@ Then, to sort:
 ```shell
 echo "$(jq 'sort_by(ascii_downcase)' packages.json)" > packages.json
 ```
+
+Make sure there are no dupes (no dupe variants w/ .git and w/o, no case differences):
+```shell
+(for repo in $(jq '.[]' packages.json); do basename $repo; done) \
+  | tr '[:upper:]' '[:lower:]' \
+  | sed 's|"||g' | sed s/.git//g \
+  | uniq -d
+```
