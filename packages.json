@@ -1633,6 +1633,7 @@
   "https://github.com/liveui/s3.git",
   "https://github.com/liveui/vaportesttools.git",
   "https://github.com/ljcoder2015/LJTool.git",
+  "https://github.com/lloydkeijzer/SwimpleAudio.git",
   "https://github.com/lloydkeijzer/SwimpleInjection.git",
   "https://github.com/llvm-swift/clangswift.git",
   "https://github.com/llvm-swift/filecheck.git",
@@ -3422,6 +3423,5 @@
   "https://github.com/zonble/ZBSimplePluginManager.git",
   "https://github.com/zoogeny/social-network.git",
   "https://github.com/zoul/generic-json-swift.git",
-  "https://github.com/zweigraf/fakebundle.git",
-  "https://github.com/lloydkeijzer/SwimpleAudio.git"
+  "https://github.com/zweigraf/fakebundle.git"
 ]
