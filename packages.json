@@ -200,6 +200,7 @@
   "https://github.com/apple/swift-nio-transport-services.git",
   "https://github.com/apple/swift-nio-zlib-support.git",
   "https://github.com/apple/swift-nio.git",
+  "https://github.com/apple/swift-numerics.git",
   "https://github.com/apple/swift-package-manager.git",
   "https://github.com/apple/swift-protobuf.git",
   "https://github.com/apple/swift-statsd-client.git",
