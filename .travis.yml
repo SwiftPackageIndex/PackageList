@@ -1,9 +1,8 @@
 language: objective-c
-osx_image: xcode10.2
+osx_image: xcode11.3
+
 before_install:
   - brew install jq
+
 script:
-  - jq -e . packages.json > /dev/null
-  - echo "$(jq 'sort_by(ascii_downcase)' packages.json)" > packages.sorted.json
-  - diff packages.json packages.sorted.json
-  
+  - ./validate.sh
