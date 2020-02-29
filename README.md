@@ -27,24 +27,10 @@ It's simple. Just fork this repository, edit the JSON, and submit a pull request
 
 ## JSON validation
 
-[Travis has been configured](https://travis-ci.org/daveverwer/SwiftPMLibrary) to validate JSON for every pull request. If you would like to run this validation locally before submitting, the commands to verify and sort JSON are listed below. These commands use [jq](https://stedolan.github.io/jq/) to do this.
+[Travis is configured](https://travis-ci.org/daveverwer/SwiftPMLibrary) to validate JSON for every pull request. Please run this validation locally before submitting by running the included validation script. These commands use [jq](https://stedolan.github.io/jq/). If you do not have `jq` installed, please install it before running this script.
 
-To validate:
-
-```shell
-jq -e . packages.json > /dev/null
-```
-
-Then, to sort:
+To validate the JSON, run the included shell script:
 
 ```shell
-echo "$(jq 'sort_by(ascii_downcase)' packages.json)" > packages.json
-```
-
-Make sure there are no dupes (no dupe variants w/ .git and w/o, no case differences):
-```shell
-(for repo in $(jq '.[]' packages.json); do basename $repo; done) \
-  | tr '[:upper:]' '[:lower:]' \
-  | sed 's|"||g' | sed s/.git//g \
-  | uniq -d
+./validate.sh
 ```
