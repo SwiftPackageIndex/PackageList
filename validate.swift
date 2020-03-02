@@ -53,12 +53,14 @@ guard unsortedUrls.count == 0 else {
   print("Error: packages.json is not sorted: \(unsortedUrls)")
   // If the sorting fails, save the sorted packages.json file
   let encoder = JSONEncoder()
-  encoder.outputFormatting = [.prettyPrinted, .withoutEscapingSlashes]
+  encoder.outputFormatting = [.prettyPrinted]
  
   
   let data = try! encoder.encode(sortedUrls)
+  let str = String(data: data, encoding: .utf8)!.replacingOccurrences(of: "\\/", with: "/") 
+  let unescapedData = str.data(using: .utf8)!
   let outputURL = url.deletingPathExtension().appendingPathExtension("sorted.json")
-  try! data.write(to: outputURL)
+  try! unescapedData.write(to: outputURL)
   print("Sorted packages.json has been saved to:\n \(outputURL.path)")
   exit(1)
 }
