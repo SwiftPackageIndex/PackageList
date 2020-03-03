@@ -2,6 +2,19 @@
 
 import Foundation
 
+struct Product : Codable {
+  let name : String
+}
+
+struct Package : Codable {
+  let name : String
+  let products : [Product]
+}
+
+enum GitHost : String {
+  case GitHub = "github.com"
+}
+
 // Find the "packages.json" file based on arguments, current directory, or the directory of the script
 let argumentURL = CommandLine.arguments.dropFirst().first.flatMap(URL.init(fileURLWithPath:))
 let currentDirectoryURL = URL(fileURLWithPath: FileManager.default.currentDirectoryPath, isDirectory: true).appendingPathComponent("packages.json")
@@ -63,6 +76,68 @@ guard unsortedUrls.count == 0 else {
   try! unescapedData.write(to: outputURL)
   print("Sorted packages.json has been saved to:\n \(outputURL.path)")
   exit(1)
+}
+
+let urlComponents = URLComponents(string: "https://raw.githubusercontent.com")!
+
+for gitURL in packageUrls {
+  guard let hostString = gitURL.host else {
+    print("Invalid URL: \(gitURL)")
+    exit(1)
+  }
+  
+  guard let host = GitHost(rawValue: hostString) else {
+    print("Unsupported Git Host: \(hostString)")
+    exit(1)
+  }
+  
+  let outputDirURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+  
+  try! FileManager.default.createDirectory(at: outputDirURL, withIntermediateDirectories: false, attributes: nil)
+  
+  switch host {
+  case .GitHub:
+    var rawURLComponents = urlComponents
+    let repositoryName = gitURL.deletingPathExtension().lastPathComponent
+    let userName = gitURL.deletingLastPathComponent().lastPathComponent
+    // https://raw.githubusercontent.com/[USER-NAME]/[REPOSITORY-NAME]/[BRANCH-NAME]/[FILE-PATH]
+    rawURLComponents.path = ["", userName, repositoryName, "master", "Package.swift"].joined(separator: "/")
+    let packageSwiftURL = rawURLComponents.url!
+    
+    let packageSwiftData : Data
+    do {
+     packageSwiftData = try Data(contentsOf: packageSwiftURL)
+    } catch let error {
+      print("Invalid Swift Package at: \(gitURL)")
+      print("Decoding Error: \(error)")
+      continue
+    }
+    try! packageSwiftData.write(to: outputDirURL.appendingPathComponent("Package.swift"))
+    let pipe = Pipe()
+    
+    let process = Process()
+    process.launchPath = "/usr/bin/swift"
+    process.arguments = ["package", "dump-package"]
+    process.currentDirectoryURL = outputDirURL
+    process.standardOutput = pipe
+    process.launch()
+    process.waitUntilExit()
+    
+    let package : Package
+    
+    do {
+      package = try decoder.decode(Package.self, from: pipe.fileHandleForReading.availableData)
+    } catch let error {
+      print("Invalid Swift Package at: \(gitURL)")
+      print("Decoding Error: \(error)")
+      continue
+    }
+    
+    guard let product = package.products.first else {
+      print("No product listed for: \(gitURL)")
+      continue
+    }
+  }
 }
 
 print("Validation Succeeded.")
