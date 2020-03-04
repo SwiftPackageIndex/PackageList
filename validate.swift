@@ -17,6 +17,7 @@ enum GitHost: String {
 }
 
 enum PackageError: Error {
+  case noResult
   case invalidURL(URL)
   case unsupportedHost(String)
   case readError(Error?)
@@ -259,10 +260,13 @@ for (index, gitURL) in packageUrls.enumerated() {
 
 group.notify(queue: .main) {
   timer.invalidate()
-  let packageResults = packageUnsetResults.compactMap { $0 }
-  assert(packageResults.count == packageUrls.count)
-  let errors = zip(packageUrls, packageResults).compactMap { (args) -> (URL, PackageError)? in
-    let (url, result) = args
+  //let packageResults = packageUnsetResults.compactMap { $0 }
+  //assert(packageResults.count == packageUrls.count)
+  let errors = zip(packageUrls, packageUnsetResults).compactMap { (args) -> (URL, PackageError)? in
+    let (url, unSetResult) = args
+    guard let result = unSetResult else {
+      return (url, .noResult)
+    }
     guard case let .failure(error) = result else {
       return nil
     }
