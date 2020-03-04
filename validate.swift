@@ -96,8 +96,8 @@ let group = DispatchGroup()
 let concurrentQueue = DispatchQueue(label: "swiftpm-verification", qos: .utility, attributes: .concurrent)
 
 let config: URLSessionConfiguration = .default
-config.timeoutIntervalForRequest = 30.0
-config.timeoutIntervalForRequest = 60.0
+config.timeoutIntervalForRequest = 3000.0
+config.timeoutIntervalForRequest = 6000.0
 let session = URLSession(configuration: config)
 var packageUnsetResults = [Result<Void, PackageError>?].init(repeating: nil, count: packageUrls.count)
 let total = packageUnsetResults.count
