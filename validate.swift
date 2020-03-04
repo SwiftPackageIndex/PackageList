@@ -1,5 +1,6 @@
 #!/usr/bin/env swift
 
+import Combine
 import Foundation
 
 struct Product: Codable {
@@ -94,8 +95,9 @@ let group = DispatchGroup()
 let concurrentQueue = DispatchQueue(label: "swiftpm-verification", qos: .utility, attributes: .concurrent)
 
 let config: URLSessionConfiguration = .default
-config.timeoutIntervalForRequest = 1000
-let session = URLSession.shared
+config.timeoutIntervalForRequest = 30.0
+config.timeoutIntervalForRequest = 60.0
+let session = URLSession(configuration: config)
 var packageUnsetResults = [Result<Void, PackageError>?].init(repeating: nil, count: packageUrls.count)
 let total = packageUnsetResults.count
 var previousCount = 0
@@ -113,6 +115,9 @@ let timer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { timer i
       packageUrls[$0]
     }
     debugPrint(urlsRemaining)
+    for _ in urlsRemaining {
+      group.leave()
+    }
   }
   previousCount = count
 }
