@@ -27,10 +27,9 @@ It's simple. Just fork this repository, edit the JSON, and submit a pull request
 
 ## JSON validation
 
-[Travis is configured](https://travis-ci.org/daveverwer/SwiftPMLibrary) to validate JSON for every pull request. Please run this validation locally before submitting by running the included validation script. These commands use [jq](https://stedolan.github.io/jq/). If you do not have `jq` installed, please install it before running this script.
+[Travis is configured](https://travis-ci.org/daveverwer/SwiftPMLibrary) to validate JSON for every pull request. Please run this validation locally before submitting by running the [included validation script](./validate.swift), like so:
 
-To validate the JSON, run the included shell script:
 
 ```shell
-./validate.sh
+swift ./validate.swift
 ```
