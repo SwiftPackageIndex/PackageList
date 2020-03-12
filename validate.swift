@@ -1,6 +1,5 @@
 #!/usr/bin/env swift
 
-import Combine
 import Foundation
 
 // MARK: Configuration Values and Constants
@@ -17,7 +16,36 @@ let rawURLComponentsBase = URLComponents(string: "https://raw.githubusercontent.
 // master package list to compare against
 let masterPackageList = rawURLComponentsBase.url!.appendingPathComponent("daveverwer/SwiftPMLibrary/master/packages.json")
 
+let helpText = """
+usage: %@ <command> [path]
+
+COMMANDS:
+  all   validate all packages in JSON packages.json
+  diff  validate all new packages in JSON packages.json
+  mine  validate the Package of the current directoy
+
+OPTIONS:
+  path  to define the specific `packages.json` file or Swift package directory
+"""
 // MARK: Types
+
+
+enum Command : String {
+  case all = "all"
+  case diff = "diff"
+  case mine = "mine"
+}
+
+extension Command {
+  static func fromArguments (_ arguments : [String]) -> Command? {
+    for argument in arguments {
+      if let command = Command(rawValue: argument) {
+        return command
+      }
+    }
+    return nil
+  }
+}
 
 /**
  Simple Product structure from package dump
@@ -52,6 +80,7 @@ enum PackageError: Error {
   case badDump(String?)
   case decodingError(Error)
   case missingProducts
+  case dumpTimeout
 }
 
 extension Result where Success == Void {
@@ -153,7 +182,13 @@ func verifyPackageDump(at directoryURL: URL, _ callback: @escaping ((PackageErro
     let package: Package
 
     guard process.terminationStatus == 0 else {
-      callback(.badDump(String(data: errorPipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8)))
+      let error : PackageError
+      if process.terminationStatus == 15 {
+        error = .dumpTimeout
+      } else {
+        error = .badDump(String(data: errorPipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8))
+      }
+      callback(error)
       return
     }
 
@@ -172,6 +207,12 @@ func verifyPackageDump(at directoryURL: URL, _ callback: @escaping ((PackageErro
   }
 
   process.launch()
+  
+  DispatchQueue.global().asyncAfter(deadline: .now() + 10.0) {
+    if process.isRunning {
+      process.terminate()
+    }
+  }
 }
 
 /**
@@ -311,12 +352,15 @@ let currentDirectoryURL = URL(fileURLWithPath: FileManager.default.currentDirect
 // Find the "packages.json" file based on arguments, current directory, or the directory of the script
 let packagesJsonURL = url(packagesFromDirectories: [currentDirectoryURL, URL(fileURLWithPath: #file).deletingLastPathComponent()], andArguments: CommandLine.arguments)
 
-let parseMine = CommandLine.arguments.contains("--mine")
+// parse the command argument subcommand
+let commandArg = Command.fromArguments(CommandLine.arguments)
 
-// parse the "--all" argument in case all packages should be validated
-let parseAllRepos = CommandLine.arguments.contains("--all")
+guard let command = commandArg else {
+  print(String(format: helpText, CommandLine.arguments.first?.components(separatedBy: "/").last ?? "validate.sh"))
+  exit(0)
+}
 
-if parseMine {
+if command == .mine {
   print("Validating Single Package.")
   let directoryURL = CommandLine.arguments.dropFirst().first.flatMap { URL(fileURLWithPath: $0, isDirectory: true) } ?? currentDirectoryURL
   verifyPackageDump(at: directoryURL) { error in
@@ -385,7 +429,7 @@ if parseMine {
 
   print("Checking each url for valid package dump.")
 
-  filterRepos(packageUrls, withSession: session, includingMaster: parseAllRepos) { result in
+  filterRepos(packageUrls, withSession: session, includingMaster: command == .all) { result in
     let packageUrls: [URL]
     switch result {
     case let .failure(error):
