@@ -33,6 +33,8 @@ let scriptDirectoryURL = URL(fileURLWithPath: #file).deletingLastPathComponent()
 
 let possibleURLs: [URL?] = [argumentURL, currentDirectoryURL, scriptDirectoryURL]
 
+let parseAllRepos = CommandLine.arguments.contains("--all")
+
 guard let url = possibleURLs.compactMap({ $0 }).first(where: { FileManager.default.fileExists(atPath: $0.path) }) else {
   print("Error: Unable to find packages.json to validate.")
   exit(1)
@@ -99,31 +101,30 @@ let config: URLSessionConfiguration = .default
 config.timeoutIntervalForRequest = 3000.0
 config.timeoutIntervalForRequest = 6000.0
 let session = URLSession(configuration: config)
-var packageUnsetResults = [Result<Void, PackageError>?].init(repeating: nil, count: packageUrls.count)
-let total = packageUnsetResults.count
+let total = packageUrls.count
 var previousCount = 0
-let timer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { timer in
-  let count = packageUnsetResults.compactMap { $0 }.count
-  guard count < total else {
-    timer.invalidate()
-    return
-  }
-  print("\(total - count) remaining")
-  if previousCount == count, total - count < 10 {
-    let urlsRemaining = packageUnsetResults.enumerated().compactMap {
-      $0.element == nil ? $0.offset : nil
-    }.map {
-      packageUrls[$0]
-    }
-    debugPrint(urlsRemaining)
-    for _ in urlsRemaining {
-      group.leave()
-    }
-  }
-  previousCount = count
-}
-
-timer.tolerance = 5.0
+//let timer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { timer in
+//  let count = packageUnsetResults.compactMap { $0 }.count
+//  guard count < total else {
+//    timer.invalidate()
+//    return
+//  }
+//  print("\(total - count) remaining")
+//  if previousCount == count, total - count < 10 {
+//    let urlsRemaining = packageUnsetResults.enumerated().compactMap {
+//      $0.element == nil ? $0.offset : nil
+//    }.map {
+//      packageUrls[$0]
+//    }
+//    debugPrint(urlsRemaining)
+//    for _ in urlsRemaining {
+//      group.leave()
+//    }
+//  }
+//  previousCount = count
+//}
+//
+//timer.tolerance = 5.0
 
 func getPackageSwiftURL(for gitURL: URL) -> Result<URL, PackageError> {
   guard let hostString = gitURL.host else {
@@ -246,38 +247,92 @@ extension Result where Success == Void {
   }
 }
 
+func filterRepos (_ packageUrls: [URL], includingMaster: Bool, _ completion: @escaping ( (Result<[URL], Error>) -> Void) ) {
+  guard !includingMaster else {
+    completion(.success(packageUrls))
+    return
+  }
+  
+  session.dataTask(with: URL(string: "https://raw.githubusercontent.com/daveverwer/SwiftPMLibrary/master/packages.json")!) { (data, _, error) in
+    
+    let allPackageURLs : [URL]
+    guard let data = data else {
+      completion(.failure(PackageError.noResult))
+      return
+    }
+    
+    if let error = error {
+      completion(.failure(error))
+      return
+    }
+    
+    do {
+      allPackageURLs = try decoder.decode([URL].self, from: data)
+    } catch let error {
+      completion(.failure(error))
+      return
+    }
+    completion(.success([URL](Set<URL>(packageUrls).subtracting(allPackageURLs))))
+  }.resume()
+}
+func parseRepos (_ packageUrls: [URL], includingMaster: Bool, _ completion: @escaping (([URL : PackageError]) -> Void)) {
+  var count = 0
+  var packageUnsetResults = [Result<Void, PackageError>?].init(repeating: nil, count: packageUrls.count)
+  for (index, gitURL) in packageUrls.enumerated() {
+    group.enter()
+    concurrentQueue.async {
+      verifyPackage(at: gitURL) {
+        error in
+        packageUnsetResults[index] = Result<Void, PackageError>(error)
+        
+        DispatchQueue.main.async {
+          count += 1
+          if count % 100 == 0 {
+            debugPrint("\(packageUnsetResults.count - count) remaining")
+          
+          }
+        }
+        group.leave()
+      }
+    }
+  }
+
+  group.notify(queue: .main) {
+    //timer.invalidate()
+    //let packageResults = packageUnsetResults.compactMap { $0 }
+    //assert(packageResults.count == packageUrls.count)
+    var errors = [URL : PackageError]()
+   zip(packageUrls, packageUnsetResults).forEach { (args)  in
+      let (url, unSetResult) = args
+    let result = unSetResult ?? .failure(.noResult)
+      guard case let .failure(error) = result else {
+        return
+      }
+      errors[url] = error
+    }
+    
+    completion(errors)
+  }
+}
+
 print("Checking each url for valid package dump.")
-for (index, gitURL) in packageUrls.enumerated() {
-  group.enter()
-  concurrentQueue.async {
-    verifyPackage(at: gitURL) {
-      error in
-      packageUnsetResults[index] = Result<Void, PackageError>(error)
-      group.leave()
-    }
+
+filterRepos(packageUrls, includingMaster: parseAllRepos) { (result) in
+  let packageUrls : [URL]
+  switch result {
+  case .failure(let error):
+    debugPrint(error)
+    exit(1)
+  case .success(let urls):
+    packageUrls = urls
+  }
+  parseRepos(packageUrls, includingMaster: parseAllRepos) { (errors) in
+      for (url, error) in errors {
+        print(url, error)
+      }
+      print("Validation Succeeded.")
+      exit(0)
   }
 }
 
-group.notify(queue: .main) {
-  timer.invalidate()
-  //let packageResults = packageUnsetResults.compactMap { $0 }
-  //assert(packageResults.count == packageUrls.count)
-  let errors = zip(packageUrls, packageUnsetResults).compactMap { (args) -> (URL, PackageError)? in
-    let (url, unSetResult) = args
-    guard let result = unSetResult else {
-      return (url, .noResult)
-    }
-    guard case let .failure(error) = result else {
-      return nil
-    }
-    return (url, error)
-  }
-  for (url, error) in errors {
-    print(url, error)
-  }
-  print("Validation Succeeded.")
-  exit(0)
-}
-
-RunLoop.current.add(timer, forMode: .default)
 RunLoop.current.run()
