@@ -3,19 +3,47 @@
 import Combine
 import Foundation
 
+// MARK: Configuration Values and Constants
+
+// number of validations to run simultaneously
+let semaphoreCount = 12
+
+let timeoutIntervalForRequest = 3000.0
+let timeoutIntervalForResource = 6000.0
+
+// base url for github raw files
+let rawURLComponentsBase = URLComponents(string: "https://raw.githubusercontent.com")!
+
+// master package list to compare against
+let masterPackageList = rawURLComponentsBase.url!.appendingPathComponent("daveverwer/SwiftPMLibrary/master/packages.json")
+
+// MARK: Types
+
+/**
+ Simple Product structure from package dump
+ */
 struct Product: Codable {
   let name: String
 }
 
+/**
+ Simple Package structure from package dump
+ */
 struct Package: Codable {
   let name: String
   let products: [Product]
 }
 
+/**
+ List of git hosts for which we can pull single files
+ */
 enum GitHost: String {
   case GitHub = "github.com"
 }
 
+/**
+ List of possible errors for each package
+ */
 enum PackageError: Error {
   case noResult
   case invalidURL(URL)
@@ -26,106 +54,23 @@ enum PackageError: Error {
   case missingProducts
 }
 
-// Find the "packages.json" file based on arguments, current directory, or the directory of the script
-let argumentURL = CommandLine.arguments.dropFirst().first.flatMap(URL.init(fileURLWithPath:))
-let currentDirectoryURL = URL(fileURLWithPath: FileManager.default.currentDirectoryPath, isDirectory: true).appendingPathComponent("packages.json")
-let scriptDirectoryURL = URL(fileURLWithPath: #file).deletingLastPathComponent().appendingPathComponent("packages.json")
-
-let possibleURLs: [URL?] = [argumentURL, currentDirectoryURL, scriptDirectoryURL]
-
-let parseAllRepos = CommandLine.arguments.contains("--all")
-
-guard let url = possibleURLs.compactMap({ $0 }).first(where: { FileManager.default.fileExists(atPath: $0.path) }) else {
-  print("Error: Unable to find packages.json to validate.")
-  exit(1)
+extension Result where Success == Void {
+  init(_ error: Failure?) {
+    if let error = error {
+      self = .failure(error)
+    } else {
+      self = .success(Void())
+    }
+  }
 }
 
-let decoder = JSONDecoder()
-let data = try! Data(contentsOf: url)
-let packageUrls = try! decoder.decode([URL].self, from: data)
+// MARK: Functions
 
-// Make sure all urls contain the .git extension
-print("Checking all urls are valid.")
-let invalidUrls = packageUrls.filter { $0.pathExtension != "git" }
-
-guard invalidUrls.count == 0 else {
-  print("Invalid URLs missing .git extension: \(invalidUrls)")
-  exit(1)
-}
-
-// Make sure there are no dupes (no dupe variants w/ .git and w/o, no case differences)
-print("Checking for duplicate packages.")
-let urlCounts = Dictionary(grouping: packageUrls.enumerated()) {
-  URL(string: $0.element.absoluteString.lowercased())!
-}.mapValues { $0.map { $0.offset } }.filter { $0.value.count > 1 }
-
-guard urlCounts.count == 0 else {
-  print("Error: Duplicate URLs:\n\(urlCounts)")
-  exit(1)
-}
-
-// Sort the array of urls
-print("Checking packages are sorted.")
-let sortedUrls = packageUrls.sorted {
-  $0.absoluteString.lowercased() < $1.absoluteString.lowercased()
-}
-
-// Verify that there are no differences between the current JSON and the sorted JSON
-let unsortedUrls = zip(packageUrls, sortedUrls).enumerated().filter { $0.element.0 != $0.element.1 }.map {
-  ($0.offset, $0.element.0)
-}
-
-guard unsortedUrls.count == 0 else {
-  print("Error: packages.json is not sorted: \(unsortedUrls)")
-  // If the sorting fails, save the sorted packages.json file
-  let encoder = JSONEncoder()
-  encoder.outputFormatting = [.prettyPrinted]
-
-  let data = try! encoder.encode(sortedUrls)
-  let str = String(data: data, encoding: .utf8)!.replacingOccurrences(of: "\\/", with: "/")
-  let unescapedData = str.data(using: .utf8)!
-  let outputURL = url.deletingPathExtension().appendingPathExtension("sorted.json")
-  try! unescapedData.write(to: outputURL)
-  print("Sorted packages.json has been saved to:\n \(outputURL.path)")
-  exit(1)
-}
-
-let processSemaphore = DispatchSemaphore(value: 12)
-let urlComponents = URLComponents(string: "https://raw.githubusercontent.com")!
-
-let group = DispatchGroup()
-
-let concurrentQueue = DispatchQueue(label: "swiftpm-verification", qos: .utility, attributes: .concurrent)
-
-let config: URLSessionConfiguration = .default
-config.timeoutIntervalForRequest = 3000.0
-config.timeoutIntervalForRequest = 6000.0
-let session = URLSession(configuration: config)
-let total = packageUrls.count
-var previousCount = 0
-//let timer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { timer in
-//  let count = packageUnsetResults.compactMap { $0 }.count
-//  guard count < total else {
-//    timer.invalidate()
-//    return
-//  }
-//  print("\(total - count) remaining")
-//  if previousCount == count, total - count < 10 {
-//    let urlsRemaining = packageUnsetResults.enumerated().compactMap {
-//      $0.element == nil ? $0.offset : nil
-//    }.map {
-//      packageUrls[$0]
-//    }
-//    debugPrint(urlsRemaining)
-//    for _ in urlsRemaining {
-//      group.leave()
-//    }
-//  }
-//  previousCount = count
-//}
-//
-//timer.tolerance = 5.0
-
+/**
+ Based on repository url, find the raw url to the Package.swift file.
+ - Parameter gitURL: Repository URL
+ - Returns: raw git URL, if successful; other `invalidURL` if not proper git repo url or `unsupportedHost` if the host is not currently supported.
+ */
 func getPackageSwiftURL(for gitURL: URL) -> Result<URL, PackageError> {
   guard let hostString = gitURL.host else {
     return .failure(.invalidURL(gitURL))
@@ -137,7 +82,7 @@ func getPackageSwiftURL(for gitURL: URL) -> Result<URL, PackageError> {
 
   switch host {
   case .GitHub:
-    var rawURLComponents = urlComponents
+    var rawURLComponents = rawURLComponentsBase
     let repositoryName = gitURL.deletingPathExtension().lastPathComponent
     let userName = gitURL.deletingLastPathComponent().lastPathComponent
     rawURLComponents.path = ["", userName, repositoryName, "master", "Package.swift"].joined(separator: "/")
@@ -148,7 +93,13 @@ func getPackageSwiftURL(for gitURL: URL) -> Result<URL, PackageError> {
   }
 }
 
-func download(_ packageSwiftURL: URL, _ callback: @escaping ((Result<URL, PackageError>) -> Void)) -> URLSessionDataTask {
+/**
+ Downloads the given Package.swift file
+ - Parameter packageSwiftURL: URL to Package.Swift
+ - Parameter session: URLSession
+ - Parameter callback: Completion callback. If successful, the resulting location of the downloaded Package.swift file; error otherwise.
+ */
+func download(_ packageSwiftURL: URL, withSession session: URLSession, _ callback: @escaping ((Result<URL, PackageError>) -> Void)) -> URLSessionDataTask {
   let task = session.dataTask(with: packageSwiftURL) { data, _, error in
 
     guard let data = data else {
@@ -172,15 +123,30 @@ func download(_ packageSwiftURL: URL, _ callback: @escaping ((Result<URL, Packag
   return task
 }
 
-func verifyPackageDump(at outputDirURL: URL, _ callback: @escaping ((PackageError?) -> Void)) {
-  let pipe = Pipe()
-  let errorPipe = Pipe()
+/**
+ Creates a `Process` for dump the package metadata.
+ - Parameter packageDirectoryURL: File URL to Package
+ - Parameter outputTo: standard output pipe
+ - Parameter errorsTo: error pipe
+ */
+func dumpPackageProcessAt(_ packageDirectoryURL: URL, outputTo pipe: Pipe, errorsTo errorPipe: Pipe) -> Process {
   let process = Process()
   process.launchPath = "/usr/bin/swift"
   process.arguments = ["package", "dump-package"]
-  process.currentDirectoryURL = outputDirURL
+  process.currentDirectoryURL = packageDirectoryURL
   process.standardOutput = pipe
   process.standardError = errorPipe
+  return process
+}
+
+/**
+ Calls `swift package dump-package` and verify correct output with at least one product.
+ - Parameter directoryURL: File URL to Package
+ */
+func verifyPackageDump(at directoryURL: URL, _ callback: @escaping ((PackageError?) -> Void)) {
+  let pipe = Pipe()
+  let errorPipe = Pipe()
+  let process = dumpPackageProcessAt(directoryURL, outputTo: pipe, errorsTo: errorPipe)
 
   process.terminationHandler = {
     process in
@@ -208,7 +174,12 @@ func verifyPackageDump(at outputDirURL: URL, _ callback: @escaping ((PackageErro
   process.launch()
 }
 
-func verifyPackage(at gitURL: URL, _ callback: @escaping ((PackageError?) -> Void)) {
+/**
+ Verifies Swift package at repository URL.
+ - Parameter gitURL: URL to git repository
+ */
+func verifyPackage(at gitURL: URL, withSession session: URLSession, _ callback: @escaping ((PackageError?) -> Void)) {
+  let processSemaphore = DispatchSemaphore(value: semaphoreCount)
   let urlResult = getPackageSwiftURL(for: gitURL)
   let packageSwiftURL: URL
   switch urlResult {
@@ -217,7 +188,7 @@ func verifyPackage(at gitURL: URL, _ callback: @escaping ((PackageError?) -> Voi
     callback(error)
     return
   }
-  _ = download(packageSwiftURL) { result in
+  _ = download(packageSwiftURL, withSession: session) { result in
     let outputDirURL: URL
 
     switch result {
@@ -237,59 +208,62 @@ func verifyPackage(at gitURL: URL, _ callback: @escaping ((PackageError?) -> Voi
   }
 }
 
-extension Result where Success == Void {
-  init(_ error: Failure?) {
-    if let error = error {
-      self = .failure(error)
-    } else {
-      self = .success(Void())
-    }
-  }
-}
-
-func filterRepos (_ packageUrls: [URL], includingMaster: Bool, _ completion: @escaping ( (Result<[URL], Error>) -> Void) ) {
+/**
+ Filters repositories based what is not listen in the master list.
+ - Parameter packageUrls: current package urls
+ - Parameter includingMaster: to not filter all repository url and just verify all package URLs
+ */
+func filterRepos(_ packageUrls: [URL], withSession session: URLSession, includingMaster: Bool, _ completion: @escaping ((Result<[URL], Error>) -> Void)) {
   guard !includingMaster else {
     completion(.success(packageUrls))
     return
   }
-  
-  session.dataTask(with: URL(string: "https://raw.githubusercontent.com/daveverwer/SwiftPMLibrary/master/packages.json")!) { (data, _, error) in
-    
-    let allPackageURLs : [URL]
+
+  session.dataTask(with: masterPackageList) { data, _, error in
+
+    let allPackageURLs: [URL]
     guard let data = data else {
       completion(.failure(PackageError.noResult))
       return
     }
-    
+
     if let error = error {
       completion(.failure(error))
       return
     }
-    
+
     do {
       allPackageURLs = try decoder.decode([URL].self, from: data)
-    } catch let error {
+    } catch {
       completion(.failure(error))
       return
     }
     completion(.success([URL](Set<URL>(packageUrls).subtracting(allPackageURLs))))
   }.resume()
 }
-func parseRepos (_ packageUrls: [URL], includingMaster: Bool, _ completion: @escaping (([URL : PackageError]) -> Void)) {
+
+/**
+ Iterate over all repositories in the packageUrls list .
+ - Parameter packageUrls: current package urls
+ - Parameter completion: Callback with a dictionary of each url with an error.
+ */
+func parseRepos(_ packageUrls: [URL], withSession session: URLSession, _ completion: @escaping (([URL: PackageError]) -> Void)) {
+  let group = DispatchGroup()
+
+  let concurrentQueue = DispatchQueue(label: "swiftpm-verification", qos: .utility, attributes: .concurrent)
   var count = 0
   var packageUnsetResults = [Result<Void, PackageError>?].init(repeating: nil, count: packageUrls.count)
   for (index, gitURL) in packageUrls.enumerated() {
     group.enter()
     concurrentQueue.async {
-      verifyPackage(at: gitURL) {
+      verifyPackage(at: gitURL, withSession: session) {
         error in
         packageUnsetResults[index] = Result<Void, PackageError>(error)
-        
+
         DispatchQueue.main.async {
           count += 1
           if count % 100 == 0 {
             debugPrint("\(packageUnsetResults.count - count) remaining")
-          
           }
         }
         group.leave()
@@ -298,40 +272,135 @@ func parseRepos (_ packageUrls: [URL], includingMaster: Bool, _ completion: @esc
   }
 
   group.notify(queue: .main) {
-    //timer.invalidate()
-    //let packageResults = packageUnsetResults.compactMap { $0 }
-    //assert(packageResults.count == packageUrls.count)
-    var errors = [URL : PackageError]()
-   zip(packageUrls, packageUnsetResults).forEach { (args)  in
+    var errors = [URL: PackageError]()
+    zip(packageUrls, packageUnsetResults).forEach { args in
       let (url, unSetResult) = args
-    let result = unSetResult ?? .failure(.noResult)
+      let result = unSetResult ?? .failure(.noResult)
       guard case let .failure(error) = result else {
         return
       }
       errors[url] = error
     }
-    
+
     completion(errors)
   }
 }
 
-print("Checking each url for valid package dump.")
+/**
+ Based on the directories passed and command line arguments, find the `packages.json` url.
+ - Parameter directoryURLs: directory url to search for `packages.json` file
+ - Parameter arguments: Command Line arguments which may contain a path to a `packages.json` file.
+ */
+func url(packagesFromDirectories directoryURLs: [URL], andArguments arguments: [String]) -> URL? {
+  let possiblePackageURLs = arguments.dropFirst().compactMap { URL(fileURLWithPath: $0) } + directoryURLs.map { $0.appendingPathComponent("packages.json") }
+  return possiblePackageURLs.first(where: { FileManager.default.fileExists(atPath: $0.path) })
+}
 
-filterRepos(packageUrls, includingMaster: parseAllRepos) { (result) in
-  let packageUrls : [URL]
-  switch result {
-  case .failure(let error):
-    debugPrint(error)
-    exit(1)
-  case .success(let urls):
-    packageUrls = urls
+// MARK: Running Code
+
+let decoder = JSONDecoder()
+
+let config: URLSessionConfiguration = .default
+config.timeoutIntervalForRequest = timeoutIntervalForRequest
+config.timeoutIntervalForResource = timeoutIntervalForResource
+
+let session = URLSession(configuration: config)
+
+let currentDirectoryURL = URL(fileURLWithPath: FileManager.default.currentDirectoryPath, isDirectory: true)
+
+// Find the "packages.json" file based on arguments, current directory, or the directory of the script
+let packagesJsonURL = url(packagesFromDirectories: [currentDirectoryURL, URL(fileURLWithPath: #file).deletingLastPathComponent()], andArguments: CommandLine.arguments)
+
+let parseMine = CommandLine.arguments.contains("--mine")
+
+// parse the "--all" argument in case all packages should be validated
+let parseAllRepos = CommandLine.arguments.contains("--all")
+
+if parseMine {
+  print("Validating Single Package.")
+  let directoryURL = CommandLine.arguments.dropFirst().first.flatMap { URL(fileURLWithPath: $0, isDirectory: true) } ?? currentDirectoryURL
+  verifyPackageDump(at: directoryURL) { error in
+    if let error = error {
+      print(error)
+      exit(1)
+    }
+    print("Validation Succeeded.")
+    exit(0)
   }
-  parseRepos(packageUrls, includingMaster: parseAllRepos) { (errors) in
+} else {
+  // Based on arguments find the `package.json` file
+  guard let url = packagesJsonURL else {
+    print("Error: Unable to find packages.json to validate.")
+    exit(1)
+  }
+
+  let data = try! Data(contentsOf: url)
+  let packageUrls = try! decoder.decode([URL].self, from: data)
+
+  // Make sure all urls contain the .git extension
+  print("Checking all urls are valid.")
+  let invalidUrls = packageUrls.filter { $0.pathExtension != "git" }
+
+  guard invalidUrls.count == 0 else {
+    print("Invalid URLs missing .git extension: \(invalidUrls)")
+    exit(1)
+  }
+
+  // Make sure there are no dupes (no dupe variants w/ .git and w/o, no case differences)
+  print("Checking for duplicate packages.")
+  let urlCounts = Dictionary(grouping: packageUrls.enumerated()) {
+    URL(string: $0.element.absoluteString.lowercased())!
+  }.mapValues { $0.map { $0.offset } }.filter { $0.value.count > 1 }
+
+  guard urlCounts.count == 0 else {
+    print("Error: Duplicate URLs:\n\(urlCounts)")
+    exit(1)
+  }
+
+  // Sort the array of urls
+  print("Checking packages are sorted.")
+  let sortedUrls = packageUrls.sorted {
+    $0.absoluteString.lowercased() < $1.absoluteString.lowercased()
+  }
+
+  // Verify that there are no differences between the current JSON and the sorted JSON
+  let unsortedUrls = zip(packageUrls, sortedUrls).enumerated().filter { $0.element.0 != $0.element.1 }.map {
+    ($0.offset, $0.element.0)
+  }
+
+  guard unsortedUrls.count == 0 else {
+    print("Error: packages.json is not sorted: \(unsortedUrls)")
+    // If the sorting fails, save the sorted packages.json file
+    let encoder = JSONEncoder()
+    encoder.outputFormatting = [.prettyPrinted]
+
+    let data = try! encoder.encode(sortedUrls)
+    let str = String(data: data, encoding: .utf8)!.replacingOccurrences(of: "\\/", with: "/")
+    let unescapedData = str.data(using: .utf8)!
+    let outputURL = url.deletingPathExtension().appendingPathExtension("sorted.json")
+    try! unescapedData.write(to: outputURL)
+    print("Sorted packages.json has been saved to:\n \(outputURL.path)")
+    exit(1)
+  }
+
+  print("Checking each url for valid package dump.")
+
+  filterRepos(packageUrls, withSession: session, includingMaster: parseAllRepos) { result in
+    let packageUrls: [URL]
+    switch result {
+    case let .failure(error):
+      debugPrint(error)
+      exit(1)
+    case let .success(urls):
+      packageUrls = urls
+    }
+    parseRepos(packageUrls, withSession: session) { errors in
       for (url, error) in errors {
         print(url, error)
       }
       print("Validation Succeeded.")
       exit(0)
+    }
   }
 }
 
