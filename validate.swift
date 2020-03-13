@@ -22,7 +22,7 @@ usage: %@ <command> [path]
 COMMANDS:
   all   validate all packages in JSON packages.json
   diff  validate all new packages in JSON packages.json
-  mine  validate the Package of the current directoy
+  mine  validate the Package of the current directory
 
 OPTIONS:
   path  to define the specific `packages.json` file or Swift package directory
