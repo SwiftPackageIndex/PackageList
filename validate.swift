@@ -18,6 +18,8 @@ let masterPackageList = rawURLComponentsBase.url!.appendingPathComponent("daveve
 
 let packageDumpTimeoutSeconds : TimeInterval = 100.0
 
+let packageQuantityOutputEvery = 25
+
 let helpText = """
 usage: %@ <command> [path]
 
@@ -305,7 +307,7 @@ func parseRepos(_ packageUrls: [URL], withSession session: URLSession, _ complet
 
         DispatchQueue.main.async {
           count += 1
-          if count % 10 == 0 {
+          if count % packageQuantityOutputEvery == 0 {
             debugPrint("\(packageUnsetResults.count - count) remaining")
           }
         }
