@@ -27,17 +27,17 @@ COMMANDS:
 OPTIONS:
   path  to define the specific `packages.json` file or Swift package directory
 """
+
 // MARK: Types
 
-
-enum Command : String {
-  case all = "all"
-  case diff = "diff"
-  case mine = "mine"
+enum Command: String {
+  case all
+  case diff
+  case mine
 }
 
 extension Command {
-  static func fromArguments (_ arguments : [String]) -> Command? {
+  static func fromArguments(_ arguments: [String]) -> Command? {
     for argument in arguments {
       if let command = Command(rawValue: argument) {
         return command
@@ -182,7 +182,7 @@ func verifyPackageDump(at directoryURL: URL, _ callback: @escaping ((PackageErro
     let package: Package
 
     guard process.terminationStatus == 0 else {
-      let error : PackageError
+      let error: PackageError
       if process.terminationStatus == 15 {
         error = .dumpTimeout
       } else {
@@ -207,7 +207,7 @@ func verifyPackageDump(at directoryURL: URL, _ callback: @escaping ((PackageErro
   }
 
   process.launch()
-  
+
   DispatchQueue.global().asyncAfter(deadline: .now() + 10.0) {
     if process.isRunning {
       process.terminate()
