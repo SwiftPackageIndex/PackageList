@@ -305,7 +305,7 @@ func parseRepos(_ packageUrls: [URL], withSession session: URLSession, _ complet
 
         DispatchQueue.main.async {
           count += 1
-          if count % 100 == 0 {
+          if count % 10 == 0 {
             debugPrint("\(packageUnsetResults.count - count) remaining")
           }
         }
