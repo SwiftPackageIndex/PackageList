@@ -5,7 +5,7 @@ import Foundation
 // MARK: Configuration Values and Constants
 
 // number of validations to run simultaneously
-let semaphoreCount = 12
+let semaphoreCount = 20
 
 let timeoutIntervalForRequest = 3000.0
 let timeoutIntervalForResource = 6000.0
@@ -15,6 +15,8 @@ let rawURLComponentsBase = URLComponents(string: "https://raw.githubusercontent.
 
 // master package list to compare against
 let masterPackageList = rawURLComponentsBase.url!.appendingPathComponent("daveverwer/SwiftPMLibrary/master/packages.json")
+
+let packageDumpTimeoutSeconds : TimeInterval = 100.0
 
 let helpText = """
 usage: %@ <command> [path]
@@ -208,7 +210,7 @@ func verifyPackageDump(at directoryURL: URL, _ callback: @escaping ((PackageErro
 
   process.launch()
 
-  DispatchQueue.global().asyncAfter(deadline: .now() + 10.0) {
+  DispatchQueue.global().asyncAfter(deadline: .now() + packageDumpTimeoutSeconds) {
     if process.isRunning {
       process.terminate()
     }
