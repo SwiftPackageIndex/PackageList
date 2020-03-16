@@ -5,7 +5,7 @@ import Foundation
 // MARK: Configuration Values and Constants
 
 // number of validations to run simultaneously
-let semaphoreCount = 1
+let semaphoreCount = 12
 
 let timeoutIntervalForRequest = 3000.0
 let timeoutIntervalForResource = 6000.0
@@ -16,32 +16,28 @@ let rawURLComponentsBase = URLComponents(string: "https://raw.githubusercontent.
 // master package list to compare against
 let masterPackageList = rawURLComponentsBase.url!.appendingPathComponent("daveverwer/SwiftPMLibrary/master/packages.json")
 
-let packageDumpTimeoutSeconds : TimeInterval = 100.0
-
-let packageQuantityOutputEvery = 10
-
 let helpText = """
 usage: %@ <command> [path]
 
 COMMANDS:
   all   validate all packages in JSON packages.json
   diff  validate all new packages in JSON packages.json
-  mine  validate the Package of the current directory
+  mine  validate the Package of the current directoy
 
 OPTIONS:
   path  to define the specific `packages.json` file or Swift package directory
 """
-
 // MARK: Types
 
-enum Command: String {
-  case all
-  case diff
-  case mine
+
+enum Command : String {
+  case all = "all"
+  case diff = "diff"
+  case mine = "mine"
 }
 
 extension Command {
-  static func fromArguments(_ arguments: [String]) -> Command? {
+  static func fromArguments (_ arguments : [String]) -> Command? {
     for argument in arguments {
       if let command = Command(rawValue: argument) {
         return command
@@ -186,7 +182,7 @@ func verifyPackageDump(at directoryURL: URL, _ callback: @escaping ((PackageErro
     let package: Package
 
     guard process.terminationStatus == 0 else {
-      let error: PackageError
+      let error : PackageError
       if process.terminationStatus == 15 {
         error = .dumpTimeout
       } else {
@@ -211,8 +207,8 @@ func verifyPackageDump(at directoryURL: URL, _ callback: @escaping ((PackageErro
   }
 
   process.launch()
-
-  DispatchQueue.global().asyncAfter(deadline: .now() + packageDumpTimeoutSeconds) {
+  
+  DispatchQueue.global().asyncAfter(deadline: .now() + 10.0) {
     if process.isRunning {
       process.terminate()
     }
@@ -307,7 +303,7 @@ func parseRepos(_ packageUrls: [URL], withSession session: URLSession, _ complet
 
         DispatchQueue.main.async {
           count += 1
-          if count % packageQuantityOutputEvery == 0 {
+          if count % 100 == 0 {
             debugPrint("\(packageUnsetResults.count - count) remaining")
           }
         }
