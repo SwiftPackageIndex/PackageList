@@ -5,7 +5,7 @@ import Foundation
 // MARK: Configuration Values and Constants
 
 // number of validations to run simultaneously
-let semaphoreCount = 15
+let semaphoreCount = 10
 
 let timeoutIntervalForRequest = 3000.0
 let timeoutIntervalForResource = 6000.0
@@ -18,7 +18,7 @@ let masterPackageList = rawURLComponentsBase.url!.appendingPathComponent("daveve
 
 let packageDumpTimeoutSeconds : TimeInterval = 100.0
 
-let packageQuantityOutputEvery = 25
+let packageQuantityOutputEvery = 10
 
 let helpText = """
 usage: %@ <command> [path]
