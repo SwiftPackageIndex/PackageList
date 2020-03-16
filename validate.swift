@@ -5,7 +5,7 @@ import Foundation
 // MARK: Configuration Values and Constants
 
 // number of validations to run simultaneously
-let semaphoreCount = 1
+let semaphoreCount = 5
 
 let timeoutIntervalForRequest = 3000.0
 let timeoutIntervalForResource = 6000.0
