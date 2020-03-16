@@ -5,7 +5,7 @@ import Foundation
 // MARK: Configuration Values and Constants
 
 // number of validations to run simultaneously
-let semaphoreCount = 12
+let semaphoreCount = 1
 
 let timeoutIntervalForRequest = 3000.0
 let timeoutIntervalForResource = 6000.0
@@ -303,7 +303,7 @@ func parseRepos(_ packageUrls: [URL], withSession session: URLSession, _ complet
 
         DispatchQueue.main.async {
           count += 1
-          if count % 10 == 0 {
+          if count % 1 == 0 {
             debugPrint("\(packageUnsetResults.count - count) remaining")
           }
         }
