@@ -10,4 +10,4 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build
-      run:  sh ./validate.swift all
+      run:  ./validate.swift all
