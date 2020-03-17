@@ -1,4 +1,4 @@
-#!/usr/bin/env swift
+//#!/usr/bin/env swift
 
 import Foundation
 
@@ -87,6 +87,28 @@ enum PackageError: Error {
   case decodingError(Error)
   case missingProducts
   case dumpTimeout
+  
+  
+  var friendlyName : String {
+    switch self {
+    case .noResult:
+      return "No Result"
+    case .invalidURL(_):
+      return "Invalid URL"
+    case .unsupportedHost(_):
+      return "Unsupported Host"
+    case .readError(_):
+      return "Download Failure"
+    case .badDump(_):
+      return "Invalid Dump"
+    case .decodingError(_):
+      return "Dump Decoding Error"
+    case .missingProducts:
+      return "No Products"
+    case .dumpTimeout:
+      return "Dump Timout"
+    }
+  }
 }
 
 extension Result where Success == Void {
@@ -453,8 +475,20 @@ if command == .mine {
       for (url, error) in errors {
         print(url, error)
       }
-      print("Validation Succeeded.")
-      exit(0)
+      if errors.count == 0 {
+        print("Validation Succeeded.")
+        exit(0)
+      } else {
+        print("Validation Failed")
+        let errorReport = [String : [PackageError]].init(grouping: errors.values, by: { $0.friendlyName }).mapValues{ $0.count }
+        for report in errorReport {
+          print(report.value, report.key, separator: "\t")
+        }
+        print()
+        print("\(errors.count) Packages Failed")
+        exit(1)
+      }
+      
     }
   }
 }
