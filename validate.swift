@@ -16,6 +16,8 @@ let rawURLComponentsBase = URLComponents(string: "https://raw.githubusercontent.
 // master package list to compare against
 let masterPackageList = rawURLComponentsBase.url!.appendingPathComponent("daveverwer/SwiftPMLibrary/master/packages.json")
 
+let logEveryCount = 10
+
 let helpText = """
 usage: %@ <command> [path]
 
@@ -303,8 +305,8 @@ func parseRepos(_ packageUrls: [URL], withSession session: URLSession, _ complet
 
         DispatchQueue.main.async {
           count += 1
-          if count % 1 == 0 {
-            debugPrint("\(packageUnsetResults.count - count) remaining")
+          if count % logEveryCount == 0 {
+            print("\(packageUnsetResults.count - count) remaining")
           }
         }
         group.leave()
