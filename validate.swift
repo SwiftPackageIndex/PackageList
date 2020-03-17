@@ -18,6 +18,10 @@ let masterPackageList = rawURLComponentsBase.url!.appendingPathComponent("daveve
 
 let logEveryCount = 10
 
+let httpMaximumConnectionsPerHost = 12
+
+let displayProgress = false
+
 let helpText = """
 usage: %@ <command> [path]
 
@@ -302,11 +306,15 @@ func parseRepos(_ packageUrls: [URL], withSession session: URLSession, _ complet
       verifyPackage(at: gitURL, withSession: session) {
         error in
         packageUnsetResults[index] = Result<Void, PackageError>(error)
-
-        DispatchQueue.main.async {
-          count += 1
-          if count % logEveryCount == 0 {
-            print("\(packageUnsetResults.count - count) remaining")
+        if error == nil {
+          print(gitURL, "passed")
+        }
+        if displayProgress {
+          DispatchQueue.main.async {
+            count += 1
+            if count % (packageUnsetResults.count / logEveryCount) == 0 {
+              print(".", terminator: "")
+            }
           }
         }
         group.leave()
@@ -346,6 +354,7 @@ let decoder = JSONDecoder()
 let config: URLSessionConfiguration = .default
 config.timeoutIntervalForRequest = timeoutIntervalForRequest
 config.timeoutIntervalForResource = timeoutIntervalForResource
+config.httpMaximumConnectionsPerHost = httpMaximumConnectionsPerHost
 
 let session = URLSession(configuration: config)
 
