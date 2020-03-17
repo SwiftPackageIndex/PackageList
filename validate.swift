@@ -5,7 +5,7 @@ import Foundation
 // MARK: Configuration Values and Constants
 
 // number of validations to run simultaneously
-let semaphoreCount = 5
+let semaphoreCount = 1
 
 let timeoutIntervalForRequest = 3000.0
 let timeoutIntervalForResource = 6000.0
@@ -18,7 +18,7 @@ let masterPackageList = rawURLComponentsBase.url!.appendingPathComponent("daveve
 
 let logEveryCount = 10
 
-let httpMaximumConnectionsPerHost = 5
+let httpMaximumConnectionsPerHost = 1
 
 let displayProgress = false
 
@@ -37,9 +37,9 @@ OPTIONS:
 
 
 enum Command : String {
-  case all = "all"
-  case diff = "diff"
-  case mine = "mine"
+  case all
+  case diff
+  case mine
 }
 
 extension Command {
@@ -462,6 +462,7 @@ if command == .mine {
 
   print("Checking each url for valid package dump.")
 
+  let semaphore = DispatchSemaphore(value: 0)
   filterRepos(packageUrls, withSession: session, includingMaster: command == .all) { result in
     let packageUrls: [URL]
     switch result {
@@ -471,6 +472,7 @@ if command == .mine {
     case let .success(urls):
       packageUrls = urls
     }
+    print("Checking \(packageUrls.count) Packages...")
     parseRepos(packageUrls, withSession: session) { errors in
       for (url, error) in errors {
         print(url, error)
@@ -488,9 +490,11 @@ if command == .mine {
         print("\(errors.count) Packages Failed")
         exit(1)
       }
+      semaphore.signal()
       
     }
   }
+
+  semaphore.wait()
 }
 
-RunLoop.current.run()
