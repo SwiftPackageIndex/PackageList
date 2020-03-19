@@ -20,7 +20,7 @@ let logEveryCount = 10
 
 let httpMaximumConnectionsPerHost = 10
 
-let displayProgress = false
+let displayProgress = true
 
 let processTimeout = 10.0
 
@@ -330,21 +330,21 @@ func parseRepos(_ packageUrls: [URL], withSession session: URLSession, _ complet
     group.enter()
     concurrentQueue.async {
       if logEachRepo {
-        print("Checking", gitURL.pathComponents.suffix(2), "...")
+        print("Checking", [String](gitURL.pathComponents.suffix(2)).joined(separator:"/"), "...")
       }
       verifyPackage(at: gitURL, withSession: session) {
         error in
         packageUnsetResults[index] = Result<Void, PackageError>(error)
-        if error == nil {
-          print(gitURL, "passed")
-        }
-        if displayProgress {
+        
+        if displayProgress && logEveryCount < packageUnsetResults.count {
           DispatchQueue.main.async {
             count += 1
             if count % (packageUnsetResults.count / logEveryCount) == 0 {
               print(".", terminator: "")
             }
           }
+        } else if error == nil {
+          print(gitURL, "passed")
         }
         group.leave()
       }
