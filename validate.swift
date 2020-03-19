@@ -5,7 +5,7 @@ import Foundation
 // MARK: Configuration Values and Constants
 
 // number of validations to run simultaneously
-let semaphoreCount = 1
+let semaphoreCount = 10
 
 let timeoutIntervalForRequest = 3000.0
 let timeoutIntervalForResource = 6000.0
@@ -18,9 +18,11 @@ let masterPackageList = rawURLComponentsBase.url!.appendingPathComponent("daveve
 
 let logEveryCount = 10
 
-let httpMaximumConnectionsPerHost = 1
+let httpMaximumConnectionsPerHost = 10
 
 let displayProgress = false
+
+let processTimeout = 10.0
 
 let helpText = """
 usage: %@ <command> [path]
@@ -207,6 +209,7 @@ func verifyPackageDump(at directoryURL: URL, _ callback: @escaping ((PackageErro
 
   process.terminationHandler = {
     process in
+
     let package: Package
 
     guard process.terminationStatus == 0 else {
@@ -236,7 +239,8 @@ func verifyPackageDump(at directoryURL: URL, _ callback: @escaping ((PackageErro
 
   process.launch()
   
-  DispatchQueue.global().asyncAfter(deadline: .now() + 10.0) {
+  
+  DispatchQueue.main.asyncAfter(deadline: .now() + processTimeout) {
     if process.isRunning {
       process.terminate()
     }
@@ -318,13 +322,16 @@ func filterRepos(_ packageUrls: [URL], withSession session: URLSession, includin
  */
 func parseRepos(_ packageUrls: [URL], withSession session: URLSession, _ completion: @escaping (([URL: PackageError]) -> Void)) {
   let group = DispatchGroup()
-
+  let logEachRepo = packageUrls.count < 8
   let concurrentQueue = DispatchQueue(label: "swiftpm-verification", qos: .utility, attributes: .concurrent)
   var count = 0
   var packageUnsetResults = [Result<Void, PackageError>?].init(repeating: nil, count: packageUrls.count)
   for (index, gitURL) in packageUrls.enumerated() {
     group.enter()
     concurrentQueue.async {
+      if logEachRepo {
+        print("Checking", gitURL.pathComponents.suffix(2), "...")
+      }
       verifyPackage(at: gitURL, withSession: session) {
         error in
         packageUnsetResults[index] = Result<Void, PackageError>(error)
@@ -462,7 +469,6 @@ if command == .mine {
 
   print("Checking each url for valid package dump.")
 
-  let semaphore = DispatchSemaphore(value: 0)
   filterRepos(packageUrls, withSession: session, includingMaster: command == .all) { result in
     let packageUrls: [URL]
     switch result {
@@ -490,11 +496,10 @@ if command == .mine {
         print("\(errors.count) Packages Failed")
         exit(1)
       }
-      semaphore.signal()
       
     }
   }
 
-  semaphore.wait()
 }
 
+RunLoop.main.run()
