@@ -5,7 +5,7 @@ import Foundation
 // MARK: Configuration Values and Constants
 
 // number of validations to run simultaneously
-let semaphoreCount = 5
+let semaphoreCount = 1
 
 let timeoutIntervalForRequest = 3000.0
 let timeoutIntervalForResource = 6000.0
@@ -15,6 +15,12 @@ let rawURLComponentsBase = URLComponents(string: "https://raw.githubusercontent.
 
 // master package list to compare against
 let masterPackageList = rawURLComponentsBase.url!.appendingPathComponent("daveverwer/SwiftPMLibrary/master/packages.json")
+
+let logEveryCount = 10
+
+let httpMaximumConnectionsPerHost = 1
+
+let displayProgress = false
 
 let helpText = """
 usage: %@ <command> [path]
@@ -31,9 +37,9 @@ OPTIONS:
 
 
 enum Command : String {
-  case all = "all"
-  case diff = "diff"
-  case mine = "mine"
+  case all
+  case diff
+  case mine
 }
 
 extension Command {
@@ -81,6 +87,28 @@ enum PackageError: Error {
   case decodingError(Error)
   case missingProducts
   case dumpTimeout
+  
+  
+  var friendlyName : String {
+    switch self {
+    case .noResult:
+      return "No Result"
+    case .invalidURL(_):
+      return "Invalid URL"
+    case .unsupportedHost(_):
+      return "Unsupported Host"
+    case .readError(_):
+      return "Download Failure"
+    case .badDump(_):
+      return "Invalid Dump"
+    case .decodingError(_):
+      return "Dump Decoding Error"
+    case .missingProducts:
+      return "No Products"
+    case .dumpTimeout:
+      return "Dump Timout"
+    }
+  }
 }
 
 extension Result where Success == Void {
@@ -300,11 +328,15 @@ func parseRepos(_ packageUrls: [URL], withSession session: URLSession, _ complet
       verifyPackage(at: gitURL, withSession: session) {
         error in
         packageUnsetResults[index] = Result<Void, PackageError>(error)
-
-        DispatchQueue.main.async {
-          count += 1
-          if count % 1 == 0 {
-            debugPrint("\(packageUnsetResults.count - count) remaining")
+        if error == nil {
+          print(gitURL, "passed")
+        }
+        if displayProgress {
+          DispatchQueue.main.async {
+            count += 1
+            if count % (packageUnsetResults.count / logEveryCount) == 0 {
+              print(".", terminator: "")
+            }
           }
         }
         group.leave()
@@ -344,6 +376,7 @@ let decoder = JSONDecoder()
 let config: URLSessionConfiguration = .default
 config.timeoutIntervalForRequest = timeoutIntervalForRequest
 config.timeoutIntervalForResource = timeoutIntervalForResource
+config.httpMaximumConnectionsPerHost = httpMaximumConnectionsPerHost
 
 let session = URLSession(configuration: config)
 
@@ -429,6 +462,7 @@ if command == .mine {
 
   print("Checking each url for valid package dump.")
 
+  let semaphore = DispatchSemaphore(value: 0)
   filterRepos(packageUrls, withSession: session, includingMaster: command == .all) { result in
     let packageUrls: [URL]
     switch result {
@@ -438,14 +472,29 @@ if command == .mine {
     case let .success(urls):
       packageUrls = urls
     }
+    print("Checking \(packageUrls.count) Packages...")
     parseRepos(packageUrls, withSession: session) { errors in
       for (url, error) in errors {
         print(url, error)
       }
-      print("Validation Succeeded.")
-      exit(0)
+      if errors.count == 0 {
+        print("Validation Succeeded.")
+        exit(0)
+      } else {
+        print("Validation Failed")
+        let errorReport = [String : [PackageError]].init(grouping: errors.values, by: { $0.friendlyName }).mapValues{ $0.count }
+        for report in errorReport {
+          print(report.value, report.key, separator: "\t")
+        }
+        print()
+        print("\(errors.count) Packages Failed")
+        exit(1)
+      }
+      semaphore.signal()
+      
     }
   }
+
+  semaphore.wait()
 }
 
-RunLoop.current.run()
