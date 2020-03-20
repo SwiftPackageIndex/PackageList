@@ -2,4 +2,4 @@ language: objective-c
 osx_image: xcode11.3
 
 script:
-  - ./validate.swift
+  - ./validate.swift diff
