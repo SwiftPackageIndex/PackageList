@@ -5,7 +5,7 @@ import Foundation
 // MARK: Configuration Values and Constants
 
 // number of validations to run simultaneously
-let semaphoreCount = 10
+let semaphoreCount = 3
 
 let timeoutIntervalForRequest = 3000.0
 let timeoutIntervalForResource = 6000.0
@@ -22,7 +22,7 @@ let httpMaximumConnectionsPerHost = 10
 
 let displayProgress = true
 
-let processTimeout = 10.0
+let processTimeout = 50.0
 
 let helpText = """
 usage: %@ <command> [path]
@@ -89,8 +89,8 @@ enum PackageError: Error {
   case decodingError(Error)
   case missingProducts
   case dumpTimeout
-  
-  
+
+
   var friendlyName : String {
     switch self {
     case .noResult:
@@ -238,8 +238,8 @@ func verifyPackageDump(at directoryURL: URL, _ callback: @escaping ((PackageErro
   }
 
   process.launch()
-  
-  
+
+
   DispatchQueue.main.asyncAfter(deadline: .now() + processTimeout) {
     if process.isRunning {
       process.terminate()
@@ -335,7 +335,7 @@ func parseRepos(_ packageUrls: [URL], withSession session: URLSession, _ complet
       verifyPackage(at: gitURL, withSession: session) {
         error in
         packageUnsetResults[index] = Result<Void, PackageError>(error)
-        
+
         if displayProgress && logEveryCount < packageUnsetResults.count {
           DispatchQueue.main.async {
             count += 1
@@ -496,7 +496,7 @@ if command == .mine {
         print("\(errors.count) Packages Failed")
         exit(1)
       }
-      
+
     }
   }
 
