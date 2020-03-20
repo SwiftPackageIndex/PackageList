@@ -108,7 +108,7 @@ enum PackageError: Error {
     case .missingProducts:
       return "No Products"
     case .dumpTimeout:
-      return "Dump Timout"
+      return "Dump Timeout"
     }
   }
 }
