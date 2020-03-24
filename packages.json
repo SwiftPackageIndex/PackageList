@@ -1,4 +1,5 @@
 [
+  "https://github.com/vapor/fluent-mongo-driver.git",
   "https://github.com/OpenKitten/MongoKitten.git",
   "https://github.com/OpenKitten/NioDNS.git",
   "https://github.com/OpenKitten/BSON.git",
