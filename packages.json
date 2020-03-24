@@ -1,4 +1,11 @@
 [
+  "https://github.com/OpenKitten/MongoKitten.git",
+  "https://github.com/OpenKitten/NioDNS.git",
+  "https://github.com/OpenKitten/BSON.git",
+  "https://github.com/autimatisering/SMTPKitten.git",
+  "https://github.com/autimatisering/VaporSMTPKit.git",
+  "https://github.com/autimatisering/AMKit.git",
+  "https://github.com/autimatisering/IkigaJSON.git",
   "https://github.com/0111b/JSONDecoder-Keypath.git",
   "https://github.com/0x7fs/countedset.git",
   "https://github.com/0xdeadp00l/bech32.git",
