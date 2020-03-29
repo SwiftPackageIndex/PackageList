@@ -1316,6 +1316,7 @@
   "https://github.com/mcfedr/DNS.git",
   "https://github.com/mczachurski/swiftgger.git",
   "https://github.com/mdvjd/kvvliveapi.git",
+  "https://github.com/mednoor/MNSwitchi.git",
   "https://github.com/meech-ward/focus.git",
   "https://github.com/meech-ward/observe.git",
   "https://github.com/Meniny/Parade.git",
@@ -2409,6 +2410,5 @@
   "https://github.com/zonble/ZBSimplePluginManager.git",
   "https://github.com/zoul/generic-json-swift.git",
   "https://github.com/zssz/BerkananSDK.git",
-  "https://github.com/zweigraf/fakebundle.git",
-  "https://github.com/mednoor/MNSwitchi.git"
+  "https://github.com/zweigraf/fakebundle.git"
 ]
