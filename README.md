@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/daveverwer/SwiftPMLibrary.svg?branch=master)](https://travis-ci.org/daveverwer/SwiftPMLibrary)
+![Valid JSON](https://github.com/daveverwer/SwiftPMLibrary/workflows/Valid%20JSON/badge.svg)
 
 # The SwiftPM Library
 
