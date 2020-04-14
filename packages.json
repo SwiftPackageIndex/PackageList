@@ -966,7 +966,6 @@
   "https://github.com/interstateone/binarycookies.git",
   "https://github.com/iosdevzone/idzswiftdatataskpublisher.git",
   "https://github.com/ipavlidakis/PutioKit.git",
-  "https://github.com/iSapozhnik/Popover.git",
   "https://github.com/ishkawa/APIKit.git",
   "https://github.com/ishkawa/dikit.git",
   "https://github.com/isotopsweden/endpoints.git",
@@ -2414,5 +2413,7 @@
   "https://github.com/zonble/ZBSimplePluginManager.git",
   "https://github.com/zoul/generic-json-swift.git",
   "https://github.com/zssz/BerkananSDK.git",
-  "https://github.com/zweigraf/fakebundle.git"
+  "https://github.com/zweigraf/fakebundle.git",
+  "https://github.com/iSapozhnik/Popover.git",
+  "https://github.com/iSapozhnik/Menu"
 ]
