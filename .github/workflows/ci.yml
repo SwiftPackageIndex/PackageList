@@ -10,6 +10,9 @@ jobs:
   build:
     runs-on: macos-latest
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Select Xcode 11.4
+      run: sudo xcode-select -s /Applications/Xcode_11.4.app && xcodebuild -version
     - name: Validate JSON
       run: swift validate.swift diff
