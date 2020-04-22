@@ -82,7 +82,7 @@ enum GitHost: String {
  */
 enum PackageError: Error {
   case noResult
-  case invalidURL(String)
+  case invalidURL(URL)
   case unsupportedHost(String)
   case readError(Error?)
   case badDump(String?)
@@ -136,10 +136,7 @@ func getGitHubDefaultBranch(for userName: String, repositoryName: String) -> Res
     var default_branch: String  // don't bother with re-casing this for now...
   }
   let sema = DispatchSemaphore(value: 0)
-  let urlString = "https://api.github.com/repos/\(userName)/\(repositoryName)"
-  guard let apiURL = URL(string: urlString) else {
-    return .failure(.invalidURL(urlString))
-  }
+  let apiURL = URL(string: "https://api.github.com/repos/\(userName)/\(repositoryName)")!
   var result: Result<String, PackageError> = .failure(.noResult)
   let task = URLSession.shared.dataTask(with: apiURL) { (data, response, error) in
     guard let data = data else { return }
@@ -160,7 +157,7 @@ func getGitHubDefaultBranch(for userName: String, repositoryName: String) -> Res
  */
 func getPackageSwiftURL(for gitURL: URL) -> Result<URL, PackageError> {
   guard let hostString = gitURL.host else {
-    return .failure(.invalidURL(gitURL.absoluteString))
+    return .failure(.invalidURL(gitURL))
   }
 
   guard let host = GitHost(rawValue: hostString) else {
@@ -174,11 +171,11 @@ func getPackageSwiftURL(for gitURL: URL) -> Result<URL, PackageError> {
     let userName = gitURL.deletingLastPathComponent().lastPathComponent
     guard let defaultBranch = try? getGitHubDefaultBranch(for: userName, repositoryName: repositoryName)
       .get() else {
-      return .failure(.invalidURL(gitURL.absoluteString))
+      return .failure(.invalidURL(gitURL))
     }
     rawURLComponents.path = ["", userName, repositoryName, defaultBranch, "Package.swift"].joined(separator: "/")
     guard let packageSwiftURL = rawURLComponents.url else {
-      return .failure(.invalidURL(gitURL.absoluteString))
+      return .failure(.invalidURL(gitURL))
     }
     return .success(packageSwiftURL)
   }
