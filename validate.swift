@@ -135,10 +135,10 @@ func getGitHubDefaultBranch(for userName: String, repositoryName: String) -> Str
   struct Repository: Decodable {
     var default_branch: String  // don't bother with re-casing this for now...
   }
-  let sema = DispatchSemaphore(value: 0)
   guard let apiURL = URL(string: "https://api.github.com/repos/\(userName)/\(repositoryName)") else {
     return nil
   }
+  let sema = DispatchSemaphore(value: 0)
   var defaultBranch: String?
   let task = URLSession.shared.dataTask(with: apiURL) { (data, response, error) in
     defaultBranch = data.flatMap {
