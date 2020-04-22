@@ -168,14 +168,12 @@ func getPackageSwiftURL(for gitURL: URL) -> Result<URL, PackageError> {
 
   switch host {
   case .GitHub:
+    var rawURLComponents = rawURLComponentsBase
     let repositoryName = gitURL.deletingPathExtension().lastPathComponent
     let userName = gitURL.deletingLastPathComponent().lastPathComponent
-    let defaultBranch = getGitHubDefaultBranch(for: userName, repositoryName: repositoryName)
-    guard let packageSwiftURL = defaultBranch.flatMap({ (branch) -> URL? in
-      var components = rawURLComponentsBase
-      components.path = ["", userName, repositoryName, branch, "Package.swift"].joined(separator: "/")
-      return components.url
-    }) else {
+    let defaultBranch = getGitHubDefaultBranch(for: userName, repositoryName: repositoryName) ?? "master"
+    rawURLComponents.path = ["", userName, repositoryName, defaultBranch, "Package.swift"].joined(separator: "/")
+    guard let packageSwiftURL = rawURLComponents.url else {
       return .failure(.invalidURL(gitURL))
     }
     return .success(packageSwiftURL)
