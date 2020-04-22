@@ -131,23 +131,23 @@ extension Result where Success == Void {
  - Parameter repositoryName: Repository name
  - Returns: default branch name if successful; otherwise `noResult` or a `decodingError`.
  */
-func getGitHubDefaultBranch(for userName: String, repositoryName: String) -> Result<String, PackageError> {
+func getGitHubDefaultBranch(for userName: String, repositoryName: String) -> String? {
   struct Repository: Decodable {
     var default_branch: String  // don't bother with re-casing this for now...
   }
   let sema = DispatchSemaphore(value: 0)
   let apiURL = URL(string: "https://api.github.com/repos/\(userName)/\(repositoryName)")!
-  var result: Result<String, PackageError> = .failure(.noResult)
+  var defaultBranch: String?
   let task = URLSession.shared.dataTask(with: apiURL) { (data, response, error) in
-    guard let data = data else { return }
-    result = Result { try JSONDecoder().decode(Repository.self, from: data) }
-      .mapError { .decodingError($0) }
-      .map { $0.default_branch }
+    defaultBranch = data.flatMap {
+      try? JSONDecoder().decode(Repository.self, from: $0)
+    }
+    .map { $0.default_branch }
     sema.signal()
   }
   task.resume()
   let _ = sema.wait(timeout: DispatchTime.now() + .seconds(2))
-  return result
+  return defaultBranch
 }
 
 /**
@@ -166,15 +166,14 @@ func getPackageSwiftURL(for gitURL: URL) -> Result<URL, PackageError> {
 
   switch host {
   case .GitHub:
-    var rawURLComponents = rawURLComponentsBase
     let repositoryName = gitURL.deletingPathExtension().lastPathComponent
     let userName = gitURL.deletingLastPathComponent().lastPathComponent
-    guard let defaultBranch = try? getGitHubDefaultBranch(for: userName, repositoryName: repositoryName)
-      .get() else {
-      return .failure(.invalidURL(gitURL))
-    }
-    rawURLComponents.path = ["", userName, repositoryName, defaultBranch, "Package.swift"].joined(separator: "/")
-    guard let packageSwiftURL = rawURLComponents.url else {
+    let defaultBranch = getGitHubDefaultBranch(for: userName, repositoryName: repositoryName)
+    guard let packageSwiftURL = defaultBranch.flatMap({ (branch) -> URL? in
+      var components = rawURLComponentsBase
+      components.path = ["", userName, repositoryName, branch, "Package.swift"].joined(separator: "/")
+      return components.url
+    }) else {
       return .failure(.invalidURL(gitURL))
     }
     return .success(packageSwiftURL)
