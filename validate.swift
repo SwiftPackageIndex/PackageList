@@ -126,6 +126,32 @@ extension Result where Success == Void {
 // MARK: Functions
 
 /**
+ Fetch the default branch for a given GitHub repository.
+ - Parameter userName: Repository owner
+ - Parameter repositoryName: Repository name
+ - Returns: default branch name if successful; otherwise `noResult` or a `decodingError`.
+ */
+func getGitHubDefaultBranch(for userName: String, repositoryName: String) -> Result<String, PackageError> {
+  struct Repository: Decodable {
+    var default_branch: String  // don't bother with re-casing this for now...
+  }
+  let sema = DispatchSemaphore(value: 0)
+  let apiURL = URL(string: "https://api.github.com/repos/\(userName)/\(repositoryName)")!
+  print("apiURL: \(apiURL.absoluteString)")
+  var result: Result<String, PackageError> = .failure(.noResult)
+  let task = URLSession.shared.dataTask(with: apiURL) { (data, response, error) in
+    guard let data = data else { return }
+    result = Result { try JSONDecoder().decode(Repository.self, from: data) }
+      .mapError { .decodingError($0) }
+      .map { $0.default_branch }
+    sema.signal()
+  }
+  task.resume()
+  let _ = sema.wait(timeout: DispatchTime.now() + .seconds(2))
+  return result
+}
+
+/**
  Based on repository url, find the raw url to the Package.swift file.
  - Parameter gitURL: Repository URL
  - Returns: raw git URL, if successful; other `invalidURL` if not proper git repo url or `unsupportedHost` if the host is not currently supported.
@@ -144,7 +170,11 @@ func getPackageSwiftURL(for gitURL: URL) -> Result<URL, PackageError> {
     var rawURLComponents = rawURLComponentsBase
     let repositoryName = gitURL.deletingPathExtension().lastPathComponent
     let userName = gitURL.deletingLastPathComponent().lastPathComponent
-    rawURLComponents.path = ["", userName, repositoryName, "master", "Package.swift"].joined(separator: "/")
+    guard let defaultBranch = try? getGitHubDefaultBranch(for: userName, repositoryName: repositoryName)
+      .get() else {
+      return .failure(.invalidURL(gitURL))
+    }
+    rawURLComponents.path = ["", userName, repositoryName, defaultBranch, "Package.swift"].joined(separator: "/")
     guard let packageSwiftURL = rawURLComponents.url else {
       return .failure(.invalidURL(gitURL))
     }
