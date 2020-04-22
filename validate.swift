@@ -137,7 +137,6 @@ func getGitHubDefaultBranch(for userName: String, repositoryName: String) -> Res
   }
   let sema = DispatchSemaphore(value: 0)
   let apiURL = URL(string: "https://api.github.com/repos/\(userName)/\(repositoryName)")!
-  print("apiURL: \(apiURL.absoluteString)")
   var result: Result<String, PackageError> = .failure(.noResult)
   let task = URLSession.shared.dataTask(with: apiURL) { (data, response, error) in
     guard let data = data else { return }
