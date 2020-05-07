@@ -829,6 +829,8 @@
   "https://github.com/groue/GRDB.swift.git",
   "https://github.com/groue/GRDBCombine.git",
   "https://github.com/groue/GRMustache.swift.git",
+  "https://github.com/GroupeMINASTE/APIRequest.swift.git",
+  "https://github.com/GroupeMINASTE/Keychain.swift.git",
   "https://github.com/grpc/grpc-swift.git",
   "https://github.com/gscalzo/SwiftCubicSpline.git",
   "https://github.com/gspd-mobi/rage-ios.git",
@@ -2476,7 +2478,5 @@
   "https://github.com/zonble/ZBSimplePluginManager.git",
   "https://github.com/zoul/generic-json-swift.git",
   "https://github.com/zssz/BerkananSDK.git",
-  "https://github.com/zweigraf/fakebundle.git",
-  "https://github.com/GroupeMINASTE/APIRequest.swift.git",
-  "https://github.com/GroupeMINASTE/Keychain.swift.git"
+  "https://github.com/zweigraf/fakebundle.git"
 ]
