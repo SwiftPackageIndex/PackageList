@@ -2143,7 +2143,6 @@
   "https://github.com/swift-aws/iam.git",
   "https://github.com/swift-aws/kinesis.git",
   "https://github.com/swift-aws/lambda.git",
-  "https://github.com/swift-aws/logs.git",
   "https://github.com/swift-aws/s3.git",
   "https://github.com/swift-aws/ses.git",
   "https://github.com/swift-server/async-http-client.git",
