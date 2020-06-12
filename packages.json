@@ -2143,6 +2143,7 @@
   "https://github.com/swift-aws/ses.git",
   "https://github.com/swift-server/async-http-client.git",
   "https://github.com/swift-server/security.git",
+  "https://github.com/swift-server/swift-aws-lambda-runtime.git",
   "https://github.com/swift-squirrel/evaluation.git",
   "https://github.com/swift-squirrel/nutview.git",
   "https://github.com/swift-squirrel/squirrel-connector.git",
