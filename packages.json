@@ -179,6 +179,8 @@
   "https://github.com/artemnovichkov/carting.git",
   "https://github.com/artemnovichkov/fastfood.git",
   "https://github.com/artemnovichkov/spasibo.git",
+  "https://github.com/arthurpalves/badgy.git",
+  "https://github.com/arthurpalves/coherent-swift.git",
   "https://github.com/artman/Signals.git",
   "https://github.com/ArtSabintsev/Fontblaster.git",
   "https://github.com/ArtSabintsev/Freedom.git",
@@ -2551,7 +2553,5 @@
   "https://github.com/zoul/generic-json-swift.git",
   "https://github.com/zssz/BerkananSDK.git",
   "https://github.com/zummenix/KeyboardNotificationsObserver.git",
-  "https://github.com/zweigraf/fakebundle.git",
-  "https://github.com/arthurpalves/coherent-swift.git",
-  "https://github.com/arthurpalves/badgy.git"
+  "https://github.com/zweigraf/fakebundle.git"
 ]
