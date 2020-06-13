@@ -1,6 +1,4 @@
 [
-  "https://github.com/matis-schotte/PublishedKVO.git",
-  "https://github.com/matis-schotte/TracingActivity.git",
   "https://github.com/0111b/JSONDecoder-Keypath.git",
   "https://github.com/0x7fs/countedset.git",
   "https://github.com/0xdeadp00l/bech32.git",
@@ -1344,6 +1342,8 @@
   "https://github.com/marty-suzuki/Ricemill.git",
   "https://github.com/marty-suzuki/SABlurImageView.git",
   "https://github.com/MastodonKit/MastodonKit.git",
+  "https://github.com/matis-schotte/PublishedKVO.git",
+  "https://github.com/matis-schotte/TracingActivity.git",
   "https://github.com/MatteoBatti/Pager.git",
   "https://github.com/matterinc/web3swift.git",
   "https://github.com/mattgallagher/cwlcatchexception.git",
