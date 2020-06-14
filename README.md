@@ -1,4 +1,4 @@
-![Valid JSON](https://github.com/daveverwer/SwiftPMLibrary/workflows/Valid%20JSON/badge.svg)
+![Valid JSON](https://github.com/SwiftPackageIndex/MasterPackageList/workflows/Valid%20JSON/badge.svg)
 
 # The Swift Package Index
 
