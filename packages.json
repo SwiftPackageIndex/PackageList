@@ -2433,6 +2433,7 @@
   "https://github.com/venj/sugar.git",
   "https://github.com/venmo/DVR.git",
   "https://github.com/verbalexpressions/swiftverbalexpressions.git",
+  "https://github.com/VergeGroup/Verge.git",
   "https://github.com/vincent-pradeilles/KeyPathKit.git",
   "https://github.com/vincent-pradeilles/weakable-self.git",
   "https://github.com/vincode-io/VinContent.git",
@@ -2559,6 +2560,5 @@
   "https://github.com/zoul/generic-json-swift.git",
   "https://github.com/zssz/BerkananSDK.git",
   "https://github.com/zummenix/KeyboardNotificationsObserver.git",
-  "https://github.com/zweigraf/fakebundle.git",
-  "https://github.com/VergeGroup/Verge.git"
+  "https://github.com/zweigraf/fakebundle.git"
 ]
