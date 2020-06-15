@@ -14,7 +14,7 @@ let timeoutIntervalForResource = 6000.0
 let rawURLComponentsBase = URLComponents(string: "https://raw.githubusercontent.com")!
 
 // master package list to compare against
-let masterPackageList = rawURLComponentsBase.url!.appendingPathComponent("daveverwer/SwiftPMLibrary/master/packages.json")
+let masterPackageList = rawURLComponentsBase.url!.appendingPathComponent("SwiftPackageIndex/MasterPackageList/master/packages.json")
 
 let logEveryCount = 10
 
@@ -126,6 +126,33 @@ extension Result where Success == Void {
 // MARK: Functions
 
 /**
+ Fetch the default branch for a given GitHub repository.
+ - Parameter userName: Repository owner
+ - Parameter repositoryName: Repository name
+ - Returns: default branch name if successful; otherwise `noResult` or a `decodingError`.
+ */
+func getGitHubDefaultBranch(for userName: String, repositoryName: String) -> String? {
+  struct Repository: Decodable {
+    var default_branch: String  // don't bother with re-casing this for now...
+  }
+  guard let apiURL = URL(string: "https://api.github.com/repos/\(userName)/\(repositoryName)") else {
+    return nil
+  }
+  let sema = DispatchSemaphore(value: 0)
+  var defaultBranch: String?
+  let task = URLSession.shared.dataTask(with: apiURL) { (data, response, error) in
+    defaultBranch = data.flatMap {
+      try? JSONDecoder().decode(Repository.self, from: $0)
+    }
+    .map { $0.default_branch }
+    sema.signal()
+  }
+  task.resume()
+  let _ = sema.wait(timeout: DispatchTime.now() + .seconds(2))
+  return defaultBranch
+}
+
+/**
  Based on repository url, find the raw url to the Package.swift file.
  - Parameter gitURL: Repository URL
  - Returns: raw git URL, if successful; other `invalidURL` if not proper git repo url or `unsupportedHost` if the host is not currently supported.
@@ -144,7 +171,8 @@ func getPackageSwiftURL(for gitURL: URL) -> Result<URL, PackageError> {
     var rawURLComponents = rawURLComponentsBase
     let repositoryName = gitURL.deletingPathExtension().lastPathComponent
     let userName = gitURL.deletingLastPathComponent().lastPathComponent
-    rawURLComponents.path = ["", userName, repositoryName, "master", "Package.swift"].joined(separator: "/")
+    let defaultBranch = getGitHubDefaultBranch(for: userName, repositoryName: repositoryName) ?? "master"
+    rawURLComponents.path = ["", userName, repositoryName, defaultBranch, "Package.swift"].joined(separator: "/")
     guard let packageSwiftURL = rawURLComponents.url else {
       return .failure(.invalidURL(gitURL))
     }
