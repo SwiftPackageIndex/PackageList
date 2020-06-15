@@ -14,7 +14,7 @@ let timeoutIntervalForResource = 6000.0
 let rawURLComponentsBase = URLComponents(string: "https://raw.githubusercontent.com")!
 
 // master package list to compare against
-let masterPackageList = rawURLComponentsBase.url!.appendingPathComponent("daveverwer/SwiftPMLibrary/master/packages.json")
+let masterPackageList = rawURLComponentsBase.url!.appendingPathComponent("SwiftPackageIndex/MasterPackageList/master/packages.json")
 
 let logEveryCount = 10
 
