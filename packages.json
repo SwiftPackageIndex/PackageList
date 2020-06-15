@@ -1,5 +1,4 @@
 [
-  "https://github.com/bmonty/AvWeather.git",
   "https://github.com/0111b/Conf.git",
   "https://github.com/0111b/JSONDecoder-Keypath.git",
   "https://github.com/0x7fs/countedset.git",
@@ -301,6 +300,7 @@
   "https://github.com/bkase/doctorpretty.git",
   "https://github.com/bloombox/Swift.git",
   "https://github.com/bmbowdish/swiftfall.git",
+  "https://github.com/bmonty/AvWeather.git",
   "https://github.com/Boilertalk/BigInt.swift.git",
   "https://github.com/Boilertalk/Keystore.swift.git",
   "https://github.com/Boilertalk/secp256k1.swift.git",
