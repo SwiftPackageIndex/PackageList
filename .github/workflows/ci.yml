@@ -12,9 +12,5 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-    - name: Install Swift-Sh
-      run: brew install mxcl/made/swift-sh
-    - name: Select Xcode 11.4
-      run: sudo xcode-select -s /Applications/Xcode_11.4.app && xcodebuild -version
     - name: Validate JSON
-      run: swift sh validate.swift diff
+      run: swiftpmls diff
