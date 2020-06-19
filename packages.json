@@ -53,6 +53,7 @@
   "https://github.com/ahti/SQLeleCoder.git",
   "https://github.com/aidantwoods/swift-paseto.git",
   "https://github.com/airbnb/AloeStackView.git",
+  "https://github.com/airbnb/HorizonCalendar.git",
   "https://github.com/airbnb/lottie-ios.git",
   "https://github.com/airbnb/ResilientDecoding.git",
   "https://github.com/akane/AnnotationInject.git",
@@ -2601,6 +2602,5 @@
   "https://github.com/zoul/generic-json-swift.git",
   "https://github.com/zssz/BerkananSDK.git",
   "https://github.com/zummenix/KeyboardNotificationsObserver.git",
-  "https://github.com/zweigraf/fakebundle.git",
-  "https://github.com/airbnb/HorizonCalendar.git"
+  "https://github.com/zweigraf/fakebundle.git"
 ]
