@@ -1,8 +1,8 @@
-![Valid JSON](https://github.com/SwiftPackageIndex/MasterPackageList/workflows/Valid%20JSON/badge.svg)
+![Valid JSON](https://github.com/SwiftPackageIndex/PackageList/workflows/Valid%20JSON/badge.svg)
 
 # The Swift Package Index
 
-Adding a new package to the Swift Package Index is straightforward. Every package indexed by this site comes from a master list of repositories, stored in a [publicly available JSON file](https://github.com/SwiftPackageIndex/MasterPackageList/blob/master/packages.json). To add a package to the index, add the URL of the repository to that file.
+Adding a new package to the Swift Package Index is straightforward. Every package indexed by this site comes from a master list of repositories, stored in a [publicly available JSON file](https://github.com/SwiftPackageIndex/PackageList/blob/main/packages.json). To add a package to the index, add the URL of the repository to that file.
 
 ### Package requirements
 
@@ -21,7 +21,7 @@ Please feel free to submit your own, or other people's repositories to this list
 
 ### How do you add a package?
 
-It's simple. Fork [this repository](https://github.com/SwiftPackageIndex/MasterPackageList/), edit `packages.json`, and submit a pull request. If you plan to add a set of packages there is no need to submit each package in a separate pull request. Feel free to bundle multiple updates at once as long as all packages match the criteria above.
+It's simple. Fork [this repository](https://github.com/SwiftPackageIndex/PackageList/), edit `packages.json`, and submit a pull request. If you plan to add a set of packages there is no need to submit each package in a separate pull request. Feel free to bundle multiple updates at once as long as all packages match the criteria above.
 
 Before submitting your pull request, please run the validation script locally:
 
