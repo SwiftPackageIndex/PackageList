@@ -2490,6 +2490,8 @@
   "https://github.com/vinivendra/Gryphon.git",
   "https://github.com/vkill/swift-aws-sigv4.git",
   "https://github.com/vknabel/archery.git",
+  "https://github.com/VladimirBrejcha/LoadingView.git",
+  "https://github.com/VladimirBrejcha/SelectableStackView.git",
   "https://github.com/voynovia/jrpcswiftnio.git",
   "https://github.com/vtourraine/acknowlist.git",
   "https://github.com/vtourraine/thirdpartymailer.git",
@@ -2608,7 +2610,5 @@
   "https://github.com/zoul/generic-json-swift.git",
   "https://github.com/zssz/BerkananSDK.git",
   "https://github.com/zummenix/KeyboardNotificationsObserver.git",
-  "https://github.com/zweigraf/fakebundle.git",
-  "https://github.com/VladimirBrejcha/SelectableStackView.git",
-  "https://github.com/VladimirBrejcha/LoadingView.git"
+  "https://github.com/zweigraf/fakebundle.git"
 ]
