@@ -26,7 +26,7 @@ It's simple. Fork [this repository](https://github.com/SwiftPackageIndex/Package
 Before submitting your pull request, please run the validation script locally:
 
 ```shell
-swift ./validate.swift diff
+./validate diff
 ```
 
 Once validation is successful, please submit your pull request! Your package(s) will appear in the index within a few minutes.
