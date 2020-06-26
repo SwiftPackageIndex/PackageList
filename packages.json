@@ -1730,6 +1730,7 @@
   "https://github.com/peacemoon/swiftyhudview.git",
   "https://github.com/pedantix/levellogger.git",
   "https://github.com/pedantix/TimedCache.git",
+  "https://github.com/Peter-Schorn/RegularExpressions.git",
   "https://github.com/perfectaccelerators/applicationconfiguration.git",
   "https://github.com/perfectaccelerators/curly.git",
   "https://github.com/perfectaccelerators/perfectvalidation.git",
@@ -2613,6 +2614,5 @@
   "https://github.com/zoul/generic-json-swift.git",
   "https://github.com/zssz/BerkananSDK.git",
   "https://github.com/zummenix/KeyboardNotificationsObserver.git",
-  "https://github.com/zweigraf/fakebundle.git",
-  "https://github.com/Peter-Schorn/RegularExpressions.git"
+  "https://github.com/zweigraf/fakebundle.git"
 ]
