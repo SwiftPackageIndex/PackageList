@@ -12,5 +12,7 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2
+    - name: Select Xcode 11.4
+      run: sudo xcode-select -s /Applications/Xcode_11.4.app && xcodebuild -version
     - name: Validate JSON
-      run: ./validate diff
+      run: swift validate.swift diff

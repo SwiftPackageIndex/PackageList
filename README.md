@@ -11,7 +11,7 @@ Please feel free to submit your own, or other people's repositories to this list
 The easiest way to validate that packages meet the requirements is to run the validation tool included in this repository. Fork [this repository](https://github.com/SwiftPackageIndex/PackageList/), edit `packages.json` and add the package URL(s) to the JSON. Then, in the directory where you have the clone of your fork of this repository, run the following command:
 
 ```shell
-./validate diff
+swift ./validate.swift diff
 ```
 
 Once validation is successful, please submit your pull request! Your package(s) will appear in the index within a few minutes.
