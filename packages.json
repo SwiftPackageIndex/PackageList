@@ -607,6 +607,7 @@
   "https://github.com/dokun1/vaux.git",
   "https://github.com/domcorvasce/decamelize.git",
   "https://github.com/dominicegginton/spinner.git",
+  "https://github.com/DominicHolmes/UIRotationEffect.git",
   "https://github.com/dougzilla32/CancelForPromiseKit.git",
   "https://github.com/dparnell/swift-parser-generator.git",
   "https://github.com/dral3x/stringslint.git",
@@ -2616,6 +2617,5 @@
   "https://github.com/zoul/generic-json-swift.git",
   "https://github.com/zssz/BerkananSDK.git",
   "https://github.com/zummenix/KeyboardNotificationsObserver.git",
-  "https://github.com/zweigraf/fakebundle.git",
-  "https://github.com/DominicHolmes/UIRotationEffect.git"
+  "https://github.com/zweigraf/fakebundle.git"
 ]
