@@ -16,3 +16,5 @@ jobs:
       run: sudo xcode-select -s /Applications/Xcode_11.4.app && xcodebuild -version
     - name: Validate JSON
       run: swift validate.swift diff
+      env: 
+        GH_PERSONAL_ACCESS_TOKEN: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
