@@ -271,7 +271,7 @@ var existingPackageList: [URL] = {
     do {
         return try downloadJSONSync(url: existingPackageListURL.absoluteString).get()
     } catch {
-        print("🚨 Failed to download existing package list from GitHub")
+        print("[Error] Failed to download existing package list from GitHub")
         print(error)
         exit(EXIT_FAILURE)
     }
@@ -284,7 +284,7 @@ var localPackageList: [URL] = {
         let data = try Data(contentsOf: packagesJsonURL)
         return try decoder.decode([URL].self, from: data)
     } catch {
-        print("🚨 Failed to load local package list")
+        print("[Error] Failed to load local package list")
         print(error)
         exit(EXIT_FAILURE)
     }
@@ -316,14 +316,14 @@ newURLsToValidate.forEach { url in
 
     // URL must end in .git
     if url.pathExtension != "git" {
-        print("🚨 \(url.absoluteString): URLs must contain `.git` extension")
+        print("[Error] \(url.absoluteString): URLs must contain `.git` extension")
         foundError = true
     }
 
     // URL must not be duplicated
     let duplicates = localPackageList.findDuplicates(of: url)
     if duplicates.count > 1 {
-        print("🚨 \(url.absoluteString): URL must not be duplicated:")
+        print("[Error] \(url.absoluteString): URL must not be duplicated:")
         duplicates.forEach { tuple in
             print("- \(tuple.offset): \(tuple.element.absoluteString)")
         }
@@ -337,27 +337,21 @@ let localPackageListSorted = localPackageList.sorted {
     $0.absoluteString.lowercased() < $1.absoluteString.lowercased()
 }
 
-let unsortedUrls = zip(localPackageList, localPackageListSorted).enumerated().filter { $0.element.0 != $0.element.1 }.map {
-    ($0.offset, $0.element.0)
-}
+let encoder = JSONEncoder()
+encoder.outputFormatting = [.prettyPrinted]
 
-if unsortedUrls.isEmpty == false {
-    let encoder = JSONEncoder()
-    encoder.outputFormatting = [.prettyPrinted]
+let data = try! encoder.encode(localPackageListSorted)
+let str = String(data: data, encoding: .utf8)!.replacingOccurrences(of: "\\/", with: "/")
+let unescapedData = str.data(using: .utf8)!
+try! unescapedData.write(to: packagesJsonURL)
 
-    let data = try! encoder.encode(localPackageListSorted)
-    let str = String(data: data, encoding: .utf8)!.replacingOccurrences(of: "\\/", with: "/")
-    let unescapedData = str.data(using: .utf8)!
-    try! unescapedData.write(to: packagesJsonURL)
-
-    print("\nℹ️ We have sorted the packages.json file for you - please push these changes.")
-}
+print("\nWe have sorted and formatted the packages.json file for you - please commit and push any changes.\n")
 
 // 6. Stop now if we've found any errors
 // We're about to run some networking checks but since we've already found issues we should stop early.
 
 if foundError {
-    print("\nℹ️ Please resolve the above issues, and then try again.")
+    print("\nPlease resolve the above issues, and then try again.")
     exit(EXIT_FAILURE)
 }
 
@@ -372,7 +366,7 @@ newURLsToValidate.enumerated().forEach { (offset, url) in
     group.enter()
 
     concurrentQueue.async {
-        print("ℹ️ [\(offset + 1)/\(newURLsToValidate.count)] Checking \(url.absoluteString)")
+        print("[\(offset + 1)/\(newURLsToValidate.count)] Checking \(url.absoluteString)")
         
         verifyPackage(url: url) { error in
             if let error = error {
@@ -385,7 +379,7 @@ newURLsToValidate.enumerated().forEach { (offset, url) in
 
 group.notify(queue: .main) {
     if packageResults.isEmpty {
-        print("ℹ️ \(newURLsToValidate.count) package(s) passed")
+        print("\(newURLsToValidate.count) package(s) passed")
         exit(EXIT_SUCCESS)
     }
     
@@ -397,7 +391,7 @@ group.notify(queue: .main) {
         }
     }
     
-    print("ℹ️ \(packageResults.count) package(s) failed")
+    print("\(packageResults.count) package(s) failed")
     
     exit(EXIT_FAILURE)
 }
