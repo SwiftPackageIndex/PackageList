@@ -278,10 +278,12 @@ var existingPackageList: [URL] = {
 }()
 
 // 2. Load local package list
+var backupLocalPackageList: Data?
 var localPackageList: [URL] = {
     do {
         let decoder = JSONDecoder()
         let data = try Data(contentsOf: packagesJsonURL)
+        backupLocalPackageList = data
         return try decoder.decode([URL].self, from: data)
     } catch {
         print("[Error] Failed to load local package list")
@@ -292,42 +294,40 @@ var localPackageList: [URL] = {
 
 // 3. Calculate Differences
 let difference = localPackageList.difference(from: existingPackageList)
-var insertedURLs = [URL]()
+var newURLsToValidate = [URL]()
 
 difference.forEach { change in
     switch change {
     case .insert(_, let url, _):
         print("+ \(url)")
-        insertedURLs.append(url)
+        newURLsToValidate.append(url)
     case .remove(_, let url, _):
         print("- \(url)")
     }
 }
 
-// We filter insertedURLs in order to silence any moves
-let newURLsToValidate = insertedURLs.filter { existingPackageList.contains($0) == false }
-
 // 4. Validate URLs
-var foundError = false
+var errorsFound = Set<String>()
 newURLsToValidate.forEach { url in
-
-    // Empty print to improve readability in console by grouping issues by URL
-    print("")
-
-    // URL must end in .git
-    if url.pathExtension != "git" {
-        print("[Error] \(url.absoluteString): URLs must contain `.git` extension")
-        foundError = true
-    }
 
     // URL must not be duplicated
     let duplicates = localPackageList.findDuplicates(of: url)
+    
     if duplicates.count > 1 {
-        print("[Error] \(url.absoluteString): URL must not be duplicated:")
-        duplicates.forEach { tuple in
-            print("- \(tuple.offset): \(tuple.element.absoluteString)")
+        duplicates.map(\.offset).reversed().dropLast().forEach { offset in
+            localPackageList.remove(at: offset)
         }
-        foundError = true
+        
+        errorsFound.insert("The packages.json file contained duplicate rows")
+    }
+    
+    // URL must end in .git
+    if url.pathExtension != "git" {
+        if let offset = localPackageList.firstIndex(of: url) {
+            localPackageList[offset] = url.appendingPathExtension("git")
+            
+            errorsFound.insert("One or more packages URLs were missing .git extensions")
+        }
     }
 
 }
@@ -337,22 +337,50 @@ let localPackageListSorted = localPackageList.sorted {
     $0.absoluteString.lowercased() < $1.absoluteString.lowercased()
 }
 
-let encoder = JSONEncoder()
-encoder.outputFormatting = [.prettyPrinted]
+let unsortedUrls = zip(localPackageList, localPackageListSorted).enumerated().filter { $0.element.0 != $0.element.1 }.map {
+    ($0.offset, $0.element.0)
+}
 
-let data = try! encoder.encode(localPackageListSorted)
-let str = String(data: data, encoding: .utf8)!.replacingOccurrences(of: "\\/", with: "/")
-let unescapedData = str.data(using: .utf8)!
-try! unescapedData.write(to: packagesJsonURL)
+if unsortedUrls.isEmpty == false {
+    errorsFound.insert("The packages.json file was incorrectly sorted")
+}
 
-print("\nWe have sorted and formatted the packages.json file for you - please commit and push any changes.\n")
+// 6. Report any problems
+// We've automatically fixed them so no need to stop the script - but users should be aware that we've overriden the file
 
-// 6. Stop now if we've found any errors
-// We're about to run some networking checks but since we've already found issues we should stop early.
+if errorsFound.isEmpty == false {
+    
+    // Write the backup package list to disk to prevent users from losing data
+    let backupURL = packagesJsonURL.deletingLastPathComponent().appendingPathComponent("packages.backup.json")
+    try! backupLocalPackageList?.write(to: backupURL)
+    
+    // Write the new local package list to disk
+    let encoder = JSONEncoder()
+    encoder.outputFormatting = [.prettyPrinted]
+    
+    let data = try! encoder.encode(localPackageListSorted)
+    let str = String(data: data, encoding: .utf8)!.replacingOccurrences(of: "\\/", with: "/")
+    let unescapedData = str.data(using: .utf8)!
+    try! unescapedData.write(to: packagesJsonURL)
+    
+    let errorMessage = errorsFound.map { "* \($0)" }.joined(separator: "\n")
+    
+    print("""
 
-if foundError {
-    print("\nPlease resolve the above issues, and then try again.")
-    exit(EXIT_FAILURE)
+    *******************************************************************************
+    ** IMPORTANT ******************************************************************
+
+    During validation, problem(s) were found:
+
+    \(errorMessage)
+
+    These problems have been automatically fixed, but you'll need to commit the
+    changes that this script has made before creating the pull request.
+
+    Thanks!
+
+    *******************************************************************************
+    """)
 }
 
 // 7. Validate Package
@@ -366,8 +394,6 @@ newURLsToValidate.enumerated().forEach { (offset, url) in
     group.enter()
 
     concurrentQueue.async {
-        print("[\(offset + 1)/\(newURLsToValidate.count)] Checking \(url.absoluteString)")
-        
         verifyPackage(url: url) { error in
             if let error = error {
                 packageResults[url] = error
@@ -379,7 +405,7 @@ newURLsToValidate.enumerated().forEach { (offset, url) in
 
 group.notify(queue: .main) {
     if packageResults.isEmpty {
-        print("\(newURLsToValidate.count) package(s) passed")
+        print("\n\(newURLsToValidate.count) package(s) passed")
         exit(EXIT_SUCCESS)
     }
     
@@ -391,7 +417,7 @@ group.notify(queue: .main) {
         }
     }
     
-    print("\(packageResults.count) package(s) failed")
+    print("\n\(packageResults.count) package(s) failed")
     
     exit(EXIT_FAILURE)
 }
