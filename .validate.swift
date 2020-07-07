@@ -348,12 +348,9 @@ if unsortedUrls.isEmpty == false {
     let data = try! encoder.encode(localPackageListSorted)
     let str = String(data: data, encoding: .utf8)!.replacingOccurrences(of: "\\/", with: "/")
     let unescapedData = str.data(using: .utf8)!
-    let outputURL = packagesJsonURL.deletingPathExtension().appendingPathExtension("sorted.json")
-    try! unescapedData.write(to: outputURL)
+    try! unescapedData.write(to: packagesJsonURL)
 
-    print("\n🚨 packages.json must be sorted correctly.")
-    print("ℹ️ We've generated packages.sorted.json for you, replace packages.json with this file and try again!")
-    foundError = true
+    print("\nℹ️ We have sorted the packages.json file for you - please push these changes.")
 }
 
 // 6. Stop now if we've found any errors
