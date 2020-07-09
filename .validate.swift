@@ -100,7 +100,7 @@ func downloadSync(url: String, timeout: Int = 10) -> Result<Data, ValidatorError
     var request = URLRequest(url: apiURL)
     
     if let pat = personalAccessToken {
-        request.addValue("token: \(pat)", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer \(pat)", forHTTPHeaderField: "Authorization")
     }
     
     let task = session.dataTask(with: request) { (data, response, error) in
