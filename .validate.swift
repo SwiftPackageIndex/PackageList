@@ -13,7 +13,7 @@ let httpMaximumConnectionsPerHost = 10
 // This is a GitHub Bearer Token which can be used to authenticate GitHub requests
 let bearerToken = ProcessInfo.processInfo.environment["GITHUB_TOKEN"]
 
-if personalAccessToken == nil {
+if bearerToken == nil {
     print("Warning: Using anonymous authentication -- may run into rate limiting issues\n")
 }
 
