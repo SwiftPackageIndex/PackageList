@@ -12,6 +12,10 @@ let httpMaximumConnectionsPerHost = 10
 
 let personalAccessToken = ProcessInfo.processInfo.environment["GH_API_TOKEN"]
 
+ProcessInfo.processInfo.environment.keys.forEach { key in
+    print(key)
+}
+
 if personalAccessToken == nil {
     print("Warning: Using anonymous authentication -- may run into rate limiting issues\n")
 }
