@@ -95,8 +95,8 @@ func downloadSync(url: String, timeout: Int = 10) -> Result<Data, ValidatorError
     
     var request = URLRequest(url: apiURL)
     
-    if let pat = personalAccessToken {
-        request.addValue("token: \(pat)", forHTTPHeaderField: "Authorization")
+    if let pat = personalAccessToken, apiURL.host == SourceHost.GitHub.rawValue {
+        request.addValue("Bearer \(pat)", forHTTPHeaderField: "Authorization")
     }
     
     let task = session.dataTask(with: request) { (data, response, error) in
@@ -105,6 +105,7 @@ func downloadSync(url: String, timeout: Int = 10) -> Result<Data, ValidatorError
         
         // TEMPORARY
         print("Limit:", httpResponse?.value(forHTTPHeaderField: "X-RateLimit-Limit") ?? "No Limit")
+        print("Remaining:", httpResponse?.value(forHTTPHeaderField: "X-RateLimit-Remaining") ?? "No Remaining")
         // TEMPORARY
         
         if let limit = httpResponse?.value(forHTTPHeaderField: "X-RateLimit-Limit").flatMap(Int.init),
@@ -146,6 +147,8 @@ func downloadJSONSync<Payload: Decodable>(url: String, timeout: Int = 10) -> Res
         do {
             return .success(try decoder.decode(Payload.self, from: data))
         } catch {
+            let output = String(data: data, encoding: .utf8)
+            print(output)
             return .failure(.decoderError(error))
         }
     }
