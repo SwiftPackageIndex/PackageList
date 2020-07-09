@@ -10,6 +10,15 @@ let timeoutIntervalForRequest = 3000.0
 let timeoutIntervalForResource = 6000.0
 let httpMaximumConnectionsPerHost = 10
 
+// When run through GitHub Actions, we get access to a GitHub Token which is a Bearer Token.
+// This enables us to get an increased rate limit of 1000 so we're less likely to see issues.
+// Learn More: https://docs.github.com/en/actions/configuring-and-managing-workflows/authenticating-with-the-github_token
+let bearerToken = ProcessInfo.processInfo.environment["GITHUB_TOKEN"]
+
+if bearerToken == nil {
+    print("Warning: Using anonymous authentication -- may run into rate limiting issues\n")
+}
+
 let config: URLSessionConfiguration = .default
 config.timeoutIntervalForRequest = timeoutIntervalForRequest
 config.timeoutIntervalForResource = timeoutIntervalForResource
@@ -48,6 +57,8 @@ enum ValidatorError: Error {
     case fileSystemError(Error)
     case badPackageDump(String?)
     case missingProducts
+    case rateLimitExceeded(Int)
+    case packageDoesNotExist(String)
     
     var localizedDescription: String {
         switch self {
@@ -65,6 +76,10 @@ enum ValidatorError: Error {
             return "Bad Package Dump -- \(output ?? "No Output")"
         case .missingProducts:
             return "Missing Products"
+        case .rateLimitExceeded(let limit):
+            return "Rate Limit of \(limit) Exceeded"
+        case .packageDoesNotExist(let url):
+            return "Package Does Not Exist: \(url)"
         }
     }
 }
@@ -81,9 +96,23 @@ func downloadSync(url: String, timeout: Int = 10) -> Result<Data, ValidatorError
     var payload: Data?
     var taskError: ValidatorError?
     
-    let task = session.dataTask(with: apiURL) { (data, _, error) in
+    var request = URLRequest(url: apiURL)
+    
+    if let token = bearerToken, apiURL.host?.contains(SourceHost.GitHub.rawValue) == true {
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+    }
+    
+    let task = session.dataTask(with: request) { (data, response, error) in
         
-        if let error = error {
+        let httpResponse = response as? HTTPURLResponse
+        
+        if let limit = httpResponse?.value(forHTTPHeaderField: "X-RateLimit-Limit").flatMap(Int.init),
+           let remaining = httpResponse?.value(forHTTPHeaderField: "X-RateLimit-Remaining").flatMap(Int.init),
+           remaining == 0 {
+            taskError = .rateLimitExceeded(limit)
+        } else if httpResponse?.statusCode == 404 {
+            taskError = .packageDoesNotExist(apiURL.absoluteString)
+        } else if let error = error {
             taskError = .networkingError(error)
         }
         
@@ -138,15 +167,20 @@ func getPackageSwiftURL(url: URL) -> Result<URL, ValidatorError> {
     case .GitHub:
         let repositoryName = url.deletingPathExtension().lastPathComponent
         let userName = url.deletingLastPathComponent().lastPathComponent
-        let defaultBranch = (try? getDefaultBranch(userName: userName, repositoryName: repositoryName).get()) ?? "master"
-        var rawURLComponents = rawGitHubBaseURL
-        rawURLComponents.path = ["", userName, repositoryName, defaultBranch, "Package.swift"].joined(separator: "/")
         
-        guard let packageURL = rawURLComponents.url else {
-            return .failure(.invalidURL(url.absoluteString))
+        switch getDefaultBranch(userName: userName, repositoryName: repositoryName) {
+        case .success(let defaultBranch):
+            var rawURLComponents = rawGitHubBaseURL
+            rawURLComponents.path = ["", userName, repositoryName, defaultBranch, "Package.swift"].joined(separator: "/")
+            
+            guard let packageURL = rawURLComponents.url else {
+                return .failure(.invalidURL(url.absoluteString))
+            }
+            
+            return .success(packageURL)
+        case .failure(let failure):
+            return .failure(failure)
         }
-        
-        return .success(packageURL)
     }
     
 }
