@@ -10,7 +10,8 @@ let timeoutIntervalForRequest = 3000.0
 let timeoutIntervalForResource = 6000.0
 let httpMaximumConnectionsPerHost = 10
 
-let personalAccessToken = ProcessInfo.processInfo.environment["GH_API_TOKEN"]
+// This is a GitHub Personal Access Token which is Base64 encoded
+let personalAccessToken = ProcessInfo.processInfo.environment["GH_API_TOKEN_BASE64"]
 
 if personalAccessToken == nil {
     print("Warning: Using anonymous authentication -- may run into rate limiting issues\n")
