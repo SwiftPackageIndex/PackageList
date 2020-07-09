@@ -109,6 +109,7 @@ func downloadSync(url: String, timeout: Int = 10) -> Result<Data, ValidatorError
         
         // TEMPORARY
         print("Limit:", httpResponse?.value(forHTTPHeaderField: "X-RateLimit-Limit") ?? "No Limit")
+        print("Remaining:", httpResponse?.value(forHTTPHeaderField: "X-RateLimit-Remaining") ?? "?")
         // TEMPORARY
         
         if let limit = httpResponse?.value(forHTTPHeaderField: "X-RateLimit-Limit").flatMap(Int.init),
