@@ -97,6 +97,7 @@ func downloadSync(url: String, timeout: Int = 10) -> Result<Data, ValidatorError
     var request = URLRequest(url: apiURL)
     
     if let pat = personalAccessToken, apiURL.host == SourceHost.GitHub.rawValue {
+        print("Adding PAT")
         request.addValue("Bearer \(pat)", forHTTPHeaderField: "Authorization")
     }
     
