@@ -12,10 +12,6 @@ let httpMaximumConnectionsPerHost = 10
 
 let personalAccessToken = ProcessInfo.processInfo.environment["GH_API_TOKEN"]
 
-ProcessInfo.processInfo.environment.keys.forEach { key in
-    print(key)
-}
-
 if personalAccessToken == nil {
     print("Warning: Using anonymous authentication -- may run into rate limiting issues\n")
 }
@@ -151,6 +147,8 @@ func downloadJSONSync<Payload: Decodable>(url: String, timeout: Int = 10) -> Res
         do {
             return .success(try decoder.decode(Payload.self, from: data))
         } catch {
+            let output = String(data: data, encoding: .utf8)
+            print(output)
             return .failure(.decoderError(error))
         }
     }
