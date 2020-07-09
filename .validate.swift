@@ -10,8 +10,8 @@ let timeoutIntervalForRequest = 3000.0
 let timeoutIntervalForResource = 6000.0
 let httpMaximumConnectionsPerHost = 10
 
-// This is a GitHub Personal Access Token which is Base64 encoded
-let personalAccessToken = ProcessInfo.processInfo.environment["GH_API_TOKEN_BASE64"]
+// This is a GitHub Bearer Token which can be used to authenticate GitHub requests
+let bearerToken = ProcessInfo.processInfo.environment["GITHUB_TOKEN"]
 
 if personalAccessToken == nil {
     print("Warning: Using anonymous authentication -- may run into rate limiting issues\n")
@@ -96,10 +96,9 @@ func downloadSync(url: String, timeout: Int = 10) -> Result<Data, ValidatorError
     
     var request = URLRequest(url: apiURL)
     
-    if let pat = personalAccessToken?.trimmingCharacters(in: .whitespacesAndNewlines), apiURL.host?.contains(SourceHost.GitHub.rawValue) == true {
-        print("Adding PAT") // temp
-        print(pat.first, pat.last, ".")
-        request.addValue("Basic \(pat)", forHTTPHeaderField: "Authorization")
+    if let token = bearerToken, apiURL.host?.contains(SourceHost.GitHub.rawValue) == true {
+        print("Adding Token") // temp
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
     }
     
     let task = session.dataTask(with: request) { (data, response, error) in

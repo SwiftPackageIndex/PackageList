@@ -26,4 +26,4 @@ jobs:
     - name: Validate JSON
       run: swift .validate.swift
       env:
-        GH_API_TOKEN_BASE64: ${{ secrets.GH_API_TOKEN_BASE64 }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
