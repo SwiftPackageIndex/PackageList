@@ -433,12 +433,13 @@ if errorsFound.isEmpty == false {
 
 // 7. Validate Package
 
+let newURLsCount = newURLsToValidate.count
 var count = 0
 var packageResults = [URL: Error]()
 
 let finish = {
     if packageResults.isEmpty {
-        print("\n\(newURLsToValidate.count) package(s) passed")
+        print("\n\(newURLsCount) package(s) passed")
         exit(EXIT_SUCCESS)
     }
     
