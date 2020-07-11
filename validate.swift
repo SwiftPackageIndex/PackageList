@@ -12,7 +12,6 @@ let timeoutIntervalForResource = 6000.0
 
 // base url for github raw files
 let rawURLComponentsBase = URLComponents(string: "https://raw.githubusercontent.com")!
-let personalAccessToken = ProcessInfo.processInfo.environment["GH_PERSONAL_ACCESS_TOKEN"]
 
 // master package list to compare against
 let masterPackageList = rawURLComponentsBase.url!.appendingPathComponent("SwiftPackageIndex/PackageList/main/packages.json")
@@ -141,12 +140,7 @@ func getGitHubDefaultBranch(for userName: String, repositoryName: String) -> Str
   }
   let sema = DispatchSemaphore(value: 0)
   var defaultBranch: String?
-
-  var request = URLRequest(url: apiURL)
-  if let personalAccessToken = personalAccessToken {
-    request.addValue("token: \(personalAccessToken)", forHTTPHeaderField: "authorization")
-  }
-  let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
+  let task = URLSession.shared.dataTask(with: apiURL) { (data, response, error) in
     defaultBranch = data.flatMap {
       try? JSONDecoder().decode(Repository.self, from: $0)
     }
