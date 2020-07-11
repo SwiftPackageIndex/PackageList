@@ -433,25 +433,10 @@ if errorsFound.isEmpty == false {
 
 // 7. Validate Package
 
-let group = DispatchGroup()
-let concurrentQueue = DispatchQueue(label: "swiftpm-verification", qos: .utility, attributes: .concurrent)
 var count = 0
 var packageResults = [URL: Error]()
 
-newURLsToValidate.enumerated().forEach { (offset, url) in
-    group.enter()
-
-    concurrentQueue.async {
-        verifyPackage(url: url) { error in
-            if let error = error {
-                packageResults[url] = error
-            }
-            group.leave()
-        }
-    }
-}
-
-group.notify(queue: .main) {
+let finish = {
     if packageResults.isEmpty {
         print("\n\(newURLsToValidate.count) package(s) passed")
         exit(EXIT_SUCCESS)
@@ -468,6 +453,21 @@ group.notify(queue: .main) {
     print("\n\(packageResults.count) package(s) failed")
     
     exit(EXIT_FAILURE)
+}
+
+func runCycle() {
+    if newURLsToValidate.isEmpty {
+        finish()
+        return
+    }
+        
+    let url = newURLsToValidate.removeFirst()
+    verifyPackage(url: url) { error in
+        if let error = error {
+            packageResults[url] = error
+        }
+        runCycle()
+    }
 }
 
 RunLoop.main.run()
