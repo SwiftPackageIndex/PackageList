@@ -9,6 +9,7 @@ let existingPackageListURL = rawGitHubBaseURL.url!.appendingPathComponent("Swift
 let timeoutIntervalForRequest = 3000.0
 let timeoutIntervalForResource = 6000.0
 let httpMaximumConnectionsPerHost = 10
+let processTimeout = 50.0
 
 // When run through GitHub Actions, we get access to a GitHub Token which is a Bearer Token.
 // This enables us to get an increased rate limit of 1000 so we're less likely to see issues.
@@ -59,6 +60,7 @@ enum ValidatorError: Error {
     case missingProducts
     case rateLimitExceeded(Int)
     case packageDoesNotExist(String)
+    case dumpTimedOut
     
     var localizedDescription: String {
         switch self {
@@ -68,6 +70,8 @@ enum ValidatorError: Error {
             return "Request Timed Out"
         case .noData:
             return "No Data Received"
+        case .dumpTimedOut:
+            return "Dump Timed Out"
         case .networkingError(let error), .decoderError(let error), .fileSystemError(let error):
             return error.localizedDescription
         case .unknownGitHost(let host):
@@ -224,8 +228,12 @@ func dumpPackage(atURL url: URL, completion: @escaping (Result<Data, ValidatorEr
     process.terminationHandler = { process in
         
         guard process.terminationStatus == 0 else {
-            let errorDump = String(data: errorPipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8)
-            completion(.failure(.badPackageDump(errorDump)))
+            if process.terminationStatus == 15 {
+                completion(.failure(.dumpTimedOut))
+            } else {
+                let errorDump = String(data: errorPipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8)
+                completion(.failure(.badPackageDump(errorDump)))
+            }
             return
         }
         
@@ -233,6 +241,12 @@ func dumpPackage(atURL url: URL, completion: @escaping (Result<Data, ValidatorEr
     }
     
     process.launch()
+    
+    DispatchQueue.main.asyncAfter(deadline: .now() + processTimeout) {
+        if process.isRunning {
+            process.terminate()
+        }
+    }
 }
 
 func verifyPackage(url: URL, completion: @escaping (Error?) -> Void) {
