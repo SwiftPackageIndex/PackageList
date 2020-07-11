@@ -470,4 +470,5 @@ func runCycle() {
     }
 }
 
+runCycle()
 RunLoop.main.run()
