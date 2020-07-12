@@ -2,23 +2,411 @@
 
 import Foundation
 
-let rawGitHubBaseURL = URLComponents(string: "https://raw.githubusercontent.com")!
+// MARK: Configuration Values and Constants
 
-let existingPackageListURL = rawGitHubBaseURL.url!.appendingPathComponent("SwiftPackageIndex/PackageList/main/packages.json")
+// number of validations to run simultaneously
+let semaphoreCount = 3
 
 let timeoutIntervalForRequest = 3000.0
 let timeoutIntervalForResource = 6000.0
+
+// base url for github raw files
+let rawURLComponentsBase = URLComponents(string: "https://raw.githubusercontent.com")!
+
+// master package list to compare against
+let masterPackageList = rawURLComponentsBase.url!.appendingPathComponent("SwiftPackageIndex/PackageList/main/packages.json")
+
+let logEveryCount = 10
+
 let httpMaximumConnectionsPerHost = 10
+
+let displayProgress = true
+
 let processTimeout = 50.0
 
-// When run through GitHub Actions, we get access to a GitHub Token which is a Bearer Token.
-// This enables us to get an increased rate limit of 1000 so we're less likely to see issues.
-// Learn More: https://docs.github.com/en/actions/configuring-and-managing-workflows/authenticating-with-the-github_token
-let bearerToken = ProcessInfo.processInfo.environment["GITHUB_TOKEN"]
+let helpText = """
+usage: %@ <command> [path]
 
-if bearerToken == nil {
-    print("Warning: Using anonymous authentication -- may run into rate limiting issues\n")
+COMMANDS:
+  all   validate all packages in JSON packages.json
+  diff  validate all new packages in JSON packages.json
+  mine  validate the Package of the current directoy
+
+OPTIONS:
+  path  to define the specific `packages.json` file or Swift package directory
+"""
+// MARK: Types
+
+
+enum Command : String {
+  case all
+  case diff
+  case mine
 }
+
+extension Command {
+  static func fromArguments (_ arguments : [String]) -> Command? {
+    for argument in arguments {
+      if let command = Command(rawValue: argument) {
+        return command
+      }
+    }
+    return nil
+  }
+}
+
+/**
+ Simple Product structure from package dump
+ */
+struct Product: Codable {
+  let name: String
+}
+
+/**
+ Simple Package structure from package dump
+ */
+struct Package: Codable {
+  let name: String
+  let products: [Product]
+}
+
+/**
+ List of git hosts for which we can pull single files
+ */
+enum GitHost: String {
+  case GitHub = "github.com"
+}
+
+/**
+ List of possible errors for each package
+ */
+enum PackageError: Error {
+  case noResult
+  case invalidURL(URL)
+  case unsupportedHost(String)
+  case readError(Error?)
+  case badDump(String?)
+  case decodingError(Error)
+  case missingProducts
+  case dumpTimeout
+
+
+  var friendlyName : String {
+    switch self {
+    case .noResult:
+      return "No Result"
+    case .invalidURL(_):
+      return "Invalid URL"
+    case .unsupportedHost(_):
+      return "Unsupported Host"
+    case .readError(_):
+      return "Download Failure"
+    case .badDump(_):
+      return "Invalid Dump"
+    case .decodingError(_):
+      return "Dump Decoding Error"
+    case .missingProducts:
+      return "No Products"
+    case .dumpTimeout:
+      return "Dump Timeout"
+    }
+  }
+}
+
+extension Result where Success == Void {
+  init(_ error: Failure?) {
+    if let error = error {
+      self = .failure(error)
+    } else {
+      self = .success(Void())
+    }
+  }
+}
+
+// MARK: Functions
+
+/**
+ Fetch the default branch for a given GitHub repository.
+ - Parameter userName: Repository owner
+ - Parameter repositoryName: Repository name
+ - Returns: default branch name if successful; otherwise `noResult` or a `decodingError`.
+ */
+func getGitHubDefaultBranch(for userName: String, repositoryName: String) -> String? {
+  struct Repository: Decodable {
+    var default_branch: String  // don't bother with re-casing this for now...
+  }
+  guard let apiURL = URL(string: "https://api.github.com/repos/\(userName)/\(repositoryName)") else {
+    return nil
+  }
+  let sema = DispatchSemaphore(value: 0)
+  var defaultBranch: String?
+  let task = URLSession.shared.dataTask(with: apiURL) { (data, response, error) in
+    defaultBranch = data.flatMap {
+      try? JSONDecoder().decode(Repository.self, from: $0)
+    }
+    .map { $0.default_branch }
+    sema.signal()
+  }
+  task.resume()
+  let _ = sema.wait(timeout: DispatchTime.now() + .seconds(2))
+  return defaultBranch
+}
+
+/**
+ Based on repository url, find the raw url to the Package.swift file.
+ - Parameter gitURL: Repository URL
+ - Returns: raw git URL, if successful; other `invalidURL` if not proper git repo url or `unsupportedHost` if the host is not currently supported.
+ */
+func getPackageSwiftURL(for gitURL: URL) -> Result<URL, PackageError> {
+  guard let hostString = gitURL.host else {
+    return .failure(.invalidURL(gitURL))
+  }
+
+  guard let host = GitHost(rawValue: hostString) else {
+    return .failure(.unsupportedHost(hostString))
+  }
+
+  switch host {
+  case .GitHub:
+    var rawURLComponents = rawURLComponentsBase
+    let repositoryName = gitURL.deletingPathExtension().lastPathComponent
+    let userName = gitURL.deletingLastPathComponent().lastPathComponent
+    let defaultBranch = getGitHubDefaultBranch(for: userName, repositoryName: repositoryName) ?? "master"
+    rawURLComponents.path = ["", userName, repositoryName, defaultBranch, "Package.swift"].joined(separator: "/")
+    guard let packageSwiftURL = rawURLComponents.url else {
+      return .failure(.invalidURL(gitURL))
+    }
+    return .success(packageSwiftURL)
+  }
+}
+
+/**
+ Downloads the given Package.swift file
+ - Parameter packageSwiftURL: URL to Package.Swift
+ - Parameter session: URLSession
+ - Parameter callback: Completion callback. If successful, the resulting location of the downloaded Package.swift file; error otherwise.
+ */
+func download(_ packageSwiftURL: URL, withSession session: URLSession, _ callback: @escaping ((Result<URL, PackageError>) -> Void)) -> URLSessionDataTask {
+  let task = session.dataTask(with: packageSwiftURL) { data, _, error in
+
+    guard let data = data else {
+      callback(.failure(.readError(error)))
+      return
+    }
+
+    let outputDirURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+
+    try! FileManager.default.createDirectory(at: outputDirURL, withIntermediateDirectories: false, attributes: nil)
+
+    do {
+      try data.write(to: outputDirURL.appendingPathComponent("Package.swift"), options: .atomic)
+    } catch {
+      callback(.failure(.readError(error)))
+      return
+    }
+    callback(.success(outputDirURL))
+  }
+  task.resume()
+  return task
+}
+
+/**
+ Creates a `Process` for dump the package metadata.
+ - Parameter packageDirectoryURL: File URL to Package
+ - Parameter outputTo: standard output pipe
+ - Parameter errorsTo: error pipe
+ */
+func dumpPackageProcessAt(_ packageDirectoryURL: URL, outputTo pipe: Pipe, errorsTo errorPipe: Pipe) -> Process {
+  let process = Process()
+  process.launchPath = "/usr/bin/swift"
+  process.arguments = ["package", "dump-package"]
+  process.currentDirectoryURL = packageDirectoryURL
+  process.standardOutput = pipe
+  process.standardError = errorPipe
+  return process
+}
+
+/**
+ Calls `swift package dump-package` and verify correct output with at least one product.
+ - Parameter directoryURL: File URL to Package
+ */
+func verifyPackageDump(at directoryURL: URL, _ callback: @escaping ((PackageError?) -> Void)) {
+  let pipe = Pipe()
+  let errorPipe = Pipe()
+  let process = dumpPackageProcessAt(directoryURL, outputTo: pipe, errorsTo: errorPipe)
+
+  process.terminationHandler = {
+    process in
+
+    let package: Package
+
+    guard process.terminationStatus == 0 else {
+      let error : PackageError
+      if process.terminationStatus == 15 {
+        error = .dumpTimeout
+      } else {
+        error = .badDump(String(data: errorPipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8))
+      }
+      callback(error)
+      return
+    }
+
+    do {
+      package = try decoder.decode(Package.self, from: pipe.fileHandleForReading.readDataToEndOfFile())
+    } catch {
+      callback(.decodingError(error))
+      return
+    }
+
+    guard package.products.count > 0 else {
+      callback(.missingProducts)
+      return
+    }
+    callback(nil)
+  }
+
+  process.launch()
+
+
+  DispatchQueue.main.asyncAfter(deadline: .now() + processTimeout) {
+    if process.isRunning {
+      process.terminate()
+    }
+  }
+}
+
+/**
+ Verifies Swift package at repository URL.
+ - Parameter gitURL: URL to git repository
+ */
+func verifyPackage(at gitURL: URL, withSession session: URLSession, _ callback: @escaping ((PackageError?) -> Void)) {
+  let processSemaphore = DispatchSemaphore(value: semaphoreCount)
+  let urlResult = getPackageSwiftURL(for: gitURL)
+  let packageSwiftURL: URL
+  switch urlResult {
+  case let .success(url): packageSwiftURL = url
+  case let .failure(error):
+    callback(error)
+    return
+  }
+  _ = download(packageSwiftURL, withSession: session) { result in
+    let outputDirURL: URL
+
+    switch result {
+    case let .failure(error):
+      callback(error)
+      return
+    case let .success(url):
+      outputDirURL = url
+    }
+    processSemaphore.wait()
+    verifyPackageDump(at: outputDirURL) {
+      error in
+      processSemaphore.signal()
+      callback(error)
+      return
+    }
+  }
+}
+
+/**
+ Filters repositories based what is not listen in the master list.
+ - Parameter packageUrls: current package urls
+ - Parameter includingMaster: to not filter all repository url and just verify all package URLs
+ */
+func filterRepos(_ packageUrls: [URL], withSession session: URLSession, includingMaster: Bool, _ completion: @escaping ((Result<[URL], Error>) -> Void)) {
+  guard !includingMaster else {
+    completion(.success(packageUrls))
+    return
+  }
+
+  session.dataTask(with: masterPackageList) { data, _, error in
+
+    let allPackageURLs: [URL]
+    guard let data = data else {
+      completion(.failure(PackageError.noResult))
+      return
+    }
+
+    if let error = error {
+      completion(.failure(error))
+      return
+    }
+
+    do {
+      allPackageURLs = try decoder.decode([URL].self, from: data)
+    } catch {
+      completion(.failure(error))
+      return
+    }
+    completion(.success([URL](Set<URL>(packageUrls).subtracting(allPackageURLs))))
+  }.resume()
+}
+
+/**
+ Iterate over all repositories in the packageUrls list .
+ - Parameter packageUrls: current package urls
+ - Parameter completion: Callback with a dictionary of each url with an error.
+ */
+func parseRepos(_ packageUrls: [URL], withSession session: URLSession, _ completion: @escaping (([URL: PackageError]) -> Void)) {
+  let group = DispatchGroup()
+  let logEachRepo = packageUrls.count < 8
+  let concurrentQueue = DispatchQueue(label: "swiftpm-verification", qos: .utility, attributes: .concurrent)
+  var count = 0
+  var packageUnsetResults = [Result<Void, PackageError>?].init(repeating: nil, count: packageUrls.count)
+  for (index, gitURL) in packageUrls.enumerated() {
+    group.enter()
+    concurrentQueue.async {
+      if logEachRepo {
+        print("Checking", [String](gitURL.pathComponents.suffix(2)).joined(separator:"/"), "...")
+      }
+      verifyPackage(at: gitURL, withSession: session) {
+        error in
+        packageUnsetResults[index] = Result<Void, PackageError>(error)
+
+        if displayProgress && logEveryCount < packageUnsetResults.count {
+          DispatchQueue.main.async {
+            count += 1
+            if count % (packageUnsetResults.count / logEveryCount) == 0 {
+              print(".", terminator: "")
+            }
+          }
+        } else if error == nil {
+          print(gitURL, "passed")
+        }
+        group.leave()
+      }
+    }
+  }
+
+  group.notify(queue: .main) {
+    var errors = [URL: PackageError]()
+    zip(packageUrls, packageUnsetResults).forEach { args in
+      let (url, unSetResult) = args
+      let result = unSetResult ?? .failure(.noResult)
+      guard case let .failure(error) = result else {
+        return
+      }
+      errors[url] = error
+    }
+
+    completion(errors)
+  }
+}
+
+/**
+ Based on the directories passed and command line arguments, find the `packages.json` url.
+ - Parameter directoryURLs: directory url to search for `packages.json` file
+ - Parameter arguments: Command Line arguments which may contain a path to a `packages.json` file.
+ */
+func url(packagesFromDirectories directoryURLs: [URL], andArguments arguments: [String]) -> URL? {
+  let possiblePackageURLs = arguments.dropFirst().compactMap { URL(fileURLWithPath: $0) } + directoryURLs.map { $0.appendingPathComponent("packages.json") }
+  return possiblePackageURLs.first(where: { FileManager.default.fileExists(atPath: $0.path) })
+}
+
+// MARK: Running Code
+
+let decoder = JSONDecoder()
 
 let config: URLSessionConfiguration = .default
 config.timeoutIntervalForRequest = timeoutIntervalForRequest
@@ -27,511 +415,117 @@ config.httpMaximumConnectionsPerHost = httpMaximumConnectionsPerHost
 
 let session = URLSession(configuration: config)
 
-// MARK: - Definitions
-
-enum SourceHost: String {
-    case GitHub = "github.com"
-}
-
-struct Repository: Decodable {
-    let default_branch: String
-}
-
-struct Product: Decodable {
-    let name: String
-}
-
-struct Package: Decodable {
-    let name: String
-    let products: [Product]
-}
-
-// MARK: - Error
-
-enum ValidatorError: Error {
-    case invalidURL(String)
-    case timedOut
-    case noData
-    case networkingError(Error)
-    case decoderError(Error)
-    case unknownGitHost(String?)
-    case fileSystemError(Error)
-    case badPackageDump(String?)
-    case missingProducts
-    case rateLimitExceeded(Int)
-    case packageDoesNotExist(String)
-    case dumpTimedOut
-    
-    var localizedDescription: String {
-        switch self {
-        case .invalidURL(let url):
-            return "Invalid URL: \(url)"
-        case .timedOut:
-            return "Request Timed Out"
-        case .noData:
-            return "No Data Received"
-        case .dumpTimedOut:
-            return "Dump Timed Out"
-        case .networkingError(let error), .decoderError(let error), .fileSystemError(let error):
-            return error.localizedDescription
-        case .unknownGitHost(let host):
-            return "Unknown URL host: \(host ?? "nil")"
-        case .badPackageDump(let output):
-            return "Bad Package Dump -- \(output ?? "No Output")"
-        case .missingProducts:
-            return "Missing Products"
-        case .rateLimitExceeded(let limit):
-            return "Rate Limit of \(limit) Exceeded"
-        case .packageDoesNotExist(let url):
-            return "Package Does Not Exist: \(url)"
-        }
-    }
-}
-
-// MARK: - Networking
-
-func downloadSync(url: String, timeout: Int = 10) -> Result<Data, ValidatorError> {
-    let semaphore = DispatchSemaphore(value: 0)
-    
-    guard let apiURL = URL(string: url) else {
-        return .failure(.invalidURL(url))
-    }
-    
-    var payload: Data?
-    var taskError: ValidatorError?
-    
-    var request = URLRequest(url: apiURL)
-    
-    if let token = bearerToken, apiURL.host?.contains(SourceHost.GitHub.rawValue) == true {
-        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-    }
-    
-    let task = session.dataTask(with: request) { (data, response, error) in
-        
-        let httpResponse = response as? HTTPURLResponse
-        
-        if let limit = httpResponse?.value(forHTTPHeaderField: "X-RateLimit-Limit").flatMap(Int.init),
-           let remaining = httpResponse?.value(forHTTPHeaderField: "X-RateLimit-Remaining").flatMap(Int.init),
-           remaining == 0 {
-            taskError = .rateLimitExceeded(limit)
-        } else if httpResponse?.statusCode == 404 {
-            taskError = .packageDoesNotExist(apiURL.absoluteString)
-        } else if let error = error {
-            taskError = .networkingError(error)
-        }
-        
-        payload = data
-        semaphore.signal()
-        
-    }
-    
-    task.resume()
-    
-    switch semaphore.wait(timeout: .now() + .seconds(timeout)) {
-    case .timedOut:
-        return .failure(.timedOut)
-    case .success where payload == nil:
-        return .failure(taskError ?? .noData)
-    case .success:
-        return .success(payload!)
-    }
-}
-
-func downloadJSONSync<Payload: Decodable>(url: String, timeout: Int = 10) -> Result<Payload, ValidatorError> {
-    let decoder = JSONDecoder()
-    let result = downloadSync(url: url, timeout: timeout)
-    
-    switch result {
-    case .failure(let error):
-        return .failure(error)
-        
-    case .success(let data):
-        do {
-            return .success(try decoder.decode(Payload.self, from: data))
-        } catch {
-            return .failure(.decoderError(error))
-        }
-    }
-}
-
-// MARK: - Verification
-
-func getDefaultBranch(userName: String, repositoryName: String) -> Result<String, ValidatorError> {
-    let result: Result<Repository, ValidatorError> = downloadJSONSync(url: "https://api.github.com/repos/\(userName)/\(repositoryName)")
-    return result.map(\.default_branch)
-}
-
-func getPackageSwiftURL(url: URL) -> Result<URL, ValidatorError> {
-    
-    guard let host = url.host.flatMap(SourceHost.init(rawValue:)) else {
-        return .failure(.unknownGitHost(url.host))
-    }
-    
-    switch host {
-    case .GitHub:
-        let repositoryName = url.deletingPathExtension().lastPathComponent
-        let userName = url.deletingLastPathComponent().lastPathComponent
-        
-        switch getDefaultBranch(userName: userName, repositoryName: repositoryName) {
-        case .success(let defaultBranch):
-            var rawURLComponents = rawGitHubBaseURL
-            rawURLComponents.path = ["", userName, repositoryName, defaultBranch, "Package.swift"].joined(separator: "/")
-            
-            guard let packageURL = rawURLComponents.url else {
-                return .failure(.invalidURL(url.absoluteString))
-            }
-            
-            return .success(packageURL)
-        case .failure(let failure):
-            return .failure(failure)
-        }
-    }
-    
-}
-
-func downloadPackage(url: URL) -> Result<URL, ValidatorError> {
-    
-    switch downloadSync(url: url.absoluteString) {
-    case .failure(let error):
-        return .failure(error)
-        
-    case .success(let packageData):
-        
-        let fileManager = FileManager.default
-        let outputDirectoryURL = fileManager.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-        
-        do {
-            try fileManager.createDirectory(at: outputDirectoryURL, withIntermediateDirectories: false, attributes: nil)
-            try packageData.write(to: outputDirectoryURL.appendingPathComponent("Package.swift"), options: .atomic)
-            return .success(outputDirectoryURL)
-        } catch {
-            return .failure(.fileSystemError(error))
-        }
-    }
-}
-
-func dumpPackageProcessAt(_ packageDirectoryURL: URL, outputTo pipe: Pipe, errorsTo errorPipe: Pipe) -> Process {
-    let process = Process()
-    process.launchPath = "/usr/bin/swift"
-    process.arguments = ["package", "dump-package"]
-    process.currentDirectoryURL = packageDirectoryURL
-    process.standardOutput = pipe
-    process.standardError = errorPipe
-    return process
-}
-
-func dumpPackage(atURL url: URL, completion: @escaping (Result<Data, ValidatorError>) -> Void) {
-    let pipe = Pipe()
-    let errorPipe = Pipe()
-    let process = dumpPackageProcessAt(url, outputTo: pipe, errorsTo: errorPipe)
-    
-    process.terminationHandler = { process in
-        
-        guard process.terminationStatus == 0 else {
-            if process.terminationStatus == 15 {
-                completion(.failure(.dumpTimedOut))
-            } else {
-                let errorDump = String(data: errorPipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8)
-                completion(.failure(.badPackageDump(errorDump)))
-            }
-            return
-        }
-        
-        completion(.success(pipe.fileHandleForReading.readDataToEndOfFile()))
-    }
-    
-    process.launch()
-    
-    DispatchQueue.main.asyncAfter(deadline: .now() + processTimeout) {
-        if process.isRunning {
-            process.terminate()
-        }
-    }
-}
-
-func verifyPackage(url: URL, completion: @escaping (Error?) -> Void) {
-    do {
-        let packageURL = try getPackageSwiftURL(url: url).get()
-        let localPackageURL = try downloadPackage(url: packageURL).get()
-        
-        dumpPackage(atURL: localPackageURL) { result in
-            switch result {
-            case .failure(let error):
-                completion(error)
-            case .success(let data):
-                let decoder = JSONDecoder()
-                
-                do {
-                    let package = try decoder.decode(Package.self, from: data)
-                    
-                    guard package.products.isEmpty == false else {
-                        completion(ValidatorError.missingProducts)
-                        return
-                    }
-                    
-                    completion(nil)
-                } catch {
-                    completion(error)
-                }
-            }
-        }
-    } catch {
-        completion(error)
-    }
-}
-
-// MARK: - Redirects
-
-class RedirectFollower: NSObject, URLSessionDataDelegate {
-    
-    var lastURL: URL?
-    
-    func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
-        lastURL = request.url ?? lastURL
-        completionHandler(request)
-    }
-    
-}
-
-extension URL {
-    
-    func removingGitExtension() -> URL {
-        if absoluteString.hasSuffix(".git") {
-            let lastPath = lastPathComponent.components(separatedBy: ".").dropLast().joined(separator: ".")
-            return self.deletingLastPathComponent().appendingPathComponent(lastPath)
-        }
-        
-        return self
-    }
-    
-    func followingRedirects() -> URL? {
-        let semaphore = DispatchSemaphore(value: 0)
-        
-        let follower = RedirectFollower()
-        let session = URLSession(configuration: .default, delegate: follower, delegateQueue: nil)
-        
-        let task = session.dataTask(with: self) { (_, response, error) in
-            semaphore.signal()
-        }
-        
-        task.resume()
-        _ = semaphore.wait(timeout: .now() + 30)
-        
-        if self.removingGitExtension().absoluteString == follower.lastURL?.absoluteString {
-            return nil
-        }
-        
-        return follower.lastURL
-    }
-    
-}
-
-// MARK: - Helpers
-
-extension Array where Element == URL {
-    
-    func findDuplicates(of url: URL) -> Array<(offset: Int, element: URL)> {
-        let normalise: (URL) -> String = { url in
-            var normalisedString = url.absoluteString.lowercased()
-                
-            if normalisedString.hasSuffix(".git") {
-                normalisedString = normalisedString.components(separatedBy: ".").dropLast().joined(separator: ".")
-            }
-            
-            return normalisedString
-        }
-        
-        let normalisedSubject = normalise(url)
-        
-        return enumerated().filter { tuple in
-            normalise(tuple.element) == normalisedSubject
-        }
-    }
-    
-}
-
-// MARK: - Running Code
-
-func url(packagesFromDirectories directoryURLs: [URL], andArguments arguments: [String]) -> URL? {
-    let possiblePackageURLs = arguments.dropFirst().compactMap { URL(fileURLWithPath: $0) } + directoryURLs.map { $0.appendingPathComponent("packages.json") }
-    return possiblePackageURLs.first(where: { FileManager.default.fileExists(atPath: $0.path) })
-}
-
 let currentDirectoryURL = URL(fileURLWithPath: FileManager.default.currentDirectoryPath, isDirectory: true)
-let packagesJsonURL = url(packagesFromDirectories: [currentDirectoryURL, URL(fileURLWithPath: #file).deletingLastPathComponent()], andArguments: CommandLine.arguments)!
 
-// 1. Download existing package list
-var existingPackageList: [URL] = {
-    do {
-        return try downloadJSONSync(url: existingPackageListURL.absoluteString).get()
-    } catch {
-        print("[Error] Failed to download existing package list from GitHub")
-        print(error)
-        exit(EXIT_FAILURE)
-    }
-}()
+// Find the "packages.json" file based on arguments, current directory, or the directory of the script
+let packagesJsonURL = url(packagesFromDirectories: [currentDirectoryURL, URL(fileURLWithPath: #file).deletingLastPathComponent()], andArguments: CommandLine.arguments)
 
-// 2. Load local package list
-var backupLocalPackageList: Data?
-var localPackageList: [URL] = {
-    do {
-        let decoder = JSONDecoder()
-        let data = try Data(contentsOf: packagesJsonURL)
-        backupLocalPackageList = data
-        return try decoder.decode([URL].self, from: data)
-    } catch {
-        print("[Error] Failed to load local package list")
-        print(error)
-        exit(EXIT_FAILURE)
-    }
-}()
+// parse the command argument subcommand
+let commandArg = Command.fromArguments(CommandLine.arguments)
 
-// 3. Calculate Differences
-let difference = localPackageList.difference(from: existingPackageList)
-var newURLsToValidate = [URL]()
-
-difference.forEach { change in
-    switch change {
-    case .insert(_, let url, _):
-        print("+ \(url)")
-        newURLsToValidate.append(url)
-    case .remove(_, let url, _):
-        print("- \(url)")
-    }
+guard let command = commandArg else {
+  print(String(format: helpText, CommandLine.arguments.first?.components(separatedBy: "/").last ?? "validate.sh"))
+  exit(0)
 }
 
-// 4. Validate URLs
-var errorsFound = Set<String>()
-newURLsToValidate.forEach { url in
-
-    var mutableURL = url
-    
-    // Handle redirects
-    if let newURL = mutableURL.followingRedirects() {
-        if let offset = localPackageList.firstIndex(of: mutableURL) {
-            localPackageList[offset] = newURL.appendingPathExtension("git")
-            errorsFound.insert("Found \"\(mutableURL.absoluteString)\" but this redirected to \"\(newURL.absoluteString)\"")
-        }
-        
-        mutableURL = newURL
+if command == .mine {
+  print("Validating Single Package.")
+  let directoryURL = CommandLine.arguments.dropFirst().first.flatMap { URL(fileURLWithPath: $0, isDirectory: true) } ?? currentDirectoryURL
+  verifyPackageDump(at: directoryURL) { error in
+    if let error = error {
+      print(error)
+      exit(1)
     }
-    
-    // URL must not be duplicated
-    let duplicates = localPackageList.findDuplicates(of: mutableURL)
-    
-    if duplicates.count > 1 {
-        duplicates.map(\.offset).reversed().dropLast().forEach { offset in
-            localPackageList.remove(at: offset)
-        }
-        
-        errorsFound.insert("The packages.json file contained duplicate rows")
-    }
-    
-    // URL must end in .git
-    if mutableURL.pathExtension != "git" {
-        if let offset = localPackageList.firstIndex(of: mutableURL) {
-            localPackageList[offset] = mutableURL.appendingPathExtension("git")
-            
-            errorsFound.insert("One or more packages URLs were missing .git extensions")
-        }
-    }
+    print("Validation Succeeded.")
+    exit(0)
+  }
+} else {
+  // Based on arguments find the `package.json` file
+  guard let url = packagesJsonURL else {
+    print("Error: Unable to find packages.json to validate.")
+    exit(1)
+  }
 
-}
+  let data = try! Data(contentsOf: url)
+  let packageUrls = try! decoder.decode([URL].self, from: data)
 
-// 5. Validate order of JSON
-let localPackageListSorted = localPackageList.sorted {
+  // Make sure all urls contain the .git extension
+  print("Checking all urls are valid.")
+  let invalidUrls = packageUrls.filter { $0.pathExtension != "git" }
+
+  guard invalidUrls.count == 0 else {
+    print("Invalid URLs missing .git extension: \(invalidUrls)")
+    exit(1)
+  }
+
+  // Make sure there are no dupes (no dupe variants w/ .git and w/o, no case differences)
+  print("Checking for duplicate packages.")
+  let urlCounts = Dictionary(grouping: packageUrls.enumerated()) {
+    URL(string: $0.element.absoluteString.lowercased())!
+  }.mapValues { $0.map { $0.offset } }.filter { $0.value.count > 1 }
+
+  guard urlCounts.count == 0 else {
+    print("Error: Duplicate URLs:\n\(urlCounts)")
+    exit(1)
+  }
+
+  // Sort the array of urls
+  print("Checking packages are sorted.")
+  let sortedUrls = packageUrls.sorted {
     $0.absoluteString.lowercased() < $1.absoluteString.lowercased()
-}
+  }
 
-let unsortedUrls = zip(localPackageList, localPackageListSorted).enumerated().filter { $0.element.0 != $0.element.1 }.map {
+  // Verify that there are no differences between the current JSON and the sorted JSON
+  let unsortedUrls = zip(packageUrls, sortedUrls).enumerated().filter { $0.element.0 != $0.element.1 }.map {
     ($0.offset, $0.element.0)
-}
+  }
 
-if unsortedUrls.isEmpty == false {
-    errorsFound.insert("The packages.json file was incorrectly sorted")
-}
-
-// 6. Report any problems
-// We've automatically fixed them so no need to stop the script - but users should be aware that we've overriden the file
-
-if errorsFound.isEmpty == false {
-    
-    // Write the backup package list to disk to prevent users from losing data
-    let backupURL = packagesJsonURL.deletingLastPathComponent().appendingPathComponent("packages.backup.json")
-    try! backupLocalPackageList?.write(to: backupURL)
-    
-    // Write the new local package list to disk
+  guard unsortedUrls.count == 0 else {
+    // If the sorting fails, save the sorted packages.json file
     let encoder = JSONEncoder()
     encoder.outputFormatting = [.prettyPrinted]
-    
-    let data = try! encoder.encode(localPackageListSorted)
+    let data = try! encoder.encode(sortedUrls)
     let str = String(data: data, encoding: .utf8)!.replacingOccurrences(of: "\\/", with: "/")
     let unescapedData = str.data(using: .utf8)!
-    try! unescapedData.write(to: packagesJsonURL)
-    
-    let errorMessage = errorsFound.map { "* \($0)" }.joined(separator: "\n")
-    
-    print("""
+    let outputURL = url.deletingPathExtension().appendingPathExtension("sorted.json")
+    try! unescapedData.write(to: outputURL)
+    print("Error: Packages.json is not sorted correctly. Run this validation locally and replace packages.json with packages.sorted.json.")
+    exit(1)
+  }
 
-    *******************************************************************************
-    ** IMPORTANT ******************************************************************
+  print("Checking each url for valid package dump.")
 
-    During validation, problem(s) were found:
-
-    \(errorMessage)
-
-    These problems have been automatically fixed, but you'll need to commit the
-    changes that this script has made before creating the pull request.
-
-    Thanks!
-
-    *******************************************************************************
-    """)
-}
-
-// 7. Validate Package
-
-let newURLsCount = newURLsToValidate.count
-var count = 0
-var packageResults = [URL: Error]()
-
-let finish = {
-    packageResults.forEach { url, error in
-        if let error = error as? ValidatorError {
-            print("🚨 \(url.absoluteString): \(error.localizedDescription)")
-        } else {
-            print("🚨 \(url.absoluteString): \(error)")
+  filterRepos(packageUrls, withSession: session, includingMaster: command == .all) { result in
+    let packageUrls: [URL]
+    switch result {
+    case let .failure(error):
+      debugPrint(error)
+      exit(1)
+    case let .success(urls):
+      packageUrls = urls
+    }
+    print("Checking \(packageUrls.count) Packages...")
+    parseRepos(packageUrls, withSession: session) { errors in
+      for (url, error) in errors {
+        print(url, error)
+      }
+      if errors.count == 0 {
+        print("Validation Succeeded.")
+        exit(0)
+      } else {
+        print("Validation Failed")
+        let errorReport = [String : [PackageError]].init(grouping: errors.values, by: { $0.friendlyName }).mapValues{ $0.count }
+        for report in errorReport {
+          print(report.value, report.key, separator: "\t")
         }
+        print()
+        print("\(errors.count) Packages Failed")
+        exit(1)
+      }
+
     }
-    
-    if errorsFound.isEmpty && packageResults.isEmpty {
-        print("\n\(newURLsCount) package(s) passed")
-        exit(EXIT_SUCCESS)
-    }
-    
-    if packageResults.isEmpty {
-        print("\nPassed validation but please commit the changes made by the script before creating the pull request.")
-        exit(EXIT_FAILURE)
-    }
-    
-    print("\n\(packageResults.count) package(s) out of \(newURLsCount) failed")
-    exit(EXIT_FAILURE)
+  }
+
 }
 
-func runCycle() {
-    if newURLsToValidate.isEmpty {
-        finish()
-        return
-    }
-        
-    let url = newURLsToValidate.removeFirst()
-    verifyPackage(url: url) { error in
-        if let error = error {
-            packageResults[url] = error
-        }
-        runCycle()
-    }
-}
-
-runCycle()
 RunLoop.main.run()
