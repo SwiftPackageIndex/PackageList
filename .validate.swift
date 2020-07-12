@@ -280,6 +280,52 @@ func verifyPackage(url: URL, completion: @escaping (Error?) -> Void) {
     }
 }
 
+// MARK: - Redirects
+
+class RedirectFollower: NSObject, URLSessionDataDelegate {
+    
+    var lastURL: URL?
+    
+    func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
+        lastURL = request.url ?? lastURL
+        completionHandler(request)
+    }
+    
+}
+
+extension URL {
+    
+    func removingGitExtension() -> URL {
+        if absoluteString.hasSuffix(".git") {
+            let lastPath = lastPathComponent.components(separatedBy: ".").dropLast().joined(separator: ".")
+            return self.deletingLastPathComponent().appendingPathComponent(lastPath)
+        }
+        
+        return self
+    }
+    
+    func followingRedirects() -> URL? {
+        let semaphore = DispatchSemaphore(value: 0)
+        
+        let follower = RedirectFollower()
+        let session = URLSession(configuration: .default, delegate: follower, delegateQueue: nil)
+        
+        let task = session.dataTask(with: self) { (_, response, error) in
+            semaphore.signal()
+        }
+        
+        task.resume()
+        _ = semaphore.wait(timeout: .now() + 30)
+        
+        if self.removingGitExtension().absoluteString == follower.lastURL?.absoluteString {
+            return nil
+        }
+        
+        return follower.lastURL
+    }
+    
+}
+
 // MARK: - Helpers
 
 extension Array where Element == URL {
@@ -358,8 +404,20 @@ difference.forEach { change in
 var errorsFound = Set<String>()
 newURLsToValidate.forEach { url in
 
+    var mutableURL = url
+    
+    // Handle redirects
+    if let newURL = mutableURL.followingRedirects() {
+        if let offset = localPackageList.firstIndex(of: mutableURL) {
+            localPackageList[offset] = newURL.appendingPathExtension("git")
+            errorsFound.insert("Found \"\(mutableURL.absoluteString)\" but this redirected to \"\(newURL.absoluteString)\"")
+        }
+        
+        mutableURL = newURL
+    }
+    
     // URL must not be duplicated
-    let duplicates = localPackageList.findDuplicates(of: url)
+    let duplicates = localPackageList.findDuplicates(of: mutableURL)
     
     if duplicates.count > 1 {
         duplicates.map(\.offset).reversed().dropLast().forEach { offset in
@@ -370,9 +428,9 @@ newURLsToValidate.forEach { url in
     }
     
     // URL must end in .git
-    if url.pathExtension != "git" {
-        if let offset = localPackageList.firstIndex(of: url) {
-            localPackageList[offset] = url.appendingPathExtension("git")
+    if mutableURL.pathExtension != "git" {
+        if let offset = localPackageList.firstIndex(of: mutableURL) {
+            localPackageList[offset] = mutableURL.appendingPathExtension("git")
             
             errorsFound.insert("One or more packages URLs were missing .git extensions")
         }
@@ -438,11 +496,6 @@ var count = 0
 var packageResults = [URL: Error]()
 
 let finish = {
-    if packageResults.isEmpty {
-        print("\n\(newURLsCount) package(s) passed")
-        exit(EXIT_SUCCESS)
-    }
-    
     packageResults.forEach { url, error in
         if let error = error as? ValidatorError {
             print("🚨 \(url.absoluteString): \(error.localizedDescription)")
@@ -451,8 +504,17 @@ let finish = {
         }
     }
     
-    print("\n\(packageResults.count) package(s) failed")
+    if errorsFound.isEmpty && packageResults.isEmpty {
+        print("\n\(newURLsCount) package(s) passed")
+        exit(EXIT_SUCCESS)
+    }
     
+    if packageResults.isEmpty {
+        print("\nPassed validation but please commit the changes made by the script before creating the pull request.")
+        exit(EXIT_FAILURE)
+    }
+    
+    print("\n\(packageResults.count) package(s) out of \(newURLsCount) failed")
     exit(EXIT_FAILURE)
 }
 
