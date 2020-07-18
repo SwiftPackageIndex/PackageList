@@ -191,6 +191,7 @@
   "https://github.com/apple/swift-syntax.git",
   "https://github.com/apple/swift-tools-support-async.git",
   "https://github.com/apple/swift-tools-support-core.git",
+  "https://github.com/apple/swiftpm-on-llbuild2.git",
   "https://github.com/apppear/chartview.git",
   "https://github.com/appsaurus/cursorpagination.git",
   "https://github.com/appsaurus/fluentseeder.git",
