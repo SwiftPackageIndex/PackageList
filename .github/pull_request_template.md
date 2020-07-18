@@ -2,7 +2,7 @@
 
 I have either:
 
-* [ ] Run `./validate.swift diff` before submitting this pull request.
+* [ ] Run `swift ./validate.swift`.
 
 Or, checked that:
 
