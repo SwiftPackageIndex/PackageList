@@ -1,0 +1,28 @@
+name: Nightly Audit
+
+on: [ workflow_dispatch ]
+
+jobs:
+  run_nightly:
+    runs-on: macos-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Select Xcode 12
+      run: sudo xcode-select -s /Applications/Xcode_12.app && xcodebuild -version
+    - name: Run Script
+      run: swift nightly.swift
+    - name: Create Pull Request
+      id: cpr
+      uses: peter-evans/create-pull-request@v2
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: Updated Packages
+        title: '[Nightly] Updated Packages'
+        body: |
+          :robot: This is an automated change
+          
+          - Removed any redirects
+          - Removed any duplicates
+    - name: Check outputs
+      run: echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
