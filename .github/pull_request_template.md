@@ -1,3 +1,7 @@
+The package(s) being submitted are:
+
+* [Package Name](https://example.com/repository/)
+
 ## Checklist
 
 I have either:
