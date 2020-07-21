@@ -150,12 +150,9 @@ if filteredPackages.count != originalPackages.count {
 // If we 404 (Not Found) then we remove the URL from the package list. If the URL we end up on is not the same as the
 // one we have listed then we replace it with the new URL to keep our list as accurate as possible.
 do {
-    let dateFormatter = DateFormatter() // temp
-    dateFormatter.dateFormat = "HH:mm:ss" // temp
-    
     let tempStorage = filteredPackages
     var lastRequestDate = Date()
-    tempStorage.forEach { packageURL in
+    tempStorage.forEach { url in
         
         let timeSinceLastRequest = abs(lastRequestDate.timeIntervalSinceNow)
         if timeSinceLastRequest < requestThrottleDelay {
@@ -163,39 +160,51 @@ do {
         }
         
         lastRequestDate = Date()
-        print(dateFormatter.string(from: lastRequestDate)) // temp
+        var recursiveCount = 0
         
-        let result = packageURL.followingRedirects()
-        
-        switch result {
-        case .notFound:
-            guard filteredPackages.remove(packageURL) else {
-                print("ERROR: Failed to remove \(packagesURL.path) (404)")
-                return
+        func process(packageURL: URL) {
+            let result = packageURL.followingRedirects()
+            
+            switch result {
+            case .notFound:
+                guard filteredPackages.remove(packageURL) else {
+                    print("ERROR: Failed to remove \(packagesURL.path) (404)")
+                    return
+                }
+                
+                print("CHANGE: Removed \(packageURL.path) as it returned a 404")
+                
+            case .redirected(let newURL):
+                let newURLWithSuffix = newURL.appendingPathExtension("git")
+                
+                guard filteredPackages.replace(packageURL, with: newURLWithSuffix) else {
+                    print("ERROR: Failed to replace \(packageURL.path) with \(newURLWithSuffix.path)")
+                    return
+                }
+                
+                print("CHANGE: Replaced \(packageURL.path) with \(newURLWithSuffix.path)")
+                
+            case .rateLimitHit:
+                recursiveCount += 1
+                
+                if recursiveCount <= 3 {
+                    print("INFO: Retrying \(packageURL.path) due to rate limits.")
+                    sleep(5 * UInt32(recursiveCount))
+                    process(packageURL: packageURL)
+                } else {
+                    print("INFO: Failed to process \(packageURL.path) due to rate limits.")
+                    sleep(15)
+                }
+                
+            case .unknownError(let error):
+                print("ERROR: Unknown error for URL: \(packageURL.path) - \(error.localizedDescription)")
+                
+            case .unchanged:
+                break
             }
-            
-            print("CHANGE: Removed \(packageURL.path) as it returned a 404")
-            
-        case .redirected(let newURL):
-            let newURLWithSuffix = newURL.appendingPathExtension("git")
-            
-            guard filteredPackages.replace(packageURL, with: newURLWithSuffix) else {
-                print("ERROR: Failed to replace \(packageURL.path) with \(newURLWithSuffix.path)")
-                return
-            }
-            
-            print("CHANGE: Replaced \(packageURL.path) with \(newURLWithSuffix.path)")
-            
-        case .rateLimitHit:
-            print("INFO: Exceeded Rate Limit -- \(packageURL.path) failed. Sleeping.")
-            sleep(2)
-            
-        case .unknownError(let error):
-            print("ERROR: Unknown error for URL: \(packageURL.path) - \(error.localizedDescription)")
-            
-        case .unchanged:
-            break
         }
+        
+        process(packageURL: url)
     }
 }
 
