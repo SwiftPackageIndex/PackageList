@@ -188,8 +188,8 @@ do {
                 recursiveCount += 1
                 
                 if recursiveCount <= 3 {
-                    print("INFO: Retrying \(packageURL.path) due to rate limits.")
-                    sleep(5 * UInt32(recursiveCount))
+                    print("INFO: Retrying \(packageURL.path) due to rate limits, sleeping first.")
+                    sleep(30)
                     process(packageURL: packageURL)
                 } else {
                     print("INFO: Failed to process \(packageURL.path) due to rate limits.")
