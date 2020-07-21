@@ -5,6 +5,10 @@ import Foundation
 let fileManager = FileManager.default
 let decoder = JSONDecoder()
 
+/// When run via GitHub Actions, requests to GitHub can happen so quickly that we hit a hidden rate limit. As such we introduce a throttle so if the requests happen
+/// too quickly then we take a break. (Time in seconds)
+let requestThrottleDelay: TimeInterval = 0.5
+
 class RedirectFollower: NSObject, URLSessionDataDelegate {
     
     var lastURL: URL?
@@ -143,7 +147,14 @@ if filteredPackages.count != originalPackages.count {
 // one we have listed then we replace it with the new URL to keep our list as accurate as possible.
 do {
     let tempStorage = filteredPackages
+    var timeSinceLastRequest = Date()
     tempStorage.forEach { packageURL in
+        
+        if abs(timeSinceLastRequest.timeIntervalSinceNow) < requestThrottleDelay {
+            usleep(1000000 * useconds_t(requestThrottleDelay))
+        }
+        
+        timeSinceLastRequest = Date()
         
         let result = packageURL.followingRedirects()
         
