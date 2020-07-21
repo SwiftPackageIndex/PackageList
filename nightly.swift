@@ -7,7 +7,7 @@ let decoder = JSONDecoder()
 
 /// When run via GitHub Actions, requests to GitHub can happen so quickly that we hit a hidden rate limit. As such we introduce a throttle so if the requests happen
 /// too quickly then we take a break. (Time in seconds)
-let requestThrottleDelay: TimeInterval = 0.5
+let requestThrottleDelay: TimeInterval = 1
 
 class RedirectFollower: NSObject, URLSessionDataDelegate {
     
@@ -29,6 +29,7 @@ class RedirectFollower: NSObject, URLSessionDataDelegate {
 enum RedirectResult {
     case unchanged
     case notFound
+    case rateLimitHit
     case unknownError(Error)
     case redirected(URL)
 }
@@ -67,6 +68,9 @@ extension URL {
                 switch statusCode {
                 case 404:
                     result = .notFound
+                    
+                case 429:
+                    result = .rateLimitHit
                     
                 case 200:
                     break
@@ -146,15 +150,20 @@ if filteredPackages.count != originalPackages.count {
 // If we 404 (Not Found) then we remove the URL from the package list. If the URL we end up on is not the same as the
 // one we have listed then we replace it with the new URL to keep our list as accurate as possible.
 do {
+    let dateFormatter = DateFormatter() // temp
+    dateFormatter.dateFormat = "HH:mm:ss" // temp
+    
     let tempStorage = filteredPackages
-    var timeSinceLastRequest = Date()
+    var lastRequestDate = Date()
     tempStorage.forEach { packageURL in
         
-        if abs(timeSinceLastRequest.timeIntervalSinceNow) < requestThrottleDelay {
-            usleep(1000000 * useconds_t(requestThrottleDelay))
+        let timeSinceLastRequest = abs(lastRequestDate.timeIntervalSinceNow)
+        if timeSinceLastRequest < requestThrottleDelay {
+            usleep(1000000 * useconds_t(requestThrottleDelay - timeSinceLastRequest))
         }
         
-        timeSinceLastRequest = Date()
+        lastRequestDate = Date()
+        print(dateFormatter.string(from: lastRequestDate)) // temp
         
         let result = packageURL.followingRedirects()
         
@@ -176,6 +185,10 @@ do {
             }
             
             print("CHANGE: Replaced \(packageURL.path) with \(newURLWithSuffix.path)")
+            
+        case .rateLimitHit:
+            print("INFO: Exceeded Rate Limit -- \(packageURL.path) failed. Sleeping.")
+            sleep(2)
             
         case .unknownError(let error):
             print("ERROR: Unknown error for URL: \(packageURL.path) - \(error.localizedDescription)")
