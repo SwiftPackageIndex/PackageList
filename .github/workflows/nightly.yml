@@ -24,5 +24,6 @@ jobs:
           
           - Removed any redirects
           - Removed any duplicates
+          - Removed any deleted repositories
     - name: Check outputs
       run: echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
