@@ -459,7 +459,7 @@ do {
         
         let timeSinceLastRequest = abs(lastRequestDate.timeIntervalSinceNow)
         if timeSinceLastRequest < requestThrottleDelay {
-            usleep(1000000 * useconds_t(requestThrottleDelay - timeSinceLastRequest))
+            //usleep(1000000 * useconds_t(requestThrottleDelay - timeSinceLastRequest))
         }
         
         lastRequestDate = Date()
@@ -507,7 +507,7 @@ do {
             }
         }
         
-        process(packageURL: url)
+        //process(packageURL: url)
     }
 }
 
@@ -523,6 +523,7 @@ do {
     var allDependencies = [Dependency]()
     filteredPackages.forEach { url in
         do {
+            print(url.path)
             let fetcher = try PackageFetcher(repoURL: url)
             let package = try fetcher.fetch().get()
             
