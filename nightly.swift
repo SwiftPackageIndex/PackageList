@@ -119,6 +119,10 @@ func downloadSync(url: String, timeout: Int = 10) -> Result<Data, ValidatorError
             taskError = .networkingError(error)
         }
         
+        if let dataUnwrapped = data {
+            print(String(data: dataUnwrapped, encoding: .utf8))
+        }
+        
         payload = data
         semaphore.signal()
         
