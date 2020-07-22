@@ -2,6 +2,8 @@
 
 import Foundation
 
+print("INFO: Running...")
+
 let fileManager = FileManager.default
 let decoder = JSONDecoder()
 
@@ -18,10 +20,10 @@ let rawGitHubBaseURL = URLComponents(string: "https://raw.githubusercontent.com"
 
 // We have a special Personal Access Token (PAT) which is used to increase our rate limit allowance up to 5,000 to enable
 // us to process every package.
-let patToken = ProcessInfo.processInfo.environment["GITHUB_TOKEN"] // GITHUB_TOKEN GH_API_TOKEN_BASE64
-let patToken2 = ProcessInfo.processInfo.environment["GH_API_TOKEN_BASE64"] ?? "?"
+let patToken = ProcessInfo.processInfo.environment["GH_API_TOKEN_BASE64"]?.trimmingCharacters(in: .whitespacesAndNewlines)
 
-print(patToken2.first, patToken2.last)
+print(patToken?.count ?? -1)
+
 if patToken == nil {
     print("Warning: Using anonymous authentication -- you will quickly run into rate limiting issues\n")
 }
@@ -95,7 +97,7 @@ func downloadSync(url: String, timeout: Int = 10) -> Result<Data, ValidatorError
     var request = URLRequest(url: apiURL)
     
     if let token = patToken, apiURL.host?.contains(SourceHost.GitHub.rawValue) == true {
-        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.addValue("Basic \(token)", forHTTPHeaderField: "Authorization")
     }
     
     let task = session.dataTask(with: request) { (data, response, error) in
@@ -595,6 +597,7 @@ do {
     let string = String(data: data, encoding: .utf8)!.replacingOccurrences(of: "\\/", with: "/")
     let unescapedData = string.data(using: .utf8)!
     try unescapedData.write(to: packagesURL)
+    print("INFO: packages.json has been updated")
 }
 
 exit(EXIT_SUCCESS)
