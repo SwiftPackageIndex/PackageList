@@ -55,6 +55,8 @@ enum ValidatorError: Error {
     case packageDoesNotExist(String)
     case dumpTimedOut
     case unknownError(Error)
+    case repoIsFork
+    case outdatedToolsVersion
     
     var localizedDescription: String {
         switch self {
@@ -78,6 +80,14 @@ enum ValidatorError: Error {
             return "Rate Limit of \(limit) Exceeded"
         case .packageDoesNotExist(let url):
             return "Package Does Not Exist: \(url)"
+        case .repoIsFork:
+            // A decision has been made that the index as a whole should support forks, but not as part of dependency analysis.
+            //
+            // This is because there's an unhealthy amount of forks with a single patch to simply make the dependency work with their library,
+            // thse are often unmaintained and don't delivery huge amounts of value.
+            return "Forks are not added as part of dependency analysis"
+        case .outdatedToolsVersion:
+            return "Repo is using an outdated package format"
         }
     }
 }
@@ -103,15 +113,6 @@ func downloadSync(url: String, timeout: Int = 10) -> Result<Data, ValidatorError
     let task = session.dataTask(with: request) { (data, response, error) in
         
         let httpResponse = response as? HTTPURLResponse
-        
-        if apiURL.host?.contains(SourceHost.GitHub.rawValue) == true {
-            // TEMPORARY
-            print(
-                httpResponse?.value(forHTTPHeaderField: "X-RateLimit-Remaining").flatMap(Int.init) ?? -1,
-                "/",
-                httpResponse?.value(forHTTPHeaderField: "X-RateLimit-Limit").flatMap(Int.init) ?? -1
-            )
-        }
         
         if let limit = httpResponse?.value(forHTTPHeaderField: "X-RateLimit-Limit").flatMap(Int.init),
            let remaining = httpResponse?.value(forHTTPHeaderField: "X-RateLimit-Remaining").flatMap(Int.init),
@@ -297,13 +298,14 @@ struct Repository: Decodable {
     let default_branch: String
     let stargazers_count: Int
     let html_url: URL
+    let fork: Bool
 }
 
 struct Product: Decodable {
     let name: String
 }
 
-struct Dependency: Decodable {
+struct Dependency: Decodable, Hashable {
     let name: String
     let url: URL
 }
@@ -410,7 +412,12 @@ class PackageFetcher {
                     result = .failure(.dumpTimedOut)
                 } else {
                     let errorDump = String(data: errorPipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8)
-                    result = .failure(.badPackageDump(errorDump))
+                    
+                    if errorDump?.contains("using Swift tools version 3.1.0 which is no longer supported") == true {
+                        result = .failure(.outdatedToolsVersion)
+                    } else {
+                        result = .failure(.badPackageDump(errorDump))
+                    }
                 }
                 
                 semaphore.signal()
@@ -525,14 +532,13 @@ do {
 // our coverage.
 
 do {
-    var allDependencies = [Dependency]()
+    var allDependencies = Set<Dependency>()
     filteredPackages.forEach { url in
         do {
-            print(url.path)
             let fetcher = try PackageFetcher(repoURL: url)
             let package = try fetcher.fetch().get()
             
-            allDependencies.append(contentsOf: package.package.dependencies)
+            package.package.dependencies.forEach { allDependencies.insert($0) }
         } catch {
             print("ERROR: Failed to obtain package information for \(url.path)")
             print(error)
@@ -550,6 +556,10 @@ do {
             
             if package.package.products.isEmpty {
                 throw ValidatorError.missingProducts
+            }
+            
+            if package.repo.fork {
+                throw ValidatorError.repoIsFork
             }
             
             // Passed validation, let's add it to the array of URLs
