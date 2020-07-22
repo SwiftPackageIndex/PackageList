@@ -12,6 +12,8 @@ jobs:
       run: sudo xcode-select -s /Applications/Xcode_12.app && xcodebuild -version
     - name: Run Script
       run: swift nightly.swift
+      env:
+        GH_API_TOKEN_BASE64: ${{ secrets.GH_API_TOKEN_BASE64 }}
     - name: Create Pull Request
       id: cpr
       uses: peter-evans/create-pull-request@v2
@@ -25,5 +27,6 @@ jobs:
           - Removed any redirects
           - Removed any duplicates
           - Removed any deleted repositories
+          - Added any unknown dependencies
     - name: Check outputs
       run: echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
