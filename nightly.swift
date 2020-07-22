@@ -80,8 +80,6 @@ enum ValidatorError: Error {
 
 // MARK: - Networking
 
-var TEMP_hasPrintedLimit = false // Temporary print so we can validate that CI is successfully picking up the PAT token
-
 func downloadSync(url: String, timeout: Int = 10) -> Result<Data, ValidatorError> {
     let semaphore = DispatchSemaphore(value: 0)
     
@@ -102,13 +100,13 @@ func downloadSync(url: String, timeout: Int = 10) -> Result<Data, ValidatorError
         
         let httpResponse = response as? HTTPURLResponse
         
-        if TEMP_hasPrintedLimit == false, apiURL.host?.contains(SourceHost.GitHub.rawValue) == true {
+        if apiURL.host?.contains(SourceHost.GitHub.rawValue) == true {
+            // TEMPORARY
             print(
                 httpResponse?.value(forHTTPHeaderField: "X-RateLimit-Remaining").flatMap(Int.init) ?? -1,
                 "/",
                 httpResponse?.value(forHTTPHeaderField: "X-RateLimit-Limit").flatMap(Int.init) ?? -1
             )
-            TEMP_hasPrintedLimit = true
         }
         
         if let limit = httpResponse?.value(forHTTPHeaderField: "X-RateLimit-Limit").flatMap(Int.init),
@@ -140,7 +138,6 @@ func downloadSync(url: String, timeout: Int = 10) -> Result<Data, ValidatorError
 
 func downloadJSONSync<Payload: Decodable>(url: String, timeout: Int = 10) -> Result<Payload, ValidatorError> {
     let decoder = JSONDecoder()
-    decoder.keyDecodingStrategy = .convertFromSnakeCase
     let result = downloadSync(url: url, timeout: timeout)
     
     switch result {
@@ -289,9 +286,9 @@ extension Array where Element == URL {
 
 // https://developer.github.com/v3/repos/#get-a-repository
 struct Repository: Decodable {
-    let defaultBranch: String
-    let stargazersCount: Int
-    let htmlUrl: URL
+    let default_branch: String
+    let stargazers_count: Int
+    let html_url: URL
 }
 
 struct Product: Decodable {
@@ -352,7 +349,7 @@ class PackageFetcher {
     
     private func getPackageSwiftURL(repository: Repository) -> Result<URL, ValidatorError> {
         var rawURLComponents = rawGitHubBaseURL
-        rawURLComponents.path = ["", repoOwner, repoName, repository.defaultBranch, "Package.swift"].joined(separator: "/")
+        rawURLComponents.path = ["", repoOwner, repoName, repository.default_branch, "Package.swift"].joined(separator: "/")
         
         guard let packageURL = rawURLComponents.url else {
             return .failure(.invalidURL(rawURLComponents.path))
@@ -548,8 +545,8 @@ do {
             }
             
             // Passed validation, let's add it to the array of URLs
-            filteredPackages.append(package.repo.htmlUrl.appendingPathExtension("git"))
-            print("CHANGE: Added \(package.repo.htmlUrl.path)")
+            filteredPackages.append(package.repo.html_url.appendingPathExtension("git"))
+            print("CHANGE: Added \(package.repo.html_url.path)")
         } catch {
             print("ERROR: Dependency (\(dependency.url.path)) did not pass validation:")
             print(error)
