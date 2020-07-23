@@ -22,8 +22,6 @@ let rawGitHubBaseURL = URLComponents(string: "https://raw.githubusercontent.com"
 // us to process every package.
 let patToken = ProcessInfo.processInfo.environment["GH_API_TOKEN_BASE64"]?.trimmingCharacters(in: .whitespacesAndNewlines)
 
-print(patToken?.count ?? -1)
-
 if patToken == nil {
     print("Warning: Using anonymous authentication -- you will quickly run into rate limiting issues\n")
 }
@@ -138,8 +136,10 @@ func downloadSync(url: String, timeout: Int = 10) -> Result<Data, ValidatorError
     switch semaphore.wait(timeout: .now() + .seconds(timeout)) {
     case .timedOut:
         return .failure(.timedOut)
+    case .success where taskError != nil:
+        return .failure(taskError!)
     case .success where payload == nil:
-        return .failure(taskError ?? .noData)
+        return .failure(.noData)
     case .success:
         return .success(payload!)
     }
@@ -471,7 +471,7 @@ do {
         
         let timeSinceLastRequest = abs(lastRequestDate.timeIntervalSinceNow)
         if timeSinceLastRequest < requestThrottleDelay {
-            //usleep(1000000 * useconds_t(requestThrottleDelay - timeSinceLastRequest))
+            usleep(1000000 * useconds_t(requestThrottleDelay - timeSinceLastRequest))
         }
         
         lastRequestDate = Date()
@@ -519,7 +519,7 @@ do {
             }
         }
         
-        //process(packageURL: url)
+        process(packageURL: url)
     }
 }
 
