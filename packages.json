@@ -2905,6 +2905,7 @@
   "https://github.com/vapor-community/multilogging.git",
   "https://github.com/vapor-community/pagination.git",
   "https://github.com/vapor-community/postman-provider.git",
+  "https://github.com/vapor-community/sendgrid-kit.git",
   "https://github.com/vapor-community/sendgrid.git",
   "https://github.com/vapor-community/sockets.git",
   "https://github.com/vapor-community/stripe-kit.git",
