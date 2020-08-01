@@ -147,8 +147,11 @@ func downloadJSONSync<Payload: Decodable>(url: String, timeout: Int = 10) -> Res
         
     case .success(let data):
         do {
+            let payloadString = String(describing: String(data: data, encoding: .utf8))
+            print("payloadString: \(payloadString)")
             return .success(try decoder.decode(Payload.self, from: data))
         } catch {
+            print("error: \(error)")
             return .failure(.decoderError(error))
         }
     }
