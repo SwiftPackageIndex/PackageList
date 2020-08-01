@@ -58,8 +58,8 @@ enum ValidatorError: Error {
     case fileSystemError(Error)
     case badPackageDump(String?)
     case missingProducts
-    case rateLimitExceeded(Int)
-    case packageDoesNotExist(String)
+//    case rateLimitExceeded(Int)
+//    case packageDoesNotExist(String)
     case dumpTimedOut
     
     var localizedDescription: String {
@@ -80,10 +80,10 @@ enum ValidatorError: Error {
             return "Bad Package Dump -- \(output ?? "No Output")"
         case .missingProducts:
             return "Missing Products"
-        case .rateLimitExceeded(let limit):
-            return "Rate Limit of \(limit) Exceeded"
-        case .packageDoesNotExist(let url):
-            return "Package Does Not Exist: \(url)"
+//        case .rateLimitExceeded(let limit):
+//            return "Rate Limit of \(limit) Exceeded"
+//        case .packageDoesNotExist(let url):
+//            return "Package Does Not Exist: \(url)"
         }
     }
 }
@@ -113,9 +113,13 @@ func downloadSync(url: String, timeout: Int = 10) -> Result<Data, ValidatorError
         if let limit = httpResponse?.value(forHTTPHeaderField: "X-RateLimit-Limit").flatMap(Int.init),
            let remaining = httpResponse?.value(forHTTPHeaderField: "X-RateLimit-Remaining").flatMap(Int.init),
            remaining == 0 {
-            taskError = .rateLimitExceeded(limit)
+            print("ERROR: Rate Limit Exceeded /\(limit)") // Temp
+            taskError = .noData
+//            taskError = .rateLimitExceeded(limit)
         } else if httpResponse?.statusCode == 404 {
-            taskError = .packageDoesNotExist(apiURL.absoluteString)
+            print("ERROR: 404 Not Found") // Temp
+            taskError = .noData
+//            taskError = .packageDoesNotExist(apiURL.absoluteString)
         } else if let error = error {
             taskError = .networkingError(error)
         }
@@ -320,7 +324,7 @@ extension URL {
         if self.removingGitExtension().absoluteString == follower.lastURL?.absoluteString {
             return nil
         }
-        
+
         return follower.lastURL
     }
     
