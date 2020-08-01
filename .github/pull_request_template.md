@@ -1,9 +1,3 @@
-🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨
-There's a bug in Xcode 12 beta 3 that is affecting this repository's validation script. Unfortunately, validation for your pull request *will* fail due to this bug.
-
-If possible, please run validation locally with Xcode 12 beta 1 or 2. If that's not possible, don't worry. Just submit your pull request, and one of the repository administrators will run validation for you.
-🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨
-
 The package(s) being submitted are:
 
 * [Package Name](https://example.com/repository/)
