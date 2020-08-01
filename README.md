@@ -1,5 +1,12 @@
 ![Valid JSON](https://github.com/SwiftPackageIndex/PackageList/workflows/Valid%20JSON/badge.svg)
 
+⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠
+There's a bug in Xcode 12 beta 3 that is affecting this repository's validation script. Unfortunately, validation for any pull requests *will* fail due to this bug.
+
+Before submitting, please run validation locally with Xcode 12 beta 1 or 2. If that's not possible, don't worry. Just submit your pull request, and one of the repository administrators will run validation for you.
+⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠
+
+
 # The Swift Package Index
 
 Adding a new package to the Swift Package Index is straightforward. Every package indexed by this site comes from a list of package repository URLs, stored in a [publicly available JSON file](https://github.com/SwiftPackageIndex/PackageList/blob/main/packages.json). To add a package to the index, add a URL to a package repository to that file.
