@@ -158,7 +158,7 @@ func downloadJSONSync<Payload: Decodable>(url: String, timeout: Int = 10) -> Res
 
 func getDefaultBranch(userName: String, repositoryName: String) -> Result<String, ValidatorError> {
     let result: Result<Repository, ValidatorError> = downloadJSONSync(url: "https://api.github.com/repos/\(userName)/\(repositoryName)")
-    return result.map(\.default_branch)
+    return result.map { $0.default_branch }
 }
 
 func getPackageSwiftURL(url: URL) -> Result<URL, ValidatorError> {
