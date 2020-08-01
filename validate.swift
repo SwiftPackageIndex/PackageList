@@ -420,7 +420,7 @@ newURLsToValidate.forEach { url in
     let duplicates = localPackageList.findDuplicates(of: mutableURL)
     
     if duplicates.count > 1 {
-        duplicates.map(\.offset).reversed().dropLast().forEach { offset in
+        duplicates.map({ $0.offset }).reversed().dropLast().forEach { offset in
             localPackageList.remove(at: offset)
         }
         
