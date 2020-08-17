@@ -1,8 +1,12 @@
+The package(s) being submitted are:
+
+* [Package Name](https://example.com/repository/)
+
 ## Checklist
 
 I have either:
 
-* [ ] Run `./validate.swift diff` before submitting this pull request.
+* [ ] Run `swift ./validate.swift`.
 
 Or, checked that:
 

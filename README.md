@@ -2,19 +2,17 @@
 
 # The Swift Package Index
 
-Adding a new package to the Swift Package Index is straightforward. Every package indexed by this site comes from the list of package repositories, stored in a [publicly available JSON file](https://github.com/SwiftPackageIndex/PackageList/blob/main/packages.json). To add a package to the index, add the URL of the repository to that file.
-
-### Adding packages to the Swift Package Index
+Adding a new package to the Swift Package Index is straightforward. Every package indexed by this site comes from a list of package repository URLs, stored in a [publicly available JSON file](https://github.com/SwiftPackageIndex/PackageList/blob/main/packages.json). To add a package to the index, add a URL to a package repository to that file.
 
 Please feel free to submit your own, or other people's repositories to this list. There are a few requirements, but they are simple.
 
-The easiest way to validate that packages meet the requirements is to run the validation tool included in this repository. Fork [this repository](https://github.com/SwiftPackageIndex/PackageList/), edit `packages.json` and add the package URL(s) to the JSON. Then, in the directory where you have the clone of your fork of this repository, run the following command:
+The easiest way to validate that packages meet the requirements is to run the validation tool included in this repository. Fork [this repository](https://github.com/SwiftPackageIndex/PackageList/) and clone your fork locally. Then edit `packages.json` and add the package URL(s) to the JSON. Finally, in the directory where you have the clone of your fork of this repository, run the following command:
 
 ```shell
-swift ./validate.swift diff
+swift ./validate.swift
 ```
 
-Once validation is successful, please submit your pull request! Your package(s) will appear in the index within a few minutes.
+When validation is successful, commit your changes and submit your pull request! Your package(s) will appear in the index within a few minutes.
 
 ---
 
