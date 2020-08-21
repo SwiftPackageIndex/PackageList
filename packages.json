@@ -2160,6 +2160,7 @@
   "https://github.com/phimage/Prephirences.git",
   "https://github.com/phimage/ValueTransformerKit.git",
   "https://github.com/phimage/XcodeProjKit.git",
+  "https://github.com/pichukov/LightChart.git",
   "https://github.com/piemonte/Burst.git",
   "https://github.com/piemonte/Player.git",
   "https://github.com/piemonte/Poly.git",
@@ -3174,6 +3175,5 @@
   "https://github.com/zulip/swift-zulip-api.git",
   "https://github.com/zummenix/KeyboardNotificationsObserver.git",
   "https://github.com/zvonicek/ImageSlideshow.git",
-  "https://github.com/zweigraf/fakebundle.git",
-  "https://github.com/pichukov/LightChart.git"
+  "https://github.com/zweigraf/fakebundle.git"
 ]
