@@ -420,6 +420,7 @@
   "https://github.com/bryannorden/elo-rating-swift.git",
   "https://github.com/brycesteve/perfect-view2pdf.git",
   "https://github.com/BubiDevs/SwiftFlags.git",
+  "https://github.com/Building42/HTTPParserC.git",
   "https://github.com/Building42/Telegraph.git",
   "https://github.com/bustoutsolutions/siesta.git",
   "https://github.com/buzzfeed/MockDuck.git",
@@ -1813,6 +1814,7 @@
   "https://github.com/Molbie/Outlaw.git",
   "https://github.com/momeno/typeswift.git",
   "https://github.com/mongodb/mongo-swift-driver.git",
+  "https://github.com/mongodb/swift-bson.git",
   "https://github.com/mongodb/swift-mongo-mobile.git",
   "https://github.com/mono0926/apns.git",
   "https://github.com/mono0926/swiftystring.git",
@@ -3199,4 +3201,3 @@
   "https://github.com/zvonicek/ImageSlideshow.git",
   "https://github.com/zweigraf/fakebundle.git"
 ]
-
