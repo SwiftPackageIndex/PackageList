@@ -1,5 +1,11 @@
 #!/usr/bin/env swift
 
+/*
+ [1]: Some parts of this script have been temporarily commented out due to a Swift bug in Xcode 12 (Beta 3).
+      Exact can be found in this pull request: https://github.com/SwiftPackageIndex/PackageList/pull/536
+      https://bugs.swift.org/browse/SR-13336
+ */
+
 import Foundation
 
 let rawGitHubBaseURL = URLComponents(string: "https://raw.githubusercontent.com")!
@@ -58,8 +64,10 @@ enum ValidatorError: Error {
     case fileSystemError(Error)
     case badPackageDump(String?)
     case missingProducts
-    case rateLimitExceeded(Int)
-    case packageDoesNotExist(String)
+    /* [1]
+//    case rateLimitExceeded(Int)
+//    case packageDoesNotExist(String)
+    */
     case dumpTimedOut
     
     var localizedDescription: String {
@@ -80,10 +88,12 @@ enum ValidatorError: Error {
             return "Bad Package Dump -- \(output ?? "No Output")"
         case .missingProducts:
             return "Missing Products"
+        /* [1]
         case .rateLimitExceeded(let limit):
             return "Rate Limit of \(limit) Exceeded"
         case .packageDoesNotExist(let url):
             return "Package Does Not Exist: \(url)"
+        */
         }
     }
 }
@@ -113,9 +123,15 @@ func downloadSync(url: String, timeout: Int = 10) -> Result<Data, ValidatorError
         if let limit = httpResponse?.value(forHTTPHeaderField: "X-RateLimit-Limit").flatMap(Int.init),
            let remaining = httpResponse?.value(forHTTPHeaderField: "X-RateLimit-Remaining").flatMap(Int.init),
            remaining == 0 {
-            taskError = .rateLimitExceeded(limit)
+            // [1]
+            print("ERROR: Rate Limit Exceeded /\(limit)") // Tem[
+            taskError = .noData // Temp
+//            taskError = .rateLimitExceeded(limit)
         } else if httpResponse?.statusCode == 404 {
-            taskError = .packageDoesNotExist(apiURL.absoluteString)
+            // [1]
+            print("ERROR: 404 Not Found") // Temp
+            taskError = .noData // Temp
+//            taskError = .packageDoesNotExist(apiURL.absoluteString)
         } else if let error = error {
             taskError = .networkingError(error)
         }
