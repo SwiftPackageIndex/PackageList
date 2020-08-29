@@ -3095,6 +3095,8 @@
   "https://github.com/wolfmcnally/WolfStrings.git",
   "https://github.com/wolfmcnally/WolfWith.git",
   "https://github.com/Workable/swift-error-handler.git",
+  "https://github.com/workingDog/AgroApi.git",
+  "https://github.com/workingDog/OWOneCall.git",
   "https://github.com/woxtu/NSString-RemoveEmoji.git",
   "https://github.com/woxtu/RouteKit.git",
   "https://github.com/wtw-software/UTMConversion.git",
@@ -3197,3 +3199,4 @@
   "https://github.com/zvonicek/ImageSlideshow.git",
   "https://github.com/zweigraf/fakebundle.git"
 ]
+
