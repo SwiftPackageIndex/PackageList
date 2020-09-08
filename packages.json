@@ -3232,5 +3232,7 @@
   "https://github.com/zulip/swift-zulip-api.git",
   "https://github.com/zummenix/KeyboardNotificationsObserver.git",
   "https://github.com/zvonicek/ImageSlideshow.git",
-  "https://github.com/zweigraf/fakebundle.git"
+  "https://github.com/zweigraf/fakebundle.git",
+  "https://github.com/linhay/EmptyPage.git",
+  "https://github.com/linhay/Stem.git"
 ]
