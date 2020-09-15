@@ -243,20 +243,12 @@ func dumpPackage(atURL url: URL, completion: @escaping (Result<Data, ValidatorEr
 
     let queue = DispatchQueue(label: "process-pipe-read-queue")
     
-    let stdoutPipe: Pipe = {
-        let p = Pipe()
-        p.fileHandleForReading.readabilityHandler = { handler in
-            queue.async { stdout.append(handler.availableData) }
-        }
-        return p
-    }()
-    let stderrPipe: Pipe = {
-        let p = Pipe()
-        p.fileHandleForReading.readabilityHandler = { handler in
-            queue.async { stderr.append(handler.availableData) }
-        }
-        return p
-    }()
+    let stdoutPipe = Pipe { handler in
+        queue.async { stdout.append(handler.availableData) }
+    }
+    let stderrPipe = Pipe { handler in
+        queue.async { stderr.append(handler.availableData) }
+    }
 
     let process = dumpPackageProcessAt(url, outputTo: stdoutPipe, errorsTo: stderrPipe)
     
