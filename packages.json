@@ -2743,7 +2743,6 @@
   "https://github.com/SwifQL/VaporFluentDriver.git",
   "https://github.com/swift-aws/apigateway.git",
   "https://github.com/swift-aws/aws-sdk-swift-core.git",
-  "https://github.com/swift-aws/aws-sdk-swift.git",
   "https://github.com/swift-aws/cloudfront.git",
   "https://github.com/swift-aws/cloudwatch.git",
   "https://github.com/swift-aws/dynamodb.git",
