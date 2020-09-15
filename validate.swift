@@ -10,7 +10,7 @@ import Foundation
 
 let rawGitHubBaseURL = URLComponents(string: "https://raw.githubusercontent.com")!
 
-let existingPackageListURL = rawGitHubBaseURL.url!.appendingPathComponent("SwiftPackageIndex/PackageList/async-read-from-pipe/packages.json")
+let existingPackageListURL = rawGitHubBaseURL.url!.appendingPathComponent("SwiftPackageIndex/PackageList/main/packages.json")
 
 let timeoutIntervalForRequest = 3000.0
 let timeoutIntervalForResource = 6000.0
