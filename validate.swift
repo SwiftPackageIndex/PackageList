@@ -263,7 +263,6 @@ func dumpPackage(atURL url: URL, completion: @escaping (Result<Data, ValidatorEr
             return
         }
         
-        print("success")
         completion(.success(stdout))
     }
     
