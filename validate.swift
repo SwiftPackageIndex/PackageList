@@ -237,7 +237,6 @@ func dumpPackageProcessAt(_ packageDirectoryURL: URL, outputTo pipe: Pipe, error
 }
 
 func dumpPackage(atURL url: URL, completion: @escaping (Result<Data, ValidatorError>) -> Void) {
-
     var stdout = Data()
     var stderr = Data()
 
