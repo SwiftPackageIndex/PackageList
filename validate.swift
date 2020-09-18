@@ -237,9 +237,19 @@ func dumpPackageProcessAt(_ packageDirectoryURL: URL, outputTo pipe: Pipe, error
 }
 
 func dumpPackage(atURL url: URL, completion: @escaping (Result<Data, ValidatorError>) -> Void) {
-    let pipe = Pipe()
-    let errorPipe = Pipe()
-    let process = dumpPackageProcessAt(url, outputTo: pipe, errorsTo: errorPipe)
+    var stdout = Data()
+    var stderr = Data()
+
+    let queue = DispatchQueue(label: "process-pipe-read-queue")
+    
+    let stdoutPipe = Pipe { handler in
+        queue.async { stdout.append(handler.availableData) }
+    }
+    let stderrPipe = Pipe { handler in
+        queue.async { stderr.append(handler.availableData) }
+    }
+
+    let process = dumpPackageProcessAt(url, outputTo: stdoutPipe, errorsTo: stderrPipe)
     
     process.terminationHandler = { process in
         
@@ -247,13 +257,13 @@ func dumpPackage(atURL url: URL, completion: @escaping (Result<Data, ValidatorEr
             if process.terminationStatus == 15 {
                 completion(.failure(.dumpTimedOut))
             } else {
-                let errorDump = String(data: errorPipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8)
+                let errorDump = String(data: stderr, encoding: .utf8)
                 completion(.failure(.badPackageDump(errorDump)))
             }
             return
         }
         
-        completion(.success(pipe.fileHandleForReading.readDataToEndOfFile()))
+        completion(.success(stdout))
     }
     
     process.launch()
@@ -364,6 +374,13 @@ extension Array where Element == URL {
         }
     }
     
+}
+
+extension Pipe {
+    convenience init(readabilityHandler: ((FileHandle) -> Void)?) {
+        self.init()
+        self.fileHandleForReading.readabilityHandler = readabilityHandler
+    }
 }
 
 // MARK: - Running Code
