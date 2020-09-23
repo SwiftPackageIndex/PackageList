@@ -1838,6 +1838,7 @@
   "https://github.com/mkj-is/MKJIcons.git",
   "https://github.com/mkj-is/PathBuilder.git",
   "https://github.com/mklbtz/finch.git",
+  "https://github.com/mkrd/Swift-BigInt.git",
   "https://github.com/MLSDev/LoadableViews.git",
   "https://github.com/MLSDev/TRON.git",
   "https://github.com/mnkd/mogif.git",
@@ -3245,6 +3246,5 @@
   "https://github.com/zulip/swift-zulip-api.git",
   "https://github.com/zummenix/KeyboardNotificationsObserver.git",
   "https://github.com/zvonicek/ImageSlideshow.git",
-  "https://github.com/zweigraf/fakebundle.git",
-  "https://github.com/mkrd/Swift-BigInt.git"
+  "https://github.com/zweigraf/fakebundle.git"
 ]
