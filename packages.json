@@ -1758,6 +1758,7 @@
   "https://github.com/mcfedr/DNS.git",
   "https://github.com/mczachurski/swiftgger.git",
   "https://github.com/mdiep/Tentacle.git",
+  "https://github.com/mecid/SwiftUICharts.git",
   "https://github.com/mednoor/MNSwitchi.git",
   "https://github.com/meech-ward/focus.git",
   "https://github.com/meech-ward/observe.git",
@@ -3249,6 +3250,5 @@
   "https://github.com/zulip/swift-zulip-api.git",
   "https://github.com/zummenix/KeyboardNotificationsObserver.git",
   "https://github.com/zvonicek/ImageSlideshow.git",
-  "https://github.com/zweigraf/fakebundle.git",
-  "https://github.com/mecid/SwiftUICharts.git"
+  "https://github.com/zweigraf/fakebundle.git"
 ]
