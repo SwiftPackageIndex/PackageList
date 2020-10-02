@@ -11,11 +11,11 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-    - name: Run Script
+    - name: Run nightly script
       run: env DEVELOPER_DIR="/Applications/Xcode_12.0.app" swift nightly.swift
       env:
         GH_API_TOKEN_BASE64: ${{ secrets.GH_API_TOKEN_BASE64 }}
-    - name: Validate JSON
+    - name: Run validation script
       run: env DEVELOPER_DIR="/Applications/Xcode_12.0.app" swift validate.swift
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
