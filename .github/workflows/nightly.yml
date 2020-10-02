@@ -7,7 +7,7 @@ on:
 
 jobs:
   run_nightly:
-    runs-on: macos-latest
+    runs-on: self-hosted
     steps:
     - name: Checkout
       uses: actions/checkout@v2
