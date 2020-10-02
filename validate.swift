@@ -17,10 +17,9 @@ let timeoutIntervalForResource = 6000.0
 let httpMaximumConnectionsPerHost = 10
 let processTimeout = 50.0
 
-// When run through GitHub Actions, we get access to a GitHub Token which is a Bearer Token.
-// This enables us to get an increased rate limit of 1000 so we're less likely to see issues.
-// Learn More: https://docs.github.com/en/actions/configuring-and-managing-workflows/authenticating-with-the-github_token
-let bearerToken = ProcessInfo.processInfo.environment["GITHUB_TOKEN"]
+// We have a special Personal Access Token (PAT) which is used to increase our rate limit allowance up to 5,000 to enable
+// us to process every package.
+let bearerToken = ProcessInfo.processInfo.environment["GH_API_TOKEN"]
 
 if bearerToken == nil {
     print("Warning: Using anonymous authentication -- may run into rate limiting issues\n")

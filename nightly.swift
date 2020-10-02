@@ -20,7 +20,7 @@ let rawGitHubBaseURL = URLComponents(string: "https://raw.githubusercontent.com"
 
 // We have a special Personal Access Token (PAT) which is used to increase our rate limit allowance up to 5,000 to enable
 // us to process every package.
-let patToken = ProcessInfo.processInfo.environment["GH_API_TOKEN_BASE64"]?.trimmingCharacters(in: .whitespacesAndNewlines)
+let patToken = ProcessInfo.processInfo.environment["GH_API_TOKEN"]
 
 if patToken == nil {
     print("Warning: Using anonymous authentication -- you will quickly run into rate limiting issues\n")
@@ -105,7 +105,7 @@ func downloadSync(url: String, timeout: Int = 10) -> Result<Data, ValidatorError
     var request = URLRequest(url: apiURL)
     
     if let token = patToken, apiURL.host?.contains(SourceHost.GitHub.rawValue) == true {
-        request.addValue("Basic \(token)", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
     }
     
     let task = session.dataTask(with: request) { (data, response, error) in
