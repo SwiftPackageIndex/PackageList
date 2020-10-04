@@ -23,7 +23,7 @@ jobs:
       id: cpr
       uses: peter-evans/create-pull-request@v3
       with:
-        token: ${{ secrets.GH_API_TOKEN }}
+        token: ${{ secrets.GITHUB_TOKEN }}
         commit-message: Updated Packages
         title: '[Nightly] Updated Packages'
         body: |
