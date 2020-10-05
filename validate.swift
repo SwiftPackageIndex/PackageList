@@ -58,7 +58,7 @@ enum ValidatorError: Error {
     case timedOut
     case noData
     case networkingError(Error)
-    case decoderError(Error, String)
+    case decoderError(Error, payload: String)
     case unknownGitHost(String?)
     case fileSystemError(Error)
     case badPackageDump(String?)
@@ -167,7 +167,7 @@ func downloadJSONSync<Payload: Decodable>(url: String, timeout: Int = 10) -> Res
             return .success(try decoder.decode(Payload.self, from: data))
         } catch {
             let payload = String(decoding: data, as: UTF8.self)
-            return .failure(.decoderError(error, payload))
+            return .failure(.decoderError(error, payload: payload))
         }
     }
 }
