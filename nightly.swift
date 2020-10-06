@@ -293,6 +293,13 @@ extension Array where Element == URL {
     
 }
 
+extension Pipe {
+    convenience init(readabilityHandler: ((FileHandle) -> Void)?) {
+        self.init()
+        self.fileHandleForReading.readabilityHandler = readabilityHandler
+    }
+}
+
 // https://developer.github.com/v3/repos/#get-a-repository
 struct Repository: Decodable {
     let default_branch: String
@@ -400,9 +407,20 @@ class PackageFetcher {
 
     private func dumpPackage(atURL url: URL) -> Result<Data, ValidatorError> {
         let semaphore = DispatchSemaphore(value: 0)
-        let pipe = Pipe()
-        let errorPipe = Pipe()
-        let process = dumpPackageProcessAt(url, outputTo: pipe, errorsTo: errorPipe)
+
+        var stdout = Data()
+        var stderr = Data()
+
+        let queue = DispatchQueue(label: "process-pipe-read-queue")
+        
+        let stdoutPipe = Pipe { handler in
+            queue.async { stdout.append(handler.availableData) }
+        }
+        let stderrPipe = Pipe { handler in
+            queue.async { stderr.append(handler.availableData) }
+        }
+
+        let process = dumpPackageProcessAt(url, outputTo: stdoutPipe, errorsTo: stderrPipe)
         var result: Result<Data, ValidatorError>?
         
         process.terminationHandler = { process in
@@ -411,7 +429,7 @@ class PackageFetcher {
                 if process.terminationStatus == 15 {
                     result = .failure(.dumpTimedOut)
                 } else {
-                    let errorDump = String(data: errorPipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8)
+                    let errorDump = String(data: stderr, encoding: .utf8)
                     
                     if errorDump?.contains("using Swift tools version 3.1.0 which is no longer supported") == true {
                         result = .failure(.outdatedToolsVersion)
@@ -424,7 +442,7 @@ class PackageFetcher {
                 return
             }
             
-            result = .success(pipe.fileHandleForReading.readDataToEndOfFile())
+            result = .success(stdout)
             semaphore.signal()
         }
         
@@ -465,15 +483,19 @@ if filteredPackages.count != originalPackages.count {
 // If we 404 (Not Found) then we remove the URL from the package list. If the URL we end up on is not the same as the
 // one we have listed then we replace it with the new URL to keep our list as accurate as possible.
 do {
+    print("INFO: Checking for redirects and 404s ...")
     let tempStorage = filteredPackages
     var lastRequestDate = Date()
-    tempStorage.forEach { url in
+    tempStorage.enumerated().forEach { (idx, url) in
+        if idx % 100 == 0 {
+            print("INFO: Processing package \(idx) ...")
+        }
         
         let timeSinceLastRequest = abs(lastRequestDate.timeIntervalSinceNow)
         if timeSinceLastRequest < requestThrottleDelay {
             usleep(1000000 * useconds_t(requestThrottleDelay - timeSinceLastRequest))
         }
-        
+
         lastRequestDate = Date()
         var recursiveCount = 0
         
@@ -525,15 +547,20 @@ do {
 
 // Dependency Analysis
 //
-// We will cycle through every package, validate that we can download and dump it's Package.swift and then extract a list
+// We will cycle through every package, validate that we can download and dump its Package.swift and then extract a list
 // of every dependency it has. We will then cycle through each of those dependencies and validate those.
 //
 // The goal of this step is to identify dependenices of known packages which are themselves unknown to our list increasing
 // our coverage.
 
 do {
+    print("INFO: Starting dependency analysis ...")
     var allDependencies = Set<Dependency>()
-    filteredPackages.forEach { url in
+    filteredPackages.enumerated().forEach { (idx, url) in
+        if idx % 100 == 0 {
+            print("INFO: Processing package \(idx) ...")
+        }
+
         do {
             let fetcher = try PackageFetcher(repoURL: url)
             let package = try fetcher.fetch().get()
@@ -576,6 +603,7 @@ do {
 //
 // There's a possibility with the redirects being removed that we've now made some duplicates, let's remove them.
 do {
+    print("INFO: Removing duplicates ...")
     let tempStorage = filteredPackages
     filteredPackages = filteredPackages.removingDuplicatesAndSort()
     
@@ -601,6 +629,7 @@ try? originalPackageData.write(to: backupLocation)
 
 // Save New Changes
 do {
+    print("INFO: Saving changes ...")
     let encoder = JSONEncoder()
     encoder.outputFormatting = [ .prettyPrinted ]
     let data = try encoder.encode(filteredPackages)

@@ -58,7 +58,7 @@ enum ValidatorError: Error {
     case timedOut
     case noData
     case networkingError(Error)
-    case decoderError(Error)
+    case decoderError(Error, payload: String)
     case unknownGitHost(String?)
     case fileSystemError(Error)
     case badPackageDump(String?)
@@ -79,7 +79,9 @@ enum ValidatorError: Error {
             return "No Data Received"
         case .dumpTimedOut:
             return "Dump Timed Out"
-        case .networkingError(let error), .decoderError(let error), .fileSystemError(let error):
+        case let .decoderError(error, payload):
+            return "payload: \(payload)\n\(error.localizedDescription)"
+        case .networkingError(let error), .fileSystemError(let error):
             return error.localizedDescription
         case .unknownGitHost(let host):
             return "Unknown URL host: \(host ?? "nil")"
@@ -164,7 +166,8 @@ func downloadJSONSync<Payload: Decodable>(url: String, timeout: Int = 10) -> Res
         do {
             return .success(try decoder.decode(Payload.self, from: data))
         } catch {
-            return .failure(.decoderError(error))
+            let payload = String(decoding: data, as: UTF8.self)
+            return .failure(.decoderError(error, payload: payload))
         }
     }
 }
