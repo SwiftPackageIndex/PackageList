@@ -7,29 +7,35 @@ import Foundation
 
 enum AppError: Error {
     case invalidURL(URL)
+    case fetchTimeout(URL)
     case networkingError(Error)
     case noData(URL)
     case notFound(URL)
+    case packageDumpError(String)
+    case packageDumpTimeout
     case rateLimitExceeded(URL, reportedLimit: Int)
     case syntaxError(String)
-    case timeout(URL)
 
     var localizedDescription: String {
         switch self {
             case .invalidURL(let url):
                 return "invalid url: \(url.absoluteString)"
+            case .fetchTimeout(let url):
+                return "timeout while fetching url: \(url.absoluteString)"
             case .networkingError(let error):
                 return "networking error: \(error.localizedDescription)"
             case .noData(let url):
                 return "no data returned from url: \(url.absoluteString)"
             case .notFound(let url):
                 return "url not found (404): \(url.absoluteString)"
+            case .packageDumpError(let msg):
+                return "package dump failed: \(msg)"
+            case .packageDumpTimeout:
+                return "timeout while running `swift package dump-package`"
             case let .rateLimitExceeded(url, limit):
                 return "rate limit of \(limit) exceeded while requesting url: \(url.absoluteString)"
             case .syntaxError(let msg):
                 return msg
-            case .timeout(let url):
-                return "timeout while fetching url: \(url.absoluteString)"
         }
     }
 }
@@ -42,6 +48,12 @@ enum RunMode {
 
 // MARK: - Generic helpers
 
+extension Pipe {
+    convenience init(readabilityHandler: ((FileHandle) -> Void)?) {
+        self.init()
+        self.fileHandleForReading.readabilityHandler = readabilityHandler
+    }
+}
 
 // MARK: - Redirect handling
 
@@ -113,7 +125,7 @@ func fetch(_ url: URL, bearerToken: String? = nil, timeout: Int = 10) throws -> 
     
     switch semaphore.wait(timeout: .now() + .seconds(timeout)) {
     case .timedOut:
-        throw AppError.timeout(url)
+        throw AppError.fetchTimeout(url)
     case .success where taskError != nil:
         throw taskError!
     case .success:
@@ -160,6 +172,46 @@ func createTempDir() throws -> URL {
     return tempDir
 }
 
+func createDumpPackageProcess(at path: URL, standardOutput: Pipe, standardError: Pipe) -> Process {
+    let process = Process()
+    process.launchPath = "/usr/bin/xcrun"
+    process.arguments = ["swift", "package", "dump-package"]
+    process.currentDirectoryURL = path
+    process.standardOutput = standardOutput
+    process.standardError = standardError
+    return process
+}
+
+func runDumpPackage(at path: URL, timeout: TimeInterval = 20) throws -> Data {
+    let queue = DispatchQueue(label: "process-pipe-read-queue")
+    var stdout = Data()
+    var stderr = Data()
+    let stdoutPipe = Pipe { handler in
+        queue.async { stdout.append(handler.availableData) }
+    }
+    let stderrPipe = Pipe { handler in
+        queue.async { stderr.append(handler.availableData) }
+    }
+
+    let process = createDumpPackageProcess(at: path, standardOutput: stdoutPipe, standardError: stderrPipe)
+    
+    DispatchQueue.main.asyncAfter(deadline: .now() + timeout) {
+        if process.isRunning { process.terminate() }
+    }
+    process.launch()
+    process.waitUntilExit()
+    
+    switch process.terminationStatus {
+        case 0:
+            return stdout
+        case 15:
+            throw AppError.packageDumpTimeout
+        default:
+            let error = String(data: stderr, encoding: .utf8) ?? "(nil)"
+            throw AppError.packageDumpError(error)
+    }
+}
+
 func dumpPackage(url: URL) throws -> Data {
     let manifestURL = try getManifestURL(url)
     let manifest = try fetch(manifestURL)
@@ -168,14 +220,14 @@ func dumpPackage(url: URL) throws -> Data {
     let fileURL = tempDir.appendingPathComponent("Package.swift")
     try manifest.write(to: fileURL)
 
-    print(fileURL.absoluteString)
     // swift dump package
-    return Data()
+    return try runDumpPackage(at: tempDir)
 }
 
 func verifyURL(_ url: URL) throws {
     print("verify: \(url.absoluteString)")
     let data = try dumpPackage(url: url)
+    print(String(data: data, encoding: .utf8)!)
     // decode data
     // check for product count
 }
