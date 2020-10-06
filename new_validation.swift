@@ -10,6 +10,7 @@ enum AppError: Error {
     case fetchTimeout(URL)
     case networkingError(Error)
     case noData(URL)
+    case noProducts(URL)
     case notFound(URL)
     case packageDumpError(String)
     case packageDumpTimeout
@@ -26,6 +27,8 @@ enum AppError: Error {
                 return "networking error: \(error.localizedDescription)"
             case .noData(let url):
                 return "no data returned from url: \(url.absoluteString)"
+            case .noProducts(let url):
+                return "package has not products: \(url.absoluteString)"
             case .notFound(let url):
                 return "url not found (404): \(url.absoluteString)"
             case .packageDumpError(let msg):
@@ -43,6 +46,15 @@ enum AppError: Error {
 enum RunMode {
     case processURL(URL)
     case processPackageList
+}
+
+struct Product: Decodable {
+    let name: String
+}
+
+struct Package: Decodable {
+    let name: String
+    let products: [Product]
 }
 
 
@@ -212,7 +224,7 @@ func runDumpPackage(at path: URL, timeout: TimeInterval = 20) throws -> Data {
     }
 }
 
-func dumpPackage(url: URL) throws -> Data {
+func dumpPackage(url: URL) throws -> Package {
     let manifestURL = try getManifestURL(url)
     let manifest = try fetch(manifestURL)
     
@@ -220,16 +232,15 @@ func dumpPackage(url: URL) throws -> Data {
     let fileURL = tempDir.appendingPathComponent("Package.swift")
     try manifest.write(to: fileURL)
 
-    // swift dump package
-    return try runDumpPackage(at: tempDir)
+    let json = try runDumpPackage(at: tempDir)
+    return try JSONDecoder().decode(Package.self, from: json)
 }
 
 func verifyURL(_ url: URL) throws {
-    print("verify: \(url.absoluteString)")
-    let data = try dumpPackage(url: url)
-    print(String(data: data, encoding: .utf8)!)
-    // decode data
-    // check for product count
+    let pkg = try dumpPackage(url: url)
+    guard !pkg.products.isEmpty else {
+        throw AppError.noProducts(url)
+    }
 }
 
 func processURL(_ url: URL) throws {
@@ -248,6 +259,7 @@ func main(args: [String]) throws {
         case .processPackageList:
             processPackageList()
     }
+    print("✅ validation succeeded")
     exit(EXIT_SUCCESS)
 }
 
