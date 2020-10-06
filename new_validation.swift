@@ -6,10 +6,13 @@ import Foundation
 // MARK: - Type declarations
 
 enum AppError: Error {
+    case invalidURL(URL)
     case syntaxError(String)
 
     var localizedDescription: String {
         switch self {
+            case .invalidURL(let url):
+                return "invalid url: \(url.absoluteString)"
             case .syntaxError(let msg):
                 return msg
         }
@@ -29,7 +32,10 @@ enum RunMode {
 
 class RedirectFollower: NSObject, URLSessionDataDelegate {
     var lastURL: URL?
-    
+    init(initialURL: URL) {
+        self.lastURL = initialURL
+    }
+
     func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
         lastURL = request.url ?? lastURL
         completionHandler(request)
@@ -40,7 +46,7 @@ extension URL {
     func followingRedirects(timeout: TimeInterval = 30) -> URL? {
         let semaphore = DispatchSemaphore(value: 0)
         
-        let follower = RedirectFollower()
+        let follower = RedirectFollower(initialURL: self)
         let session = URLSession(configuration: .default, delegate: follower, delegateQueue: nil)
         
         let task = session.dataTask(with: self) { (_, response, error) in
@@ -66,9 +72,14 @@ func parseArgs(_ args: [String]) throws -> RunMode {
     return .processURL(url)
 }
 
-func processURL(_ url: URL) {
-    let resolvedURL = url.followingRedirects()
-    print(resolvedURL!.absoluteString)
+func verifyURL(_ url: URL) {
+
+    print(url.absoluteString)
+}
+
+func processURL(_ url: URL) throws {
+    guard let resolvedURL = url.followingRedirects() else { throw AppError.invalidURL(url) }
+    verifyURL(resolvedURL)
 }
 
 func processPackageList() {
@@ -78,7 +89,7 @@ func processPackageList() {
 func main(args: [String]) throws {
     switch try parseArgs(args) {
         case .processURL(let url):
-            processURL(url)
+            try processURL(url)
         case .processPackageList:
             processPackageList()
     }
