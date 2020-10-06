@@ -2,6 +2,11 @@
 
 import Foundation
 
+// MARK: - Constants
+
+enum Constants {
+    static let githubPackageListURL = URL(string: "https://raw.githubusercontent.com/SwiftPackageIndex/PackageList/main/packages.json")!
+}
 
 // MARK: - Type declarations
 
@@ -236,28 +241,82 @@ func dumpPackage(url: URL) throws -> Package {
     return try JSONDecoder().decode(Package.self, from: json)
 }
 
-func verifyURL(_ url: URL) throws {
-    let pkg = try dumpPackage(url: url)
+func verifyURL(_ url: URL) throws -> URL {
+    guard let resolvedURL = url.followingRedirects() else { throw AppError.invalidURL(url) }
+    let pkg = try dumpPackage(url: resolvedURL)
     guard !pkg.products.isEmpty else {
         throw AppError.noProducts(url)
     }
+    return resolvedURL
 }
 
-func processURL(_ url: URL) throws {
-    guard let resolvedURL = url.followingRedirects() else { throw AppError.invalidURL(url) }
-    try verifyURL(resolvedURL)
+func fetchGithubPackageList() throws -> [URL] {
+    let json = try fetch(Constants.githubPackageListURL)
+    return try JSONDecoder().decode([URL].self, from: json)
 }
 
-func processPackageList() {
-    fatalError("not implemented")
+func processPackageList() throws -> [String] {
+    var changes = [String]()
+    let onlinePackageList = try fetchGithubPackageList()
+    let packageListFileURL = URL(fileURLWithPath: FileManager.default.currentDirectoryPath, isDirectory: true).appendingPathComponent("packages.json")
+    let packageListData = try Data(contentsOf: packageListFileURL)
+    let localPackageList = try JSONDecoder().decode([URL].self, from: packageListData)
+
+    if localPackageList.count != Set(localPackageList).count {
+        changes.append("The packages.json file contained duplicate rows")
+    }
+
+    let new = try Set(localPackageList)
+        .subtracting(Set(onlinePackageList))
+        .map { try verifyURL($0) }
+        .map { url in
+            url.absoluteString.hasSuffix(".git")
+            ? url
+            : url.appendingPathExtension("git")
+        }
+    // FIXME: make diff case-insensitive
+    let additions = Set(new).subtracting(Set(onlinePackageList))
+    let removals = Set(onlinePackageList).subtracting(Set(localPackageList))
+
+    let newList = Array(
+            Set(onlinePackageList)
+                .subtracting(removals)
+                .union(additions)
+        )
+        .map(\.absoluteString)
+        .sorted { $0.lowercased() < $1.lowercased() }
+
+    additions.forEach { changes.append("ADDED   \($0)") }
+    removals.forEach { changes.append("REMOVED \($0)") }
+
+    if !changes.isEmpty {
+        let backupURL = packageListFileURL.deletingLastPathComponent()
+            .appendingPathComponent("packages.backup.json")
+        try packageListData.write(to: backupURL)
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .withoutEscapingSlashes]
+        let data = try encoder.encode(newList)
+        try data.write(to: packageListFileURL)
+    }
+
+    return changes
 }
 
 func main(args: [String]) throws {
     switch try parseArgs(args) {
         case .processURL(let url):
-            try processURL(url)
+            let resolvedURL = try verifyURL(url)
+            if resolvedURL.absoluteString != url.absoluteString {
+                print("ℹ️  package moved: \(url) -> \(resolvedURL)")
+            }
         case .processPackageList:
-            processPackageList()
+            let changes = try processPackageList()
+            if !changes.isEmpty {
+                print("ℹ️  Changes:")
+            }
+            changes.forEach {
+                print("- \($0)")
+            }
     }
     print("✅ validation succeeded")
     exit(EXIT_SUCCESS)
