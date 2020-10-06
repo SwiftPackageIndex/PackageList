@@ -153,10 +153,22 @@ func getManifestURL(_ url: URL) throws -> URL {
     return URL(string: "https://raw.githubusercontent.com/\(owner)/\(repository)/\(defaultBranch)/Package.swift")!
 }
 
+func createTempDir() throws -> URL {
+    let fm = FileManager.default
+    let tempDir = fm.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+    try fm.createDirectory(at: tempDir, withIntermediateDirectories: false, attributes: nil)
+    return tempDir
+}
+
 func dumpPackage(url: URL) throws -> Data {
     let manifestURL = try getManifestURL(url)
-    print("manifest: \(manifestURL)")
-    // download package
+    let manifest = try fetch(manifestURL)
+    
+    let tempDir = try createTempDir()
+    let fileURL = tempDir.appendingPathComponent("Package.swift")
+    try manifest.write(to: fileURL)
+
+    print(fileURL.absoluteString)
     // swift dump package
     return Data()
 }
