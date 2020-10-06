@@ -7,14 +7,29 @@ import Foundation
 
 enum AppError: Error {
     case invalidURL(URL)
+    case networkingError(Error)
+    case noData(URL)
+    case notFound(URL)
+    case rateLimitExceeded(URL, reportedLimit: Int)
     case syntaxError(String)
+    case timeout(URL)
 
     var localizedDescription: String {
         switch self {
             case .invalidURL(let url):
                 return "invalid url: \(url.absoluteString)"
+            case .networkingError(let error):
+                return "networking error: \(error.localizedDescription)"
+            case .noData(let url):
+                return "no data returned from url: \(url.absoluteString)"
+            case .notFound(let url):
+                return "url not found (404): \(url.absoluteString)"
+            case let .rateLimitExceeded(url, limit):
+                return "rate limit of \(limit) exceeded while requesting url: \(url.absoluteString)"
             case .syntaxError(let msg):
                 return msg
+            case .timeout(let url):
+                return "timeout while fetching url: \(url.absoluteString)"
         }
     }
 }
@@ -60,6 +75,54 @@ extension URL {
     }
 }
 
+
+// MARK: - Networking
+
+
+func fetch(_ url: URL, bearerToken: String? = nil, timeout: Int = 10) throws -> Data {
+    var request = URLRequest(url: url)
+    
+    if let token = bearerToken {
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+    }
+    
+    let semaphore = DispatchSemaphore(value: 0)
+    
+    var payload: Data?
+    var taskError: AppError?
+    
+    let session = URLSession(configuration: .default)
+    let task = session.dataTask(with: request) { (data, response, error) in
+        let httpResponse = response as? HTTPURLResponse
+        
+        if let limit = httpResponse?.value(forHTTPHeaderField: "X-RateLimit-Limit").flatMap(Int.init),
+           let remaining = httpResponse?.value(forHTTPHeaderField: "X-RateLimit-Remaining").flatMap(Int.init),
+           remaining == 0 {
+            taskError = .rateLimitExceeded(url, reportedLimit: limit)
+        } else if httpResponse?.statusCode == 404 {
+            taskError = .notFound(url)
+        } else if let error = error {
+            taskError = .networkingError(error)
+        }
+        
+        payload = data
+        semaphore.signal()
+    }
+    
+    task.resume()
+    
+    switch semaphore.wait(timeout: .now() + .seconds(timeout)) {
+    case .timedOut:
+        throw AppError.timeout(url)
+    case .success where taskError != nil:
+        throw taskError!
+    case .success:
+        guard let payload = payload else { throw AppError.noData(url) }
+        return payload
+    }
+}
+
+
 // MARK: - Script logic
 
 func parseArgs(_ args: [String]) throws -> RunMode {
@@ -72,14 +135,42 @@ func parseArgs(_ args: [String]) throws -> RunMode {
     return .processURL(url)
 }
 
-func verifyURL(_ url: URL) {
+func getDefaultBranch(owner: String, repository: String) throws -> String {
+    let url = URL(string: "https://api.github.com/repos/\(owner)/\(repository)")!
+    let json = try fetch(url)
 
-    print(url.absoluteString)
+    struct Repository: Decodable {
+        let default_branch: String
+    }
+
+    return try JSONDecoder().decode(Repository.self, from: json).default_branch
+}
+
+func getManifestURL(_ url: URL) throws -> URL {
+    let repository = url.deletingPathExtension().lastPathComponent
+    let owner = url.deletingLastPathComponent().lastPathComponent    
+    let defaultBranch = try getDefaultBranch(owner: owner, repository: repository)
+    return URL(string: "https://raw.githubusercontent.com/\(owner)/\(repository)/\(defaultBranch)/Package.swift")!
+}
+
+func dumpPackage(url: URL) throws -> Data {
+    let manifestURL = try getManifestURL(url)
+    print("manifest: \(manifestURL)")
+    // download package
+    // swift dump package
+    return Data()
+}
+
+func verifyURL(_ url: URL) throws {
+    print("verify: \(url.absoluteString)")
+    let data = try dumpPackage(url: url)
+    // decode data
+    // check for product count
 }
 
 func processURL(_ url: URL) throws {
     guard let resolvedURL = url.followingRedirects() else { throw AppError.invalidURL(url) }
-    verifyURL(resolvedURL)
+    try verifyURL(resolvedURL)
 }
 
 func processPackageList() {
