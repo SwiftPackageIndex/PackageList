@@ -13,6 +13,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
     - name: Validate JSON
-      run: env DEVELOPER_DIR="/Applications/Xcode_12.app" xcrun swift validate.swift
+      run: xcrun swift validate.swift
       env:
-        GH_API_TOKEN: ${{ secrets.GH_API_TOKEN }}
+        DEVELOPER_DIR: /Applications/Xcode_12.app
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
