@@ -7,6 +7,17 @@ on:
     branches: [ main ]
 
 jobs:
+  new validation:
+    runs-on: macos-latest
+    continue-on-error: true
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Validate JSON (new)
+      run: xcrun swift new_validate.swift
+      env:
+        DEVELOPER_DIR: /Applications/Xcode_12.app
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   validate:
     runs-on: macos-latest
     steps:
