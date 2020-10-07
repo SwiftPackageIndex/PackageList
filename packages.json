@@ -217,6 +217,7 @@
   "https://github.com/apple/swift-se0270-range-set.git",
   "https://github.com/apple/swift-statsd-client.git",
   "https://github.com/apple/swift-syntax.git",
+  "https://github.com/apple/swift-system.git",
   "https://github.com/apple/swift-tools-support-async.git",
   "https://github.com/apple/swift-tools-support-core.git",
   "https://github.com/apple/swiftpm-on-llbuild2.git",
