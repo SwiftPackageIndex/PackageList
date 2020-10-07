@@ -19,7 +19,7 @@ let processTimeout = 50.0
 
 // We have a special Personal Access Token (PAT) which is used to increase our rate limit allowance up to 5,000 to enable
 // us to process every package.
-let bearerToken = ProcessInfo.processInfo.environment["GH_API_TOKEN"]
+let bearerToken = ProcessInfo.processInfo.environment["GITHUB_TOKEN"]
 
 if bearerToken == nil {
     print("Warning: Using anonymous authentication -- may run into rate limiting issues\n")
@@ -230,8 +230,8 @@ func downloadPackage(url: URL) -> Result<URL, ValidatorError> {
 
 func dumpPackageProcessAt(_ packageDirectoryURL: URL, outputTo pipe: Pipe, errorsTo errorPipe: Pipe) -> Process {
     let process = Process()
-    process.launchPath = "/usr/bin/swift"
-    process.arguments = ["package", "dump-package"]
+    process.launchPath = "/usr/bin/xcrun"
+    process.arguments = ["swift", "package", "dump-package"]
     process.currentDirectoryURL = packageDirectoryURL
     process.standardOutput = pipe
     process.standardError = errorPipe
