@@ -62,7 +62,6 @@ struct Package: Decodable {
     let products: [Product]
 }
 
-
 // MARK: - Generic helpers
 
 extension Pipe {
@@ -104,9 +103,7 @@ extension URL {
     }
 }
 
-
 // MARK: - Networking
-
 
 func fetch(_ url: URL, bearerToken: String? = nil, timeout: Int = 10) throws -> Data {
     var request = URLRequest(url: url)
@@ -151,6 +148,41 @@ func fetch(_ url: URL, bearerToken: String? = nil, timeout: Int = 10) throws -> 
     }
 }
 
+// MARK: - Script specific extensions
+
+extension String {
+    func removingGitExtension() -> String {
+        let suffix = ".git"
+        if lowercased().hasSuffix(suffix) {
+            return String(dropLast(suffix.count))
+        }
+        return self
+    }
+}
+
+extension URL {
+    func removingGitExtension() -> URL {
+        guard absoluteString.hasSuffix(".git") else { return self }
+        return URL(string: absoluteString.removingGitExtension())!
+    }
+
+    func normalized() -> String {
+        let str = absoluteString.lowercased()
+        return str.hasSuffix(".git") ? str : str + ".git"
+    }
+}
+
+extension Set where Element == URL {
+    func normalized() -> Set<String> {
+        Set<String>(map { $0.normalized() })
+    }
+}
+
+extension Array where Element == URL {
+    func normalized() -> Set<String> {
+        Set<String>(map { $0.normalized() })
+    }
+}
 
 // MARK: - Script logic
 
@@ -262,41 +294,51 @@ func processPackageList() throws -> [String] {
     let packageListData = try Data(contentsOf: packageListFileURL)
     let localPackageList = try JSONDecoder().decode([URL].self, from: packageListData)
 
-    if localPackageList.count != Set(localPackageList).count {
+    let normalizedOnlineList = onlinePackageList.normalized()
+    let normalizedLocalList = localPackageList.normalized()
+
+    if localPackageList.count != normalizedLocalList.count {
         changes.append("The packages.json file contained duplicate rows")
     }
 
-    let new = try Set(localPackageList)
-        .subtracting(Set(onlinePackageList))
+    let additions = try localPackageList
+        .filter { !normalizedOnlineList.contains($0.absoluteString.lowercased()) }
         .map { try verifyURL($0) }
         .map { url in
             url.absoluteString.hasSuffix(".git")
-            ? url
-            : url.appendingPathExtension("git")
+            ? url : url.appendingPathExtension("git")
         }
-    // FIXME: make diff case-insensitive
-    let additions = Set(new).subtracting(Set(onlinePackageList))
-    let removals = Set(onlinePackageList).subtracting(Set(localPackageList))
+        .filter {
+            // filter again, in case a redirect happens to be in the list already
+            !normalizedOnlineList.contains($0.absoluteString.lowercased())
+        }
 
-    let newList = Array(
-            Set(onlinePackageList)
-                .subtracting(removals)
-                .union(additions)
-        )
-        .map(\.absoluteString)
-        .sorted { $0.lowercased() < $1.lowercased() }
+    let removals = normalizedOnlineList
+        .filter { !normalizedLocalList.contains($0) }
 
     additions.forEach { changes.append("ADDED   \($0)") }
     removals.forEach { changes.append("REMOVED \($0)") }
 
-    if !changes.isEmpty {
+    let newList = (
+            onlinePackageList
+                .filter { !removals.contains($0.normalized()) }
+            + additions
+        )
+        .map(\.absoluteString)
+        .sorted { $0.lowercased() < $1.lowercased() }
+    let newListData: Data = try {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .withoutEscapingSlashes]
+        return try encoder.encode(newList)
+    }()
+
+    if packageListData != newListData {
+        print("⚠️  Changes have been made to 'packages.json'. Your original version has been")
+        print("⚠️  copied to 'package.backup.json'. Please commit the updated file.")
         let backupURL = packageListFileURL.deletingLastPathComponent()
             .appendingPathComponent("packages.backup.json")
         try packageListData.write(to: backupURL)
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = [.prettyPrinted, .withoutEscapingSlashes]
-        let data = try encoder.encode(newList)
-        try data.write(to: packageListFileURL)
+        try newListData.write(to: packageListFileURL)
     }
 
     return changes
@@ -321,27 +363,6 @@ func main(args: [String]) throws {
     print("✅ validation succeeded")
     exit(EXIT_SUCCESS)
 }
-
-
-// MARK: - Script specific extensions
-
-extension String {
-    func removingGitExtension() -> String {
-        let suffix = ".git"
-        if lowercased().hasSuffix(suffix) {
-            return String(dropLast(suffix.count))
-        }
-        return self
-    }
-}
-
-extension URL {
-    func removingGitExtension() -> URL {
-        guard absoluteString.hasSuffix(".git") else { return self }
-        return URL(string: absoluteString.removingGitExtension())!
-    }
-}
-
 
 // MARK: - main
 
