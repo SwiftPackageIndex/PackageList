@@ -19,6 +19,7 @@ jobs:
         chmod +x validator
         ./validator check-redirects --use-package-list -o packages.json
         cat packages.json
+        rm validator  # prevent it from appearing in the PR
 
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
