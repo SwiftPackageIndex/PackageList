@@ -17,8 +17,8 @@ jobs:
       run: |
         curl -s -O "https://raw.githubusercontent.com/SwiftPackageIndex/Validator/main/validator"
         chmod +x validator
-        # ./validator check-redirects --use-package-list -o packages.json
-        ./validator check-dependencies --use-package-list -o packages.json -l 10
+        ./validator check-redirects --use-package-list -o packages.json -l 10
+        # ./validator check-dependencies --use-package-list -o packages.json -l 10
         cat packages.json
         rm validator  # prevent it from appearing in the PR
 
