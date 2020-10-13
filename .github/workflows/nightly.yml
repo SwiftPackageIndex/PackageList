@@ -15,9 +15,9 @@ jobs:
 
     - name: Check redirects
       run: |
-        curl -O "https://raw.githubusercontent.com/SwiftPackageIndex/Validator/main/validator"
+        curl -s -O "https://raw.githubusercontent.com/SwiftPackageIndex/Validator/main/validator"
         chmod +x validator
-        ./validator check-redirects --use-package-list -o packages.json -l 10
+        ./validator check-redirects --use-package-list -o packages.json
         cat packages.json
 
       env:
