@@ -9,6 +9,7 @@ on:
 jobs:
   run_nightly:
     runs-on: self-hosted
+    timeout-minutes: 240
     steps:
     - name: Checkout
       uses: actions/checkout@v2
