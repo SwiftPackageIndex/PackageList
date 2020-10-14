@@ -17,9 +17,8 @@ jobs:
       run: |
         curl -s -O "https://raw.githubusercontent.com/SwiftPackageIndex/Validator/main/validator"
         chmod +x validator
-        ./validator check-redirects --use-package-list -o packages.json
-        # ./validator check-dependencies -i package.json -o packages.json
-        # cat packages.json
+        # ./validator check-redirects -i packages.json -o packages.json
+        ./validator check-dependencies -i packages.json -o packages.json
         rm validator  # prevent binary from appearing in the PR
 
       env:
