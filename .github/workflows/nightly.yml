@@ -23,6 +23,7 @@ jobs:
         rm validator  # prevent binary from appearing in the PR
 
       env:
+        DEVELOPER_DIR: /Applications/Xcode_12.app
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Create Pull Request
