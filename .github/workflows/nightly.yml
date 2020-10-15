@@ -8,19 +8,21 @@ on:
 
 jobs:
   run_nightly:
-    runs-on: macos-latest
-    # timeout-minutes: 240
+    runs-on: self-hosted
+    timeout-minutes: 240
     steps:
     - name: Checkout
       uses: actions/checkout@v2
 
     - name: Check
+      timeout-minutes: 240
       run: |
+        rm -f ./validator
         curl -s -O "https://raw.githubusercontent.com/SwiftPackageIndex/Validator/main/validator"
-        chmod +x validator
+        chmod +x ./validator
+        ./validator --version
         # ./validator check-redirects -i packages.json -o packages.json
-        # ./validator check-dependencies -i packages.json -o packages.json
-        ./validator check-dependencies https://github.com/fermoya/SwiftUIPager
+        ./validator check-dependencies -i packages.json -o packages.json
         rm validator  # prevent binary from appearing in the PR
       env:
         DEVELOPER_DIR: /Applications/Xcode_12.app
