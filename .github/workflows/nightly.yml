@@ -8,40 +8,38 @@ on:
 
 jobs:
   run_nightly:
-    runs-on: self-hosted
-    timeout-minutes: 240
+    runs-on: macos-latest
     steps:
     - name: Checkout
       uses: actions/checkout@v2
 
-    - name: Check
-      timeout-minutes: 240
+    - name: Run checks
+      env:
+        DEVELOPER_DIR: /Applications/Xcode_12.app
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         rm -f ./validator
         curl -s -O "https://raw.githubusercontent.com/SwiftPackageIndex/Validator/main/validator"
         chmod +x ./validator
         ./validator --version
-        # ./validator check-redirects -i packages.json -o packages.json
+        ./validator check-redirects -i packages.json -o packages.json
         ./validator check-dependencies -i packages.json -o packages.json
         rm validator  # prevent binary from appearing in the PR
-      env:
-        DEVELOPER_DIR: /Applications/Xcode_12.app
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    # - name: Create Pull Request
-    #   id: cpr
-    #   uses: peter-evans/create-pull-request@v3
-    #   with:
-    #     token: ${{ secrets.GITHUB_TOKEN }}
-    #     commit-message: Updated Packages
-    #     title: '[Nightly] Updated Packages'
-    #     body: |
-    #       :robot: This is an automated change
+    - name: Create Pull Request
+      id: cpr
+      uses: peter-evans/create-pull-request@v3
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: Updated Packages
+        title: '[Nightly] Updated Packages'
+        body: |
+          :robot: This is an automated change
           
-    #       - Removed any redirects
-    #       - Removed any duplicates
-    #       - Removed any deleted repositories
-    #       - Added any unknown dependencies
+          - Removed any redirects
+          - Removed any duplicates
+          - Removed any deleted repositories
+          - Added any unknown dependencies
 
-    # - name: Check outputs
-    #   run: echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
+    - name: Check outputs
+      run: echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
