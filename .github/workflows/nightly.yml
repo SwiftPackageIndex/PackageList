@@ -22,6 +22,10 @@ jobs:
         chmod +x ./validator
         ./validator --version
         ./validator check-redirects -i packages.json -o packages.json
+        echo
+        echo packages.json diff:
+        git diff packages.json
+        echo
         ./validator check-dependencies -i packages.json -o packages.json
         rm validator  # prevent binary from appearing in the PR
 
