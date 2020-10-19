@@ -22,7 +22,7 @@ jobs:
         curl -s -O "https://raw.githubusercontent.com/SwiftPackageIndex/Validator/new-redirect/validator"
         chmod +x ./validator
         ./validator --version
-        ./validator check-redirects -i packages.json -o packages.json --verbose
+        ./validator check-redirects -i packages.json -o packages.json
         echo
         echo packages.json diff:
         git diff packages.json
