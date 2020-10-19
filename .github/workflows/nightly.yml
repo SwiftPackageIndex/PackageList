@@ -19,7 +19,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         rm -f ./validator
-        curl -s -O "https://raw.githubusercontent.com/SwiftPackageIndex/Validator/main/validator"
+        curl -s -O "https://raw.githubusercontent.com/SwiftPackageIndex/Validator/new-redirect/validator"
         chmod +x ./validator
         ./validator --version
         ./validator check-redirects -i packages.json -o packages.json --verbose
