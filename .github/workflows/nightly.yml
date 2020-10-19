@@ -22,13 +22,12 @@ jobs:
         curl -s -O "https://raw.githubusercontent.com/SwiftPackageIndex/Validator/main/validator"
         chmod +x ./validator
         ./validator --version
-        ./validator check-redirects -i packages.json -o packages.json
+        ./validator check-redirects -i packages.json -o packages.json --verbose
         echo
         echo packages.json diff:
         git diff packages.json
         echo
         # ./validator check-dependencies -i packages.json -o packages.json
-        rm validator  # prevent binary from appearing in the PR
 
     # - name: Create Pull Request
     #   id: cpr
