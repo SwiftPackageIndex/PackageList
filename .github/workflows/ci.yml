@@ -15,7 +15,12 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
     - name: Validate JSON (new)
-      run: xcrun swift .validate-new.swift
+      run: |
+        xcrun swift .validate-new.swift
+        echo
+        echo packages.json diff:
+        git diff packages.json
+        echo
       env:
         DEVELOPER_DIR: /Applications/Xcode_12.app
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
