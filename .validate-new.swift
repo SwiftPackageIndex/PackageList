@@ -81,6 +81,7 @@ class RedirectFollower: NSObject, URLSessionDataDelegate {
 
     func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
         lastURL = request.url ?? lastURL
+        // FIXME: port 404 and 429 handling from PackageList/Validator
         completionHandler(request)
     }
 }
