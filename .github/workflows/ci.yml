@@ -8,7 +8,7 @@ on:
 
 jobs:
 
-  new validation:
+  validate-new:
     runs-on: macos-latest
     continue-on-error: true
     steps:
@@ -19,7 +19,7 @@ jobs:
       env:
         DEVELOPER_DIR: /Applications/Xcode_12.app
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        
+
   validate:
     runs-on: macos-latest
     steps:
