@@ -6,6 +6,7 @@ import Foundation
 
 enum Constants {
     static let githubPackageListURL = URL(string: "https://raw.githubusercontent.com/SwiftPackageIndex/PackageList/main/packages.json")!
+    static let githubToken = ProcessInfo.processInfo.environment["GITHUB_TOKEN"]
 }
 
 // MARK: - Type declarations
@@ -106,10 +107,10 @@ extension URL {
 
 // MARK: - Networking
 
-func fetch(_ url: URL, bearerToken: String? = nil, timeout: Int = 10) throws -> Data {
+func fetch(_ url: URL, timeout: Int = 10) throws -> Data {
     var request = URLRequest(url: url)
     
-    if let token = bearerToken {
+    if let token = Constants.githubToken {
         request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
     }
     
@@ -346,6 +347,10 @@ func processPackageList() throws -> [String] {
 }
 
 func main(args: [String]) throws {
+    if Constants.githubToken == nil {
+        print("Warning: Using anonymous authentication -- may run into rate limiting issues\n")
+    }
+
     switch try parseArgs(args) {
         case .processURL(let url):
             let resolvedURL = try verifyURL(url)
