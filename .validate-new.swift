@@ -1,5 +1,33 @@
 #!/usr/bin/env swift
 
+/*
+
+Removed from `ci.yml` as this script was failing, timing out fetching details for the
+NWWebSocket package even when that package is not being validated. The error was:
+
+ERROR: timeout while fetching url: https://api.github.com/repos/pusher/NWWebSocket
+
+It was being run in CI with:
+
+  validate-new:
+    runs-on: macos-latest
+    continue-on-error: true
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Validate JSON (new)
+      run: |
+        xcrun swift .validate-new.swift
+        echo
+        echo packages.json diff:
+        git diff packages.json
+        echo
+      env:
+        DEVELOPER_DIR: /Applications/Xcode_12.app
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+*/
+
 import Foundation
 
 // MARK: - Constants
