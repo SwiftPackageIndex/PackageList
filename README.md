@@ -21,7 +21,7 @@ If you would prefer to validate the requirements manually, please verify that:
 * The package repositories are all publicly accessible.
 * The packages all contain a `Package.swift` file in the root folder.
 * The packages are written in Swift 4.0 or later.
-* The packages all contain at least one product (either library or executable), and that product must be usable in other Swift apps.
+* The packages all contain at least one product (either library or executable), and at least one product must be usable in other Swift apps.
 * The packages all have at least one release tagged as a [semantic version](https://semver.org/).
 * The packages all output valid JSON from `swift package dump-package` with the latest Swift toolchain.
 * The package URLs are all fully specified including the protocol (usually `https`) and the `.git` extension.
