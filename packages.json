@@ -2300,6 +2300,8 @@
   "https://github.com/pnre/sketching.git",
   "https://github.com/poetmountain/MotionMachine.git",
   "https://github.com/pointfreeco/combine-schedulers.git",
+  "https://github.com/pointfreeco/composable-core-location.git",
+  "https://github.com/pointfreeco/composable-core-motion.git",
   "https://github.com/pointfreeco/swift-case-paths.git",
   "https://github.com/pointfreeco/swift-composable-architecture.git",
   "https://github.com/pointfreeco/swift-enum-properties.git",
