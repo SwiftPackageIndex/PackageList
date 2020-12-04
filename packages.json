@@ -209,6 +209,7 @@
   "https://github.com/apple/swift-atomics.git",
   "https://github.com/apple/swift-corelibs-xctest.git",
   "https://github.com/apple/swift-crypto.git",
+  "https://github.com/apple/swift-distributed-tracing.git",
   "https://github.com/apple/swift-driver.git",
   "https://github.com/apple/swift-format.git",
   "https://github.com/apple/swift-llbuild.git",
