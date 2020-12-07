@@ -979,6 +979,8 @@
   "https://github.com/finestructure/Gala.git",
   "https://github.com/finestructure/Parser.git",
   "https://github.com/finestructure/Rester.git",
+  "https://github.com/finestructure/swift-test-pkg-1.git",
+  "https://github.com/finestructure/swift-test-pkg-2.git",
   "https://github.com/finestructure/ValueCodable.git",
   "https://github.com/firebase/abseil-cpp-SwiftPM.git",
   "https://github.com/firebase/boringssl-SwiftPM.git",
