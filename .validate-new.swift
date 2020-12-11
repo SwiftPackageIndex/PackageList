@@ -181,6 +181,10 @@ func fetch(_ url: URL, timeout: Int = 10) throws -> Data {
 // MARK: - Script specific extensions
 
 extension String {
+    func addingGitExtension() -> String {
+        hasSuffix(".git") ? self : self + ".git"
+    }
+
     func removingGitExtension() -> String {
         let suffix = ".git"
         if lowercased().hasSuffix(suffix) {
@@ -188,17 +192,23 @@ extension String {
         }
         return self
     }
+
+    func normalized() -> String {
+        lowercased().addingGitExtension()
+    }
 }
 
 extension URL {
+    func appendingGitExtension() -> URL {
+        absoluteString.hasSuffix(".git") ? self : appendingPathExtension("git")
+    }
+
     func removingGitExtension() -> URL {
-        guard absoluteString.hasSuffix(".git") else { return self }
-        return URL(string: absoluteString.removingGitExtension())!
+        URL(string: absoluteString.removingGitExtension())!
     }
 
     func normalized() -> String {
-        let str = absoluteString.lowercased()
-        return str.hasSuffix(".git") ? str : str + ".git"
+        absoluteString.lowercased().addingGitExtension()
     }
 }
 
@@ -209,6 +219,12 @@ extension Set where Element == URL {
 }
 
 extension Array where Element == URL {
+    func normalized() -> Set<String> {
+        Set<String>(map { $0.normalized() })
+    }
+}
+
+extension Array where Element == String {
     func normalized() -> Set<String> {
         Set<String>(map { $0.normalized() })
     }
@@ -317,9 +333,16 @@ func fetchGithubPackageList() throws -> [URL] {
     return try JSONDecoder().decode([URL].self, from: json)
 }
 
-func processPackageList() throws -> [String] {
-    var changes = [String]()
+func processPackageList() throws {
+    print("Processing package list ...")
     let onlinePackageList = try fetchGithubPackageList()
+        .map { url -> URL in
+            let updated = url.appendingGitExtension()
+            if updated != url {
+                print("→ \(url.lastPathComponent) -> \(updated.lastPathComponent)")
+            }
+            return updated
+        }
     let packageListFileURL = URL(fileURLWithPath: FileManager.default.currentDirectoryPath, isDirectory: true).appendingPathComponent("packages.json")
     let packageListData = try Data(contentsOf: packageListFileURL)
     let localPackageList = try JSONDecoder().decode([URL].self, from: packageListData)
@@ -328,33 +351,33 @@ func processPackageList() throws -> [String] {
     let normalizedLocalList = localPackageList.normalized()
 
     if localPackageList.count != normalizedLocalList.count {
-        changes.append("The packages.json file contained duplicate rows")
+        print("The packages.json file contained duplicate rows")
     }
 
-    let additions = try localPackageList
-        .filter { !normalizedOnlineList.contains($0.absoluteString.lowercased()) }
-        .map { try verifyURL($0) }
-        .map { url in
-            url.absoluteString.hasSuffix(".git")
-            ? url : url.appendingPathExtension("git")
-        }
+    let additions = try localPackageList // use localPackageList to preserve original casing
+        .filter { !normalizedOnlineList.contains($0.normalized()) }
+        .map { try verifyURL($0).appendingGitExtension() }
         .filter {
             // filter again, in case a redirect happens to be in the list already
-            !normalizedOnlineList.contains($0.absoluteString.lowercased())
+            !normalizedOnlineList.contains($0.normalized())
         }
+        .map(\.absoluteString)
 
-    let removals = normalizedOnlineList
-        .filter { !normalizedLocalList.contains($0) }
+    let removals = onlinePackageList
+        .filter { !normalizedLocalList.contains($0.normalized()) }
+        .map(\.absoluteString)
 
-    additions.forEach { changes.append("ADDED   \($0)") }
-    removals.forEach { changes.append("REMOVED \($0)") }
+    additions.forEach { print("+ \($0)") }
+    removals.forEach { print("- \($0)") }
+
+    let normalizedRemovals = removals.map { $0.normalized() }
 
     let newList = (
             onlinePackageList
-                .filter { !removals.contains($0.normalized()) }
-            + additions
+                .map(\.absoluteString)
+                .filter { !normalizedRemovals.contains($0.normalized()) }
+                + additions
         )
-        .map(\.absoluteString)
         .sorted { $0.lowercased() < $1.lowercased() }
     let newListData: Data = try {
         let encoder = JSONEncoder()
@@ -370,8 +393,6 @@ func processPackageList() throws -> [String] {
         try packageListData.write(to: backupURL)
         try newListData.write(to: packageListFileURL)
     }
-
-    return changes
 }
 
 func main(args: [String]) throws {
@@ -386,13 +407,7 @@ func main(args: [String]) throws {
                 print("ℹ️  package moved: \(url) -> \(resolvedURL)")
             }
         case .processPackageList:
-            let changes = try processPackageList()
-            if !changes.isEmpty {
-                print("ℹ️  Changes:")
-            }
-            changes.forEach {
-                print("- \($0)")
-            }
+            try processPackageList()
     }
     print("✅ validation succeeded")
     exit(EXIT_SUCCESS)
