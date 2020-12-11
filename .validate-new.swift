@@ -154,6 +154,7 @@ func fetch(_ url: URL, timeout: Int = 10) throws -> Data {
         if let limit = httpResponse?.value(forHTTPHeaderField: "X-RateLimit-Limit").flatMap(Int.init),
            let remaining = httpResponse?.value(forHTTPHeaderField: "X-RateLimit-Remaining").flatMap(Int.init),
            remaining == 0 {
+            print("RATE LIMITED (fetch)")
             taskError = .rateLimitExceeded(url, reportedLimit: limit)
         } else if httpResponse?.statusCode == 404 {
             taskError = .notFound(url)
@@ -162,6 +163,12 @@ func fetch(_ url: URL, timeout: Int = 10) throws -> Data {
         }
         
         payload = data
+        print("response:")
+        if let data = data {
+            print(String(decoding: data, as: UTF8.self))
+        } else {
+            print("nil")
+        }
         semaphore.signal()
     }
     
