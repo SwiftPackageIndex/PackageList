@@ -1,8 +1,0 @@
-language: objective-c
-osx_image: xcode11.3
-
-before_install:
-  - brew install jq
-
-script:
-  - ./validate.sh

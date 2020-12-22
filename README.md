@@ -1,36 +1,31 @@
-[![Build Status](https://travis-ci.org/daveverwer/SwiftPMLibrary.svg?branch=master)](https://travis-ci.org/daveverwer/SwiftPMLibrary)
+![Valid JSON](https://github.com/SwiftPackageIndex/PackageList/workflows/Valid%20JSON/badge.svg)
 
-# The SwiftPM Library
+# The Swift Package Index
 
-This repository powers the list of packages indexed and monitored by the [SwiftPM Library](https://swiftpm.co). The intention of this repository is to build a *complete* list of packages that support the Swift Package Manager.
+Adding a new package to the Swift Package Index is straightforward. Every package indexed by this site comes from a list of package repository URLs, stored in a [publicly available JSON file](https://github.com/SwiftPackageIndex/PackageList/blob/main/packages.json). To add a package to the index, add a URL to a package repository to that file.
 
-At some point, this list may be able to be replaced with an *official* list supplied by Apple and/or GitHub but until then, this is better than nothing.
+Please feel free to submit your own, or other people's repositories to this list. There are a few requirements, but they are simple.
 
-## Adding packages
-
-Please do submit your own, or other people's repositories to this list. There are a few requirements, but they are simple:
-
-* Packages must have a Package.swift file (obviously?) in the root of the repository.
-* Packages must be written in **Swift 4.0 or later**.
-* Packages should declare at least one product in the Package.swift file. This can be either a library product, or an executable product. Packages can of course declare more than one product!
-* Packages must have at least one release. A release is defined as a git tag that conforms to the [semantic version](https://semver.org) spec. This can be a [beta or a pre-release](https://semver.org/#spec-item-9) semantic version, it does not necessarily need to be stable.
-* Packages should compile without errors. Actually, this isn't a strict requirement but it's probably a good idea since you're about to add it to a package directory.
-* Packages should output valid JSON when `swift package dump-package` is run with the latest version of the Swift tools. Please check that you can execute this command in the root of the package directory before submitting.
-* The full HTTPS clone URL for the repository should be submitted, including the .git extension.
-* Packages can be on *any* publicly available git repository, not just GitHub. Just add the full HTTPS clone URL.
-
-**Note:** There's no gatekeeping or quality threshold to be included in this list. The [library itself](https://swiftpm.co) sorts package search results by a number of metrics to place mature, good quality packages higher in the results.
-
-## How do you add a package?
-
-It's simple. Just fork this repository, edit the JSON, and submit a pull request. If you plan to submit a set of packages, there is no need to submit each package in a separate pull request. Feel free to bundle multiple updates at once as long as all packages match the criteria above.
-
-## JSON validation
-
-[Travis is configured](https://travis-ci.org/daveverwer/SwiftPMLibrary) to validate JSON for every pull request. Please run this validation locally before submitting by running the included validation script. These commands use [jq](https://stedolan.github.io/jq/). If you do not have `jq` installed, please install it before running this script.
-
-To validate the JSON, run the included shell script:
+The easiest way to validate that packages meet the requirements is to run the validation tool included in this repository. Fork [this repository](https://github.com/SwiftPackageIndex/PackageList/) and clone your fork locally. Then edit `packages.json` and add the package URL(s) to the JSON. Finally, in the directory where you have the clone of your fork of this repository, run the following command:
 
 ```shell
-./validate.sh
+swift ./validate.swift
 ```
+
+When validation is successful, commit your changes and submit your pull request! Your package(s) will appear in the index within a few minutes.
+
+---
+
+If you would prefer to validate the requirements manually, please verify that:
+
+* The package repositories are all publicly accessible.
+* The packages all contain a `Package.swift` file in the root folder.
+* The packages are written in Swift 4.0 or later.
+* The packages all contain at least one product (either library or executable), and at least one product must be usable in other Swift apps.
+* The packages all have at least one release tagged as a [semantic version](https://semver.org/).
+* The packages all output valid JSON from `swift package dump-package` with the latest Swift toolchain.
+* The package URLs are all fully specified including the protocol (usually `https`) and the `.git` extension.
+* The packages all compile without errors.
+* The packages JSON file is sorted alphabetically.
+
+**Note:** There's no gatekeeping or quality threshold to be included in this list. As long as the package is valid, and meets the above requirements, we will accept it.
