@@ -2,17 +2,29 @@ name: Valid JSON
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 
 jobs:
-  build:
-    runs-on: macos-latest
+  validate:
+    runs-on: macos-11.0
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-    - name: Select Xcode 11.4
-      run: sudo xcode-select -s /Applications/Xcode_11.4.app && xcodebuild -version
     - name: Validate JSON
-      run: swift validate.swift diff
+      run: xcrun swift validate.swift
+      env:
+        DEVELOPER_DIR: /Applications/Xcode_12.2.app
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  validate-new:
+    runs-on: macos-11.0
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Validate JSON
+      run: xcrun swift .validate-new.swift
+      env:
+        DEVELOPER_DIR: /Applications/Xcode_12.2.app
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
