@@ -15,7 +15,7 @@ jobs:
     - name: Validate JSON
       run: xcrun swift validate.swift
       env:
-        DEVELOPER_DIR: /Applications/Xcode_12.2.app
+        DEVELOPER_DIR: /Applications/Xcode_12.3.app
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   validate-new:
@@ -26,5 +26,5 @@ jobs:
     - name: Validate JSON
       run: xcrun swift .validate-new.swift
       env:
-        DEVELOPER_DIR: /Applications/Xcode_12.2.app
+        DEVELOPER_DIR: /Applications/Xcode_12.3.app
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
