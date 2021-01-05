@@ -1919,6 +1919,7 @@
   "https://github.com/mihaelisaev/wkhtmltopdf.git",
   "https://github.com/mikaoj/EnigmaKit.git",
   "https://github.com/mikroservices/smtp.git",
+  "https://github.com/milanpanchal/Swifty-Extensions.git",
   "https://github.com/milend/hmap.git",
   "https://github.com/millertechnologyperu/hcitool.git",
   "https://github.com/millertechnologyperu/nordicdfu.git",
@@ -3421,6 +3422,5 @@
   "https://github.com/zulip/swift-zulip-api.git",
   "https://github.com/zummenix/KeyboardNotificationsObserver.git",
   "https://github.com/zvonicek/ImageSlideshow.git",
-  "https://github.com/zweigraf/fakebundle.git",
-  "https://github.com/milanpanchal/Swifty-Extensions.git"
+  "https://github.com/zweigraf/fakebundle.git"
 ]
