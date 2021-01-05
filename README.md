@@ -2,9 +2,9 @@
 
 # The Swift Package Index
 
-Adding a new package to the Swift Package Index is straightforward. Every package indexed by this site comes from a list of package repository URLs, stored in a [publicly available JSON file](https://github.com/SwiftPackageIndex/PackageList/blob/main/packages.json). To add a package to the index, add a URL to a package repository to that file.
+Anyone can add a package to the [Swift Package Index](https://swiftpackageindex.com). Every package indexed by the site comes from a list of package repository URLs, stored in a [publicly available JSON file](https://github.com/SwiftPackageIndex/PackageList/blob/main/packages.json). To add a package to the index, add a URL to a package repository to that file.
 
-Please feel free to submit your own, or other people's repositories to this list. There are a few requirements, but they are simple.
+Please feel free to submit your own, or other people's repositories to this list. There are a few requirements, but they aren't onerous.
 
 The easiest way to validate that packages meet the requirements is to run the validation tool included in this repository. Fork [this repository](https://github.com/SwiftPackageIndex/PackageList/) and clone your fork locally. Then edit `packages.json` and add the package URL(s) to the JSON. Finally, in the directory where you have the clone of your fork of this repository, run the following command:
 
@@ -12,7 +12,7 @@ The easiest way to validate that packages meet the requirements is to run the va
 swift ./validate.swift
 ```
 
-When validation is successful, commit your changes and submit your pull request! Your package(s) will appear in the index within a few minutes.
+When validation succeeds, commit your changes and submit your pull request! Your package(s) will appear in the index within a few minutes.
 
 ---
 
@@ -28,4 +28,4 @@ If you would prefer to validate the requirements manually, please verify that:
 * The packages all compile without errors.
 * The packages JSON file is sorted alphabetically.
 
-**Note:** There's no gatekeeping or quality threshold to be included in this list. As long as the package is valid, and meets the above requirements, we will accept it.
+**Note:** There's no gatekeeping or quality threshold to be included in the [Swift Package Index](https://swiftpackageindex.com). As long as packages are valid, and meet the requirements above, we will accept them.
