@@ -1,6 +1,9 @@
 #!/usr/bin/env swift
 
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 // MARK: - Constants
 
@@ -241,8 +244,8 @@ func createTempDir() throws -> URL {
 
 func createDumpPackageProcess(at path: URL, standardOutput: Pipe, standardError: Pipe) -> Process {
     let process = Process()
-    process.launchPath = "/usr/bin/xcrun"
-    process.arguments = ["swift", "package", "dump-package"]
+    process.executableURL = URL(fileURLWithPath: "/usr/bin/swift")
+    process.arguments = ["package", "dump-package"]
     process.currentDirectoryURL = path
     process.standardOutput = standardOutput
     process.standardError = standardError
@@ -265,7 +268,7 @@ func runDumpPackage(at path: URL, timeout: TimeInterval = 20) throws -> Data {
     DispatchQueue.main.asyncAfter(deadline: .now() + timeout) {
         if process.isRunning { process.terminate() }
     }
-    process.launch()
+    try process.run()
     process.waitUntilExit()
     
     switch process.terminationStatus {
