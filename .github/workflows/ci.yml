@@ -15,5 +15,4 @@ jobs:
     - name: Validate JSON
       run: docker run --rm -v "$PWD:/host" -w /host swift:5.3 swift validate.swift
       env:
-        DEVELOPER_DIR: /Applications/Xcode_12.2.app
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
