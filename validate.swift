@@ -23,6 +23,8 @@ enum AppError: Error {
     case notFound(URL)
     case packageDumpError(String)
     case packageDumpTimeout
+    case packageListChanged
+    case packageMoved
     case rateLimitExceeded(URL, reportedLimit: Int)
     case syntaxError(String)
 
@@ -44,6 +46,10 @@ enum AppError: Error {
                 return "package dump failed: \(msg)"
             case .packageDumpTimeout:
                 return "timeout while running `swift package dump-package`"
+            case .packageListChanged:
+                return "package list was modified"
+            case .packageMoved:
+                return "package moved"
             case let .rateLimitExceeded(url, limit):
                 return "rate limit of \(limit) exceeded while requesting url: \(url.absoluteString)"
             case .syntaxError(let msg):
@@ -367,6 +373,7 @@ func processPackageList() throws {
             .appendingPathComponent("packages.backup.json")
         try packageListData.write(to: backupURL)
         try newListData.write(to: packageListFileURL)
+        throw AppError.packageListChanged
     }
 }
 
@@ -380,6 +387,7 @@ func main(args: [String]) throws {
             let resolvedURL = try verifyURL(url)
             if resolvedURL.absoluteString != url.absoluteString {
                 print("ℹ️  package moved: \(url) -> \(resolvedURL)")
+                throw AppError.packageMoved
             }
         case .processPackageList:
             try processPackageList()
