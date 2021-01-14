@@ -3431,5 +3431,6 @@
   "https://github.com/zulip/swift-zulip-api.git",
   "https://github.com/zummenix/KeyboardNotificationsObserver.git",
   "https://github.com/zvonicek/ImageSlideshow.git",
-  "https://github.com/zweigraf/fakebundle.git"
+  "https://github.com/zweigraf/fakebundle.git",
+  "https://github.com/r-dent/FritzBoxKit.git"
 ]
