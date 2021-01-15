@@ -2474,6 +2474,7 @@
   "https://github.com/quver/SlidableImage.git",
   "https://github.com/quynhnguyen/slidingtabview.git",
   "https://github.com/r-dent/EliminationMenu.git",
+  "https://github.com/r-dent/FritzBoxKit.git",
   "https://github.com/r-thomson/SwiftySass.git",
   "https://github.com/ra1028/DifferenceKit.git",
   "https://github.com/RACCommunity/FlexibleDiff.git",
@@ -3431,6 +3432,5 @@
   "https://github.com/zulip/swift-zulip-api.git",
   "https://github.com/zummenix/KeyboardNotificationsObserver.git",
   "https://github.com/zvonicek/ImageSlideshow.git",
-  "https://github.com/zweigraf/fakebundle.git",
-  "https://github.com/r-dent/FritzBoxKit.git"
+  "https://github.com/zweigraf/fakebundle.git"
 ]
