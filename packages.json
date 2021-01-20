@@ -1839,6 +1839,7 @@
   "https://github.com/mattpolzin/OpenAPIKit.git",
   "https://github.com/mattpolzin/Poly.git",
   "https://github.com/mattpolzin/swift-test-codecov.git",
+  "https://github.com/mattt/CommonMarkAttributedString.git",
   "https://github.com/mattt/euler.git",
   "https://github.com/maustinstar/swiftui-drawer.git",
   "https://github.com/mavisbroadcast/amf.git",
@@ -3436,5 +3437,6 @@
   "https://github.com/zulip/swift-zulip-api.git",
   "https://github.com/zummenix/KeyboardNotificationsObserver.git",
   "https://github.com/zvonicek/ImageSlideshow.git",
-  "https://github.com/zweigraf/fakebundle.git"
+  "https://github.com/zweigraf/fakebundle.git",
+  "https://gitlab.com/mattt/CommonMarkAttributedString.git"
 ]
