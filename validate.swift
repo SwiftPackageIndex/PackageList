@@ -235,7 +235,9 @@ func getDefaultBranch(owner: String, repository: String) throws -> String {
 }
 
 func getManifestURL(_ url: URL) throws -> URL {
-    let repository = url.deletingPathExtension().lastPathComponent
+    let repository = (url.pathExtension.lowercased() == "git")
+        ? url.deletingPathExtension().lastPathComponent
+        : url.lastPathComponent
     let owner = url.deletingLastPathComponent().lastPathComponent    
     let defaultBranch = try getDefaultBranch(owner: owner, repository: repository)
     return URL(string: "https://raw.githubusercontent.com/\(owner)/\(repository)/\(defaultBranch)/Package.swift")!
