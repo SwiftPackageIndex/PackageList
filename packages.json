@@ -237,6 +237,7 @@
   "https://github.com/apple/swift-metrics.git",
   "https://github.com/apple/swift-nio-extras.git",
   "https://github.com/apple/swift-nio-http2.git",
+  "https://github.com/apple/swift-nio-ssh.git",
   "https://github.com/apple/swift-nio-ssl.git",
   "https://github.com/apple/swift-nio-transport-services.git",
   "https://github.com/apple/swift-nio.git",
