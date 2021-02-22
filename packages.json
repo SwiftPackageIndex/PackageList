@@ -1723,6 +1723,7 @@
   "https://github.com/Kuniwak/MemoryLeakTestKit.git",
   "https://github.com/Kuniwak/MirrorDiffKit.git",
   "https://github.com/Kuniwak/MultipartFormDataKit.git",
+  "https://github.com/kvyatkovskys/KVKCalendar.git",
   "https://github.com/Kxyaaad/MyLibrary-demo.git",
   "https://github.com/kylebrowning/APNSwift.git",
   "https://github.com/kylef-archive/fd.git",
@@ -3530,6 +3531,5 @@
   "https://github.com/zulip/swift-zulip-api.git",
   "https://github.com/zummenix/KeyboardNotificationsObserver.git",
   "https://github.com/zvonicek/ImageSlideshow.git",
-  "https://github.com/zweigraf/fakebundle.git",
-  "https://github.com/kvyatkovskys/KVKCalendar.git"
+  "https://github.com/zweigraf/fakebundle.git"
 ]
