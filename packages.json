@@ -1314,6 +1314,7 @@
   "https://github.com/hummingbird-project/hummingbird-core.git",
   "https://github.com/hummingbird-project/hummingbird-fluent.git",
   "https://github.com/hummingbird-project/hummingbird-lambda.git",
+  "https://github.com/hummingbird-project/hummingbird-mustache.git",
   "https://github.com/hummingbird-project/hummingbird-redis.git",
   "https://github.com/hummingbird-project/hummingbird-websocket.git",
   "https://github.com/hummingbird-project/hummingbird.git",
