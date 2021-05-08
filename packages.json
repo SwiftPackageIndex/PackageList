@@ -2864,6 +2864,7 @@
   "https://github.com/S2Ler/SMosquitto.git",
   "https://github.com/S2Ler/SwiftyImageIO.git",
   "https://github.com/sacOO7/socketcluster-client-swift.git",
+  "https://github.com/Sadmansamee/CachyKit.git",
   "https://github.com/Saelyria/Artemis.git",
   "https://github.com/safx/Cron-Swift.git",
   "https://github.com/Sajjon/ForkHyugitEllipticCurve.git",
@@ -3699,6 +3700,5 @@
   "https://github.com/zulip/swift-zulip-api.git",
   "https://github.com/zummenix/KeyboardNotificationsObserver.git",
   "https://github.com/zvonicek/ImageSlideshow.git",
-  "https://github.com/zweigraf/fakebundle.git",
-  "https://github.com/Sadmansamee/CachyKit.git"
+  "https://github.com/zweigraf/fakebundle.git"
 ]
