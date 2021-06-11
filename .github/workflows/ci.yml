@@ -8,13 +8,11 @@ on:
 
 jobs:
   validate:
-    runs-on: macos-latest
+    runs-on: ubuntu-20.04
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-    - name: Select Xcode 12
-      run: sudo xcode-select -s /Applications/Xcode_12.app && xcodebuild -version
     - name: Validate JSON
-      run: swift validate.swift
+      run: docker run --rm -v "$PWD:/host" -w /host swift:5.4 swift validate.swift
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

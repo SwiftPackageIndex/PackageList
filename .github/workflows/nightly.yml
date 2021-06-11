@@ -1,6 +1,9 @@
 name: Nightly Audit
 
-on: [ workflow_dispatch ]
+on: 
+  workflow_dispatch:
+  schedule:
+    - cron: '0 2 * * *'
 
 jobs:
   run_nightly:
@@ -8,19 +11,27 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-    - name: Select Xcode 12
-      run: sudo xcode-select -s /Applications/Xcode_12.app && xcodebuild -version
-    - name: Run Script
-      run: swift nightly.swift
+
+    - name: Run checks
       env:
-        GH_API_TOKEN_BASE64: ${{ secrets.GH_API_TOKEN_BASE64 }}
-    - name: Validate JSON
-      run: swift validate.swift
-      env:
+        DEVELOPER_DIR: /Applications/Xcode_12.5.app
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        rm -f ./validator
+        curl -s -O "https://raw.githubusercontent.com/SwiftPackageIndex/PackageList-Validator/main/validator"
+        chmod +x ./validator
+        ./validator --version
+        ./validator check-redirects -i packages.json -o packages.json
+        echo
+        echo packages.json diff:
+        git diff packages.json
+        echo
+        ./validator check-dependencies -i packages.json -o packages.json
+        rm validator  # prevent binary from appearing in the PR
+
     - name: Create Pull Request
       id: cpr
-      uses: peter-evans/create-pull-request@v2
+      uses: peter-evans/create-pull-request@v3
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         commit-message: Updated Packages
@@ -32,5 +43,6 @@ jobs:
           - Removed any duplicates
           - Removed any deleted repositories
           - Added any unknown dependencies
+
     - name: Check outputs
       run: echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
