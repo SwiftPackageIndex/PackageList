@@ -2,6 +2,7 @@
   "https://github.com/0111b/Conf.git",
   "https://github.com/0111b/JSONDecoder-Keypath.git",
   "https://github.com/0111b/UIPreview.git",
+  "https://github.com/0x0c/TableViewContent.git",
   "https://github.com/0x7fs/countedset.git",
   "https://github.com/0xacdc/XCFSodium.git",
   "https://github.com/0xdeadp00l/bech32.git",
@@ -3837,6 +3838,5 @@
   "https://github.com/zulip/swift-zulip-api.git",
   "https://github.com/zummenix/KeyboardNotificationsObserver.git",
   "https://github.com/zvonicek/ImageSlideshow.git",
-  "https://github.com/zweigraf/fakebundle.git",
-  "https://github.com/0x0c/TableViewContent"
+  "https://github.com/zweigraf/fakebundle.git"
 ]
