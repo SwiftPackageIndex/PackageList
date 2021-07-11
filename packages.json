@@ -37,7 +37,6 @@
   "https://github.com/abdullahselek/SwiftyNotifications.git",
   "https://github.com/abdullahselek/TakeASelfie.git",
   "https://github.com/abeintopalo/appiconsetgen.git",
-  "https://github.com/abhimuktheeswarar/DryRunKotlinMPP.git",
   "https://github.com/ABridoux/BooleanExpressionEvaluation.git",
   "https://github.com/ABridoux/lux.git",
   "https://github.com/ABridoux/scout.git",
@@ -3854,5 +3853,6 @@
   "https://github.com/zulip/swift-zulip-api.git",
   "https://github.com/zummenix/KeyboardNotificationsObserver.git",
   "https://github.com/zvonicek/ImageSlideshow.git",
-  "https://github.com/zweigraf/fakebundle.git"
+  "https://github.com/zweigraf/fakebundle.git",
+  "https://github.com/abhimuktheeswarar/Flywheel.git"
 ]
