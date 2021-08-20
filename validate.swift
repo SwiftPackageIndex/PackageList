@@ -382,14 +382,18 @@ func processPackageList() throws {
         return try encoder.encode(newList)
     }()
 
-    if packageListData != newListData {
-        print("⚠️  Changes have been made to 'packages.json'. Your original version has been")
-        print("⚠️  copied to 'package.backup.json'. Please commit the updated file.")
-        let backupURL = packageListFileURL.deletingLastPathComponent()
-            .appendingPathComponent("packages.backup.json")
-        try packageListData.write(to: backupURL)
-        try newListData.write(to: packageListFileURL)
-        throw AppError.packageListChanged
+    do {
+        let original = String(decoding: packageListData, as: UTF8.self).trimmingCharacters(in: .whitespacesAndNewlines)
+        let new = String(decoding: newListData, as: UTF8.self).trimmingCharacters(in: .whitespacesAndNewlines)
+        if original != new {
+            print("⚠️  Changes have been made to 'packages.json'. Your original version has been")
+            print("⚠️  copied to 'package.backup.json'. Please commit the updated file.")
+            let backupURL = packageListFileURL.deletingLastPathComponent()
+                .appendingPathComponent("packages.backup.json")
+            try packageListData.write(to: backupURL)
+            try newListData.write(to: packageListFileURL)
+            throw AppError.packageListChanged
+        }
     }
 }
 
