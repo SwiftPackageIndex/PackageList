@@ -3910,6 +3910,7 @@
   "https://github.com/vadymmarkov/When.git",
   "https://github.com/valdirunars/bigintcompress.git",
   "https://github.com/valdirunars/bioswift.git",
+  "https://github.com/valentinradu/Firestarter.git",
   "https://github.com/valeriomazzeo/docker-client-swift.git",
   "https://github.com/valeriyvan/RaspberryPiSenseHat.git",
   "https://github.com/vapor-community/async.git",
@@ -4183,6 +4184,5 @@
   "https://github.com/zulip/swift-zulip-api.git",
   "https://github.com/zummenix/KeyboardNotificationsObserver.git",
   "https://github.com/zvonicek/ImageSlideshow.git",
-  "https://github.com/zweigraf/fakebundle.git",
-  "https://github.com/valentinradu/Firestarter.git"
+  "https://github.com/zweigraf/fakebundle.git"
 ]
