@@ -275,6 +275,7 @@
   "https://github.com/apple/swift-collections.git",
   "https://github.com/apple/swift-corelibs-xctest.git",
   "https://github.com/apple/swift-crypto.git",
+  "https://github.com/apple/swift-distributed-actors.git",
   "https://github.com/apple/swift-distributed-tracing-baggage-core.git",
   "https://github.com/apple/swift-distributed-tracing-baggage.git",
   "https://github.com/apple/swift-distributed-tracing.git",
