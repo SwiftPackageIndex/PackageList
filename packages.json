@@ -3084,7 +3084,9 @@
   "https://github.com/quickbirdstudios/XServiceLocator.git",
   "https://github.com/quickthyme/qloop.git",
   "https://github.com/quickthyme/qroute.git",
-  "https://github.com/quickthyme/webrequest.git",
+  "https://github.com/quickthyme/webrequest.git",,
+  "https://github.com/Quintschaf/SchafKit.git",
+  "https://github.com/Quintschaf/SwiftyOpenGraph.git"
   "https://github.com/quver/SlidableImage.git",
   "https://github.com/quynhnguyen/slidingtabview.git",
   "https://github.com/r-dent/EliminationMenu.git",
@@ -4233,7 +4235,5 @@
   "https://github.com/zummenix/KeyboardNotificationsObserver.git",
   "https://github.com/zvonicek/ImageSlideshow.git",
   "https://github.com/zweigraf/fakebundle.git",
-  "https://github.com/zxcj04/WMSKit.git",
-  "https://github.com/Quintschaf/SchafKit.git",
-  "https://github.com/Quintschaf/SwiftyOpenGraph.git"
+  "https://github.com/zxcj04/WMSKit.git"
 ]
