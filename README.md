@@ -15,6 +15,9 @@ swift ./validate.swift
 When validation succeeds, commit your changes and submit your pull request! Your package(s) will appear in the index within a few minutes.
 
 > **Note:** If submitting your own packages, don't forget to add shields.io badges to your package's README to always have up to date swift version and platform compatibility information readily available. Once your package appears in the index, use the "Do you maintain this package?" link in the right-hand sidebar of your package page and use the provided markdown.
+>
+> For example:
+> [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fdaveverwer%2FLeftPad%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/daveverwer/LeftPad) [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fdaveverwer%2FLeftPad%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/daveverwer/LeftPad)
 
 ---
 
