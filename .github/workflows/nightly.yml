@@ -4,8 +4,6 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '0 2 * * *'
-  pull_request_review:
-    types: [submitted]
 
 jobs:
   run_nightly:
