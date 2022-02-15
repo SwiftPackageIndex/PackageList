@@ -5,4 +5,4 @@ contact_links:
     about: Add one or more new packages to the Swift Package Index
   - name: Bugs and Feature Requests
     url: https://github.com/SwiftPackageIndex/SwiftPackageIndex-Server/issues/new/choose
-    about: Do you have a bug or feature reuest related to the Swift Package Index?
+    about: Do you have a bug or feature request related to the Swift Package Index?
