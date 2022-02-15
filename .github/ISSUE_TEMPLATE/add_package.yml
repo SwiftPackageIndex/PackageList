@@ -1,0 +1,30 @@
+name: Add Package(s)
+description: Add one or more new packages to the Swift Package Index.
+title: "Add Package"
+labels: ["add_package"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for taking the time to contribute to Swift Package Index.
+
+        There's no gatekeeping or quality threshold to be included in the Swift Package Index. As long as packages are valid, and meet the requirements below, we will accept them. If you're unsure, submit the package and we can provide any necessary feedback.
+
+        * The package repositories are all publicly accessible.
+        * The packages all contain a Package.swift file in the root folder.
+        * The packages are written in Swift 5.0 or later.
+        * The packages all contain at least one product (either library or executable), and at least one product must be usable in other Swift apps.
+        * The packages all have at least one release tagged as a [semantic version](https://semver.org/).
+        * The packages all output valid JSON from `swift package dump-package` with the latest Swift toolchain.
+        * The package URLs are all fully specified including the protocol (usually https) and the `.git` extension.
+        * The packages all compile without errors.
+  - type: textarea
+    id: list
+    attributes:
+      label: List Packages
+      description: Please list all of the packages you wish to add here. Place each package on a new line.
+      placeholder: |
+        https://github.com/daveverwer/LeftPad
+        https://github.com/Sherlouk/swift-snapshot-testing-stitch
+    validations:
+      required: true
