@@ -13,34 +13,17 @@ cp packages.json packages-backup.json
 
 echo "${GH_BODY}" | while read url ; do
     url=$(echo "$url" | sed 's/\r//g')
-    echo "Processing '$url'."
 
     # 1a. Skip non URLs
     if [[ $url != https://github.com/* ]]; then
         continue
     fi
 
-    # 1b. Normalise URL
-    if [[ $url != *.git ]]; then
-        # Add `.git` at end
-        url="$url.git"
-    fi
-
-    # 1c. Append Item
+    # 1b. Append Item
     jq '. |= . + ["'$url'"]' -S packages.json > temp.json
+    echo "+ '$url'."
 
-    # 1d. Remove Duplicates and Sort
+    # 1c. Remove Duplicates and Sort
     jq '.|unique' temp.json > packages.json
     rm temp.json 
 done
-
-# 2. Compare
-
-diff --brief packages.json packages-backup.json >/dev/null
-CONTAINS_CHANGES=$?
-
-if [ $CONTAINS_CHANGES -eq 1 ]; then
-    echo '::set-output name=changes::true'
-else
-    echo '::set-output name=changes::false'
-fi
