@@ -422,9 +422,14 @@ do {
     try main(args: CommandLine.arguments)
 } catch {
     if let appError = error as? AppError {
-        print("ERROR: \(appError.localizedDescription)")
+        print("::set-output name=validateError::\(appError.localizedDescription)")
+
+        if case .packageListChanged = appError {
+            // For CI it's acceptable for the package list to change as we'll simply take the output of this script
+            exit(EXIT_SUCCESS)
+        }
     } else {
-        print(error)
+        print("::set-output name=validateError::\(error)")
     }
     exit(EXIT_FAILURE)
 }
