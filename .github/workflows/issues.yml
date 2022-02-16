@@ -1,0 +1,77 @@
+name: Automatic Pull Request
+
+on:
+  issues:
+    types: [ opened ]
+
+env:
+  # Swift version 5.6-dev (LLVM 542eceb110d8480, Swift 4323d2fa26a6bf8)
+  # Target: x86_64-unknown-linux-gnu
+  SWIFT_IMAGE: swiftlang/swift@sha256:cc3a796de27ef460b7b4a3dc8f2e7e5aff7fcae989ea49674753a87261ae0448
+
+jobs:
+  add:
+    runs-on: ubuntu-20.04
+    if: contains(github.event.issue.labels.*.name, 'add_package')
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Add Package to JSON
+      run: bash .github/add_package.sh
+      id: package
+      env:
+        GH_BODY: ${{ github.event.issue.body }}
+
+    - name: Validate JSON
+      if: steps.package.outputs.changes == 'true'
+      run: docker run --rm -v "$PWD:/host" -w /host $SWIFT_IMAGE swift validate.swift
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Create Pull Request
+      id: cpr
+      if: steps.package.outputs.changes == 'true'
+      uses: peter-evans/create-pull-request@v3
+      with:
+        add-paths: |
+          packages.json
+        commit-message: ${{ github.event.issue.title }}
+        title: ${{ github.event.issue.title }}
+        branch: spi-auto-${{ github.event.issue.number }}
+        delete-branch: true
+        body: |
+          Closes #${{ github.event.issue.number }}
+
+          ## Original Message
+
+          ${{ github.event.issue.body }}
+        committer: ${{ github.event.issue.user.login }} <${{ github.event.issue.user.login }}@users.noreply.github.com>
+        author: ${{ github.event.issue.user.login }} <${{ github.event.issue.user.login }}@users.noreply.github.com>
+
+    - name: Update Issue (Success)
+      if: steps.package.outputs.changes == 'true'
+      uses: actions/github-script@v3
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          github.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: 'Congrats! A pull request has been successfully created: #${{ steps.cpr.outputs.pull-request-number }}. We hope to merge this for you shortly.'
+          })
+
+    - name: Update Issue (Failure)
+      if: steps.package.outputs.changes != 'true'
+      uses: actions/github-script@v3
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          github.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: 'Oh no! Unfortunately we were unable to detect any new packages within your comment.'
+          })
