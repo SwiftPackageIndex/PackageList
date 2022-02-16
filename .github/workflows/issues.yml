@@ -76,5 +76,5 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: 'Oh no! We were unable to detect any valid packages in your submission. If you submitted the wrong URL and would like to update it, please [open a new issue](https://github.com/SwiftPackageIndex/PackageList/issues/new/choose)'
+              body: 'Oh no! We were unable to detect any valid packages in your submission. If you submitted the wrong URL and would like to update it, please [open a new issue](https://github.com/SwiftPackageIndex/PackageList/issues/new/choose).'
             })
