@@ -1,7 +1,7 @@
 name: Add Package(s)
 description: Add one or more new packages to the Swift Package Index.
-title: "Add Package"
-labels: ["add_package"]
+title: "Add <Package>"
+labels: ["Add Package"]
 body:
   - type: markdown
     attributes:
@@ -23,8 +23,6 @@ body:
     attributes:
       label: List Packages
       description: Please list all of the packages you wish to add here. Place each package on a new line.
-      placeholder: |
-        https://github.com/daveverwer/LeftPad
-        https://github.com/Sherlouk/swift-snapshot-testing-stitch
+      placeholder: https://github.com/daveverwer/LeftPad.git
     validations:
       required: true

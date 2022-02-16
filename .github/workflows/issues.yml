@@ -12,7 +12,7 @@ env:
 jobs:
   add:
     runs-on: ubuntu-20.04
-    if: contains(github.event.issue.labels.*.name, 'add_package')
+    if: contains(github.event.issue.labels.*.name, 'Add Package')
 
     steps:
     - name: Checkout
@@ -20,19 +20,22 @@ jobs:
 
     - name: Add Package to JSON
       run: bash .github/add_package.sh
-      id: package
       env:
         GH_BODY: ${{ github.event.issue.body }}
 
     - name: Validate JSON
-      if: steps.package.outputs.changes == 'true'
       run: docker run --rm -v "$PWD:/host" -w /host $SWIFT_IMAGE swift validate.swift
+      continue-on-error: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+    - name: Check for Changes
+      run: bash .github/check_for_changes.sh
+      id: check
+
     - name: Create Pull Request
       id: cpr
-      if: steps.package.outputs.changes == 'true'
+      if: steps.check.outputs.changes == 'true'
       uses: peter-evans/create-pull-request@v3
       with:
         add-paths: |
@@ -51,7 +54,7 @@ jobs:
         author: ${{ github.event.issue.user.login }} <${{ github.event.issue.user.login }}@users.noreply.github.com>
 
     - name: Update Issue (Success)
-      if: steps.package.outputs.changes == 'true'
+      if: steps.check.outputs.changes == 'true'
       uses: actions/github-script@v3
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -64,7 +67,7 @@ jobs:
           })
 
     - name: Update Issue (Failure)
-      if: steps.package.outputs.changes != 'true'
+      if: steps.check.outputs.changes != 'true'
       uses: actions/github-script@v3
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
