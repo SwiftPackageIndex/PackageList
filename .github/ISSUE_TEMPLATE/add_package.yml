@@ -1,7 +1,7 @@
 name: Add Package(s)
 description: Add one or more new packages to the Swift Package Index.
-title: "Add <Package>"
-labels: ["Add Package"]
+title: 'Add <Package>'
+labels: ['Add Package']
 body:
   - type: markdown
     attributes:
