@@ -424,9 +424,9 @@ do {
     if let appError = error as? AppError {
         if ProcessInfo.processInfo.environment["CI"] == "true" {
             print("::set-output name=validateError::\(appError.localizedDescription)")
-        } else {
-            print("ERROR: \(appError.localizedDescription)")
         }
+
+        print("ERROR: \(appError.localizedDescription)")
         
         if case .packageListChanged = appError {
             // For CI it's acceptable for the package list to change as we'll simply take the output of this script
@@ -435,9 +435,9 @@ do {
     } else {
         if ProcessInfo.processInfo.environment["CI"] == "true" {
             print("::set-output name=validateError::\(error)")
-        } else {
-            print("ERROR: \(error)")
         }
+        
+        print("ERROR: \(error)")
     }
     exit(EXIT_FAILURE)
 }
