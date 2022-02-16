@@ -422,14 +422,22 @@ do {
     try main(args: CommandLine.arguments)
 } catch {
     if let appError = error as? AppError {
-        print("::set-output name=validateError::\(appError.localizedDescription)")
-
+        if ProcessInfo.processInfo.environment["CI"] == "true" {
+            print("::set-output name=validateError::\(appError.localizedDescription)")
+        } else {
+            print("ERROR: \(appError.localizedDescription)")
+        }
+        
         if case .packageListChanged = appError {
             // For CI it's acceptable for the package list to change as we'll simply take the output of this script
             exit(EXIT_SUCCESS)
         }
     } else {
-        print("::set-output name=validateError::\(error)")
+        if ProcessInfo.processInfo.environment["CI"] == "true" {
+            print("::set-output name=validateError::\(error)")
+        } else {
+            print("ERROR: \(error)")
+        }
     }
     exit(EXIT_FAILURE)
 }
