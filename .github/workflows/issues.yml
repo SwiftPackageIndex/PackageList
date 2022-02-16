@@ -25,6 +25,7 @@ jobs:
 
     - name: Validate JSON
       run: docker run --rm -v "$PWD:/host" -w /host $SWIFT_IMAGE swift validate.swift
+      continue-on-error: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
