@@ -63,7 +63,7 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: 'Thank you for your submission! It will be merged with #${{ steps.cpr.outputs.pull-request-number }}.'
+              body: 'Thank you for your submission! We will merge it with #${{ steps.cpr.outputs.pull-request-number }}.'
             })
 
       - name: Update Issue (Failure)
@@ -76,5 +76,5 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: 'Oh no! Unfortunately we were unable to detect any new packages within your comment.'
+              body: 'Oh no! We were unable to detect any valid packages in your submission. If you have an updated URL that we should retry, please [open a new issue](https://github.com/SwiftPackageIndex/PackageList/issues/new/choose)'
             })
