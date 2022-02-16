@@ -63,7 +63,7 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: 'Congrats! A pull request has been successfully created: #${{ steps.cpr.outputs.pull-request-number }}. We hope to merge this for you shortly.'
+              body: 'Thank you for your submission! It will be merged with #${{ steps.cpr.outputs.pull-request-number }}.'
             })
 
       - name: Update Issue (Failure)
