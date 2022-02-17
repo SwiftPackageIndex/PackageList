@@ -22,6 +22,5 @@ echo "${GH_BODY}" | while read url ; do
     # 1b. Append Item
     jq '. |= . + ["'$url'"]' -S packages.json > temp.json
     mv temp.json packages.json
-    rm temp.json
     echo "+ '$url'."
 done
