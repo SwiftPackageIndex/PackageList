@@ -4079,6 +4079,8 @@
   "https://github.com/vapor-community/copenssl.git",
   "https://github.com/vapor-community/csrf.git",
   "https://github.com/vapor-community/ferno.git",
+  "https://github.com/vapor-community/google-cloud-kit.git",
+  "https://github.com/vapor-community/google-cloud.git",
   "https://github.com/vapor-community/htmlkit.git",
   "https://github.com/vapor-community/imperial.git",
   "https://github.com/vapor-community/leaf-markdown.git",
