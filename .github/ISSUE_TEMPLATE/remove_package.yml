@@ -10,7 +10,7 @@ body:
         
         Note that we automatically track packages which are a dependency of another package on the index, so your package may re-appear.
 
-        The Swift Package Index will show when a project has been archived, and will automatically update it's information if it's renamed or moved to a new owner.
+        The Swift Package Index will show when a project has been archived, and will automatically update its information if it's renamed or moved to a new owner.
   - type: textarea
     id: list
     attributes:
