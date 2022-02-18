@@ -53,7 +53,7 @@ enum AppError: Error {
             case .noData(let url):
                 return "no data returned from url: \(url.absoluteString)"
             case .noProducts(let url):
-                return "package has not products: \(url.absoluteString)"
+                return "package has no products: \(url.absoluteString)"
             case .notFound(let url):
                 return "url not found (404): \(url.absoluteString)"
             case .packageDumpError(let msg):
