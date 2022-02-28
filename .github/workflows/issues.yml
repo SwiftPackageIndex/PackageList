@@ -63,7 +63,7 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: 'Thank you for your submission! We will merge it with #${{ steps.cpr.outputs.pull-request-number }}.'
+              body: 'Thank you! We will approve and add these packages with #${{ steps.cpr.outputs.pull-request-number }}.'
             })
 
       - name: Update Issue (Failure)
@@ -131,7 +131,7 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: 'Thank you for your contribution! We will merge it with #${{ steps.cpr.outputs.pull-request-number }}.'
+              body: 'Thank you! We will approve and remove these packages with #${{ steps.cpr.outputs.pull-request-number }}.'
             })
 
       - name: Update Issue (Failure)
