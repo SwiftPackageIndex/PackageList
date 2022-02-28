@@ -15,7 +15,7 @@ There are a few requirements for inclusion in the index, but they aren't onerous
 - The package URLs must include the protocol (usually `https`) and the `.git` extension.
 - The packages must all compile without errors.
 
-[![Add Packages Button](https://user-images.githubusercontent.com/5180/156020907-8bebd0ca-c1ca-4a6f-9771-11a4037002a3.png)](https://github.com/SwiftPackageIndex/PackageList/issues/new/choose)
+<a href="https://github.com/SwiftPackageIndex/PackageList/issues/new/choose"><img src="https://user-images.githubusercontent.com/5180/156020907-8bebd0ca-c1ca-4a6f-9771-11a4037002a3.png" alt="Add Packages Button"></a>
 
 > **Note:** If submitting your own packages, don't forget to add shields.io badges to your package's README to always have up to date swift version and platform compatibility information readily available. Once your package appears in the index, use the "Do you maintain this package?" link in the right-hand sidebar of your package page and use the provided markdown.
 >
