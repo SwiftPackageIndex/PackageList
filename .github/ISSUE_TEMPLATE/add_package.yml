@@ -6,24 +6,22 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thank you for taking the time to contribute to Swift Package Index.
+        Anyone can add a package to the Swift Package Index. Please feel free to submit any package repository to the index, whether it's a package written by you or someone else. There's also no quality threshold. As long as the packages are valid and meet the requirements below, we will accept them. If you're unsure about any of the requirements, please submit the package(s), and we'll happily provide help.
 
-        There's no gatekeeping or quality threshold for a package to be included in the Swift Package Index. As long as packages are valid and meet the requirements below, we will accept them. If you're unsure, please submit the package and we can provide feedback.
+        There are a few requirements for inclusion in the index, but they aren't onerous:
 
-        The requirements are:
-
-        * The package repositories are all publicly accessible.
-        * The packages all contain a Package.swift file in the root folder.
-        * The packages are written in Swift 5.0 or later.
-        * The packages all contain at least one product (either library or executable), and at least one product must be usable in other Swift apps.
-        * The packages all have at least one release tagged as a [semantic version](https://semver.org/).
-        * The packages all output valid JSON from `swift package dump-package` with the latest Swift toolchain.
-        * The package URLs are all fully specified including the protocol (usually https) and the `.git` extension.
-        * The packages all compile without errors.
+        - The package repositories must all be publicly accessible.
+        - The packages must all contain a valid `Package.swift` file in the root folder.
+        - The packages must be written in Swift 5.0 or later.
+        - The packages must all contain at least one product (either library or executable), and at least one product must be usable from other Swift apps.
+        - The packages must all have at least one release tagged as a [semantic version](https://semver.org/).
+        - The packages must all output valid JSON when running `swift package dump-package` with the latest Swift toolchain.
+        - The package URLs must include the protocol (usually `https`) and the `.git` extension.
+        - The packages must all compile without errors.
   - type: textarea
     id: list
     attributes:
-      label: List Packages
+      label: New Packages
       description: Please list all of the packages you wish to add here. Place each package on a new line.
       placeholder: https://github.com/daveverwer/LeftPad.git
     validations:
