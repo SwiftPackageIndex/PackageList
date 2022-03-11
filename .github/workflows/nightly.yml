@@ -15,7 +15,7 @@ jobs:
     - name: Run checks
       env:
         # see https://github.com/actions/virtual-environments for supported Xcode versions
-        DEVELOPER_DIR: /Applications/Xcode_13.1.app
+        DEVELOPER_DIR: /Applications/Xcode_13.2.1.app
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         rm -f ./validator
