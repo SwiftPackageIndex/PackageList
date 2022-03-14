@@ -11,7 +11,7 @@ fmt.timeZone = .init(abbreviation: "UTC")
 
 let start = fmt.date(from: "2019-05-15")!
 var date = start
-while date < Date.now {
+while date <= Date.now {
     defer { date = calendar.date(byAdding: .init(day: 7), to: date)! }
 
     let rev = try shellOut(to: #"git rev-list -n 1 --before="\#(date)" main"#)
