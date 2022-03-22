@@ -1,0 +1,148 @@
+name: Automatic Pull Request
+
+on:
+  issues:
+    types: [opened]
+
+env:
+  # Swift version 5.6-dev (LLVM 542eceb110d8480, Swift 4323d2fa26a6bf8)
+  # Target: x86_64-unknown-linux-gnu
+  SWIFT_IMAGE: swiftlang/swift@sha256:cc3a796de27ef460b7b4a3dc8f2e7e5aff7fcae989ea49674753a87261ae0448
+
+jobs:
+  add:
+    runs-on: ubuntu-20.04
+    if: contains(github.event.issue.labels.*.name, 'Add Package')
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Add Package to JSON
+        run: bash .github/add_package.sh
+        env:
+          GH_BODY: ${{ github.event.issue.body }}
+
+      - name: Validate JSON
+        run: docker run --rm --env CI=true -v "$PWD:/host" -w /host $SWIFT_IMAGE swift validate.swift
+        id: validate
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check for Changes
+        run: bash .github/check_for_changes.sh
+        id: check
+
+      - name: Create Pull Request
+        id: cpr
+        if: steps.check.outputs.changes == 'true'
+        uses: peter-evans/create-pull-request@v3
+        with:
+          add-paths: |
+            packages.json
+          commit-message: ${{ github.event.issue.title }}
+          title: ${{ github.event.issue.title }}
+          branch: spi-auto-${{ github.event.issue.number }}
+          delete-branch: true
+          body: |
+            Closes #${{ github.event.issue.number }}
+
+            ## Original Message
+
+            ${{ github.event.issue.body }}
+          committer: ${{ github.event.issue.user.login }} <${{ github.event.issue.user.login }}@users.noreply.github.com>
+          author: ${{ github.event.issue.user.login }} <${{ github.event.issue.user.login }}@users.noreply.github.com>
+
+      - name: Update Issue (Success)
+        if: steps.check.outputs.changes == 'true'
+        uses: actions/github-script@v3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: 'Thank you! We will approve and add these packages with #${{ steps.cpr.outputs.pull-request-number }}.'
+            })
+
+      - name: Update Issue (Failure)
+        if: ${{ failure() || steps.check.outputs.changes != 'true' }}
+        uses: actions/github-script@v3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: 'Oh no! We were unable to detect any valid packages in your submission. If you submitted the wrong URL and would like to update it, please [open a new issue](https://github.com/SwiftPackageIndex/PackageList/issues/new/choose).\n\n>Validate Error: ${{ steps.validate.outputs.validateError || 'None' }}'
+            })
+  remove:
+    runs-on: ubuntu-20.04
+    if: contains(github.event.issue.labels.*.name, 'Remove Package')
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Remove Package from JSON
+        run: bash .github/remove_package.sh
+        env:
+          GH_BODY: ${{ github.event.issue.body }}
+
+      - name: Validate JSON
+        run: docker run --rm --env CI=true -v "$PWD:/host" -w /host $SWIFT_IMAGE swift validate.swift
+        id: validate
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check for Changes
+        run: bash .github/check_for_changes.sh
+        id: check
+
+      - name: Create Pull Request
+        id: cpr
+        if: steps.check.outputs.changes == 'true'
+        uses: peter-evans/create-pull-request@v3
+        with:
+          add-paths: |
+            packages.json
+          commit-message: ${{ github.event.issue.title }}
+          title: ${{ github.event.issue.title }}
+          branch: spi-auto-${{ github.event.issue.number }}
+          delete-branch: true
+          body: |
+            Closes #${{ github.event.issue.number }}
+
+            ## Original Message
+
+            ${{ github.event.issue.body }}
+          committer: ${{ github.event.issue.user.login }} <${{ github.event.issue.user.login }}@users.noreply.github.com>
+          author: ${{ github.event.issue.user.login }} <${{ github.event.issue.user.login }}@users.noreply.github.com>
+
+      - name: Update Issue (Success)
+        if: steps.check.outputs.changes == 'true'
+        uses: actions/github-script@v3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: 'Thank you! We will approve and remove these packages with #${{ steps.cpr.outputs.pull-request-number }}.'
+            })
+
+      - name: Update Issue (Failure)
+        if: ${{ failure() || steps.check.outputs.changes != 'true' }}
+        uses: actions/github-script@v3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: 'Oh no! We were unable to detect any valid packages in your submission. If you submitted the wrong URL and would like to update it, please [open a new issue](https://github.com/SwiftPackageIndex/PackageList/issues/new/choose).\n\n>Validate Error: ${{ steps.validate.outputs.validateError || 'None' }}'
+            })

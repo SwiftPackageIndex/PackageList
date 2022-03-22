@@ -1,0 +1,28 @@
+name: Add Package(s)
+description: Add one or more new packages to the Swift Package Index.
+title: 'Add <Package>'
+labels: ['Add Package']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Anyone can add a package to the Swift Package Index. Please feel free to submit any package repository to the index, whether it's a package written by you or someone else. There's also no quality threshold. As long as the packages are valid and meet the requirements below, we will accept them. If you're unsure about any of the requirements, please submit the package(s), and we'll happily provide help.
+
+        There are a few requirements for inclusion in the index, but they aren't onerous:
+
+        - The package repositories must all be publicly accessible.
+        - The packages must all contain a valid `Package.swift` file in the root folder.
+        - The packages must be written in Swift 5.0 or later.
+        - The packages must all contain at least one product (either library or executable), and at least one product must be usable from other Swift apps.
+        - The packages must all have at least one release tagged as a [semantic version](https://semver.org/).
+        - The packages must all output valid JSON when running `swift package dump-package` with the latest Swift toolchain.
+        - The package URLs must include the protocol (usually `https`) and the `.git` extension.
+        - The packages must all compile without errors.
+  - type: textarea
+    id: list
+    attributes:
+      label: New Packages
+      description: Please list the URLs to all the repositories where the packages you wish to add are hosted. Place each package on a new line.
+      placeholder: https://github.com/daveverwer/LeftPad.git
+    validations:
+      required: true

@@ -1,0 +1,33 @@
+name: Remove Package(s)
+description: Remove one or more packages from the Swift Package Index.
+title: 'Remove <Package>'
+labels: ['Remove Package']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Fill in this form to request that we remove one or more packages from the Swift Package Index. We will review and remove them as soon as possible.
+
+        There's no need to remove a package if its repository has been archived as we clearly identify archived projects on package pages. Our automated scripts will also detect packages where the repository has been deleted or renamed, so there's no need to fill in this form if that's the case.
+
+        **Note:** We have automated scripts that find new packages through their dependencies. So, if another package is likely to depend on your package, please mention this in the notes.
+  - type: textarea
+    id: list
+    attributes:
+      label: Packages to Remove
+      description: Please list the URLs to all of the packages you wish to remove. Place each package URL on a new line.
+      placeholder: https://github.com/daveverwer/LeftPad.git
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+    validations:
+      required: false
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Ownership
+      options:
+        - label: I am the author or core maintainer of the package(s) listed for removal.
