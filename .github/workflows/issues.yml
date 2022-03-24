@@ -2,7 +2,7 @@ name: Automatic Pull Request
 
 on:
   issues:
-    types: [opened]
+    types: [opened, reopened]
 
 env:
   # Swift version 5.6-dev (LLVM 542eceb110d8480, Swift 4323d2fa26a6bf8)
