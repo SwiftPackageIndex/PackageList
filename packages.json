@@ -286,6 +286,7 @@
   "https://github.com/apple/FHIRModels.git",
   "https://github.com/apple/swift-algorithms.git",
   "https://github.com/apple/swift-argument-parser.git",
+  "https://github.com/apple/swift-async-algorithms.git",
   "https://github.com/apple/swift-atomics.git",
   "https://github.com/apple/swift-collections-benchmark.git",
   "https://github.com/apple/swift-collections.git",
