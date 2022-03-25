@@ -22,10 +22,7 @@ jobs:
       - name: Check redirect
         run: |
           ./validator --version
-          ./validator check-redirects -i packages.json -o packages.json --chunk 0 --number-of-chunks 2
-          echo
-          echo packages.json diff:
-          git diff packages.json
+          ./validator check-redirects -i packages.json -o packages.json --chunk 0 --number-of-chunks 2 --limit 10
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
@@ -44,6 +41,8 @@ jobs:
 
       - name: Check redirect
         run: |
+          ls
+          chmod +x ./validator
           ./validator --version
           ./validator check-redirects -i packages.json -o packages.json --chunk 1 --number-of-chunks 2
           echo
