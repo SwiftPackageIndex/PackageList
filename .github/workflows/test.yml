@@ -12,14 +12,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      # TODO: remove --limit
       - name: Check redirect
         run: |
           rm -f ./validator
           curl -s -O "https://raw.githubusercontent.com/SwiftPackageIndex/PackageList-Validator/main/validator"
           chmod +x ./validator
           ./validator --version
-          ./validator check-redirects -i packages.json -o packages.json --limit 10
+          ./validator check-redirects -i packages.json -o packages.json
           echo
           echo packages.json diff:
           git diff packages.json
@@ -40,14 +39,13 @@ jobs:
         with:
           name: packages.json
 
-      # TODO: remove --limit
       - name: Check dependencies
         run: |
           rm -f ./validator
           curl -s -O "https://raw.githubusercontent.com/SwiftPackageIndex/PackageList-Validator/main/validator"
           chmod +x ./validator
           ./validator --version
-          ./validator check-dependencies -i packages.json -o packages.json --chunk 0 --number-of-chunks 3 --limit 10
+          ./validator check-dependencies -i packages.json -o packages.json --chunk 0 --number-of-chunks 3
 
       - name: Upload packages.json
         uses: actions/upload-artifact@v3
@@ -65,14 +63,13 @@ jobs:
         with:
           name: packages.json
 
-      # TODO: remove --limit
       - name: Check dependencies
         run: |
           rm -f ./validator
           curl -s -O "https://raw.githubusercontent.com/SwiftPackageIndex/PackageList-Validator/main/validator"
           chmod +x ./validator
           ./validator --version
-          ./validator check-dependencies -i packages.json -o packages.json --chunk 1 --number-of-chunks 3 --limit 10
+          ./validator check-dependencies -i packages.json -o packages.json --chunk 1 --number-of-chunks 3
       - name: Upload packages.json
         uses: actions/upload-artifact@v3
         with:
@@ -80,7 +77,7 @@ jobs:
           path: packages.json
 
   check_dependencies_last:
-    name: Check dependencies batch 0
+    name: Check dependencies batch 2
     needs: check_dependencies_1
     runs-on: macos-latest
     steps:
@@ -93,14 +90,13 @@ jobs:
         with:
           name: packages.json
 
-      # TODO: remove --limit
       - name: Check dependencies
         run: |
           rm -f ./validator
           curl -s -O "https://raw.githubusercontent.com/SwiftPackageIndex/PackageList-Validator/main/validator"
           chmod +x ./validator
           ./validator --version
-          ./validator check-dependencies -i packages.json -o packages.json --chunk 2 --number-of-chunks 3 --limit 10
+          ./validator check-dependencies -i packages.json -o packages.json --chunk 2 --number-of-chunks 3
 
           rm validator  # prevent binary from appearing in the PR
 
