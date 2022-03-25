@@ -4,14 +4,6 @@ on:
   push:
   workflow_dispatch:
 
-#     # - name: Set up cache
-#     #   id: packages.json-cache
-#     #   uses: actions/cache@v2
-#     #   with:
-#     #       path: ${{ github.workspace }}/packages.json
-#     #       key: ${{ runner.os }}-packages.json
-
-
 jobs:
   check_redirects:
     name: Check redirect
@@ -52,9 +44,70 @@ jobs:
           curl -s -O "https://raw.githubusercontent.com/SwiftPackageIndex/PackageList-Validator/main/validator"
           chmod +x ./validator
           ./validator --version
-          ./validator check-dependencies -i packages.json -o packages.json --limit 10
+          ./validator check-dependencies -i packages.json -o packages.json --chunk 0 --number-of-chunks 3 --limit 10
       - name: Upload packages.json
         uses: actions/upload-artifact@v3
         with:
           name: packages.json
           path: packages.json
+
+  check_dependencies_1:
+    name: Check dependencies batch 1
+    needs: check_dependencies_0
+    runs-on: macos-latest
+    steps:
+      - name: Download packages.json
+        uses: actions/download-artifact@v3
+        with:
+          name: packages.json
+      # TODO: remove --limit
+      - name: Check dependencies
+        run: |
+          rm -f ./validator
+          curl -s -O "https://raw.githubusercontent.com/SwiftPackageIndex/PackageList-Validator/main/validator"
+          chmod +x ./validator
+          ./validator --version
+          ./validator check-dependencies -i packages.json -o packages.json --chunk 1 --number-of-chunks 3 --limit 10
+      - name: Upload packages.json
+        uses: actions/upload-artifact@v3
+        with:
+          name: packages.json
+          path: packages.json
+
+  check_dependencies_2:
+    name: Check dependencies batch 0
+    needs: check_dependencies_1
+    runs-on: macos-latest
+    steps:
+      - name: Download packages.json
+        uses: actions/download-artifact@v3
+        with:
+          name: packages.json
+      # TODO: remove --limit
+      - name: Check dependencies
+        run: |
+          rm -f ./validator
+          curl -s -O "https://raw.githubusercontent.com/SwiftPackageIndex/PackageList-Validator/main/validator"
+          chmod +x ./validator
+          ./validator --version
+          ./validator check-dependencies -i packages.json -o packages.json --chunk 2 --number-of-chunks 3 --limit 10
+
+          rm validator  # prevent binary from appearing in the PR
+
+      - name: Create pull request
+        id: cpr
+        uses: peter-evans/create-pull-request@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: Updated Packages
+          title: '[Nightly] Updated Packages'
+          body: |
+            :robot: This is an automated change
+            
+            - Removed any redirects
+            - Removed any duplicates
+            - Removed any deleted repositories
+            - Added any unknown dependencies
+
+      - name: Check outputs
+        run: echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
