@@ -6,52 +6,71 @@ on:
     - cron: '0 2 * * *'
 
 jobs:
-  check_redirects:
-    name: Check redirect
+  check_redirects_0:
+    name: Check redirect 0
     runs-on: macos-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Check redirect
+      - name: Fetch validator
         run: |
           rm -f ./validator
           curl -s -O "https://raw.githubusercontent.com/SwiftPackageIndex/PackageList-Validator/main/validator"
           chmod +x ./validator
+
+      - name: Check redirect
+        run: |
           ./validator --version
-          ./validator check-redirects -i packages.json -o packages.json
+          ./validator check-redirects -i packages.json -o packages.json --chunk 0 --number-of-chunks 2
           echo
           echo packages.json diff:
           git diff packages.json
 
-      - name: Upload packages.json
+      - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: packages.json
+          path: |
+            validator
+            packages.json
+
+  check_redirects_1:
+    name: Check redirect 1
+    needs: check_redirects_0
+    runs-on: macos-latest
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+
+      - name: Check redirect
+        run: |
+          ./validator --version
+          ./validator check-redirects -i packages.json -o packages.json --chunk 1 --number-of-chunks 2
+          echo
+          echo packages.json diff:
+          git diff packages.json
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
           path: packages.json
 
   check_dependencies_0:
     name: Check dependencies 0
-    needs: check_redirects
+    needs: check_redirects_1
     runs-on: macos-latest
     steps:
-      - name: Download packages.json
+      - name: Download artifacts
         uses: actions/download-artifact@v3
-        with:
-          name: packages.json
 
       - name: Check dependencies
         run: |
-          rm -f ./validator
-          curl -s -O "https://raw.githubusercontent.com/SwiftPackageIndex/PackageList-Validator/main/validator"
-          chmod +x ./validator
           ./validator --version
           ./validator check-dependencies -i packages.json -o packages.json --chunk 0 --number-of-chunks 3
 
-      - name: Upload packages.json
+      - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: packages.json
           path: packages.json
 
   check_dependencies_1:
@@ -59,22 +78,17 @@ jobs:
     needs: check_dependencies_0
     runs-on: macos-latest
     steps:
-      - name: Download packages.json
+      - name: Download artifacts
         uses: actions/download-artifact@v3
-        with:
-          name: packages.json
 
       - name: Check dependencies
         run: |
-          rm -f ./validator
-          curl -s -O "https://raw.githubusercontent.com/SwiftPackageIndex/PackageList-Validator/main/validator"
-          chmod +x ./validator
           ./validator --version
           ./validator check-dependencies -i packages.json -o packages.json --chunk 1 --number-of-chunks 3
-      - name: Upload packages.json
+
+      - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: packages.json
           path: packages.json
 
   check_dependencies_last:
@@ -86,16 +100,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Download packages.json
+      - name: Download artifacts
         uses: actions/download-artifact@v3
         with:
-          name: packages.json
+          path: packages.json
 
       - name: Check dependencies
         run: |
-          rm -f ./validator
-          curl -s -O "https://raw.githubusercontent.com/SwiftPackageIndex/PackageList-Validator/main/validator"
-          chmod +x ./validator
           ./validator --version
           ./validator check-dependencies -i packages.json -o packages.json --chunk 2 --number-of-chunks 3
 
