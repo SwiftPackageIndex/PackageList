@@ -38,11 +38,13 @@ jobs:
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v3
+        with:
+          path: |
+            validator
+            packages.json
 
       - name: Check redirect
         run: |
-          ls
-          chmod +x ./validator
           ./validator --version
           ./validator check-redirects -i packages.json -o packages.json --chunk 1 --number-of-chunks 2
           echo
