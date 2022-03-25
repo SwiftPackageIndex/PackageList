@@ -31,7 +31,7 @@ jobs:
           path: packages.json
 
   check_dependencies_0:
-    name: Check dependencies batch 0
+    name: Check dependencies 0
     needs: check_redirects
     runs-on: macos-latest
     steps:
@@ -55,7 +55,7 @@ jobs:
           path: packages.json
 
   check_dependencies_1:
-    name: Check dependencies batch 1
+    name: Check dependencies 1
     needs: check_dependencies_0
     runs-on: macos-latest
     steps:
@@ -78,7 +78,7 @@ jobs:
           path: packages.json
 
   check_dependencies_last:
-    name: Check dependencies batch 2
+    name: Check dependencies 2
     needs: check_dependencies_1
     runs-on: macos-latest
     steps:
