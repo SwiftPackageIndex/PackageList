@@ -4,13 +4,6 @@ on:
   push:
   workflow_dispatch:
 
-# jobs:
-#   test_job:
-#     runs-on: macos-latest
-#     steps:
-#     - name: Checkout
-#       uses: actions/checkout@v2
-
 #     # - name: Set up cache
 #     #   id: packages.json-cache
 #     #   uses: actions/cache@v2
@@ -18,68 +11,50 @@ on:
 #     #       path: ${{ github.workspace }}/packages.json
 #     #       key: ${{ runner.os }}-packages.json
 
-#     - name: Archive production artifacts
-#       uses: actions/upload-artifact@v3
-#       with:
-#         name: dist-without-markdown
-#         path: |
-#           dist
-#           !dist/**/*.md
-
-#     - name: Check redirects
-#       run: |
-#         echo $(date) > packages.json
-    
-#     - name: Check dependencies
-#       run: |
-#         echo "Reading packages.json"
-#         cat packages.json
-
 
 jobs:
-  job_1:
-    name: Add 3 and 7
-    runs-on: ubuntu-latest
+  check_redirects:
+    name: Check redirect
+    runs-on: macos-latest
     steps:
-      - shell: bash
+      - name: Checkout
+        uses: actions/checkout@v2
+      # TODO: remove --limit
+      - name: Check redirect
         run: |
-          expr 3 + 7 > math-homework.txt
-      - name: Upload math result for job 1
+          rm -f ./validator
+          curl -s -O "https://raw.githubusercontent.com/SwiftPackageIndex/PackageList-Validator/main/validator"
+          chmod +x ./validator
+          ./validator --version
+          ./validator check-redirects -i packages.json -o packages.json --limit 10
+          echo
+          echo packages.json diff:
+          git diff packages.json
+      - name: Upload packages.json
         uses: actions/upload-artifact@v3
         with:
-          name: homework
-          path: math-homework.txt
+          name: packages.json
+          path: packages.json
 
-  job_2:
-    name: Multiply by 9
-    needs: job_1
-    runs-on: windows-latest
+  check_dependencies_0:
+    name: Check dependencies batch 0
+    needs: check_redirects
+    runs-on: macos-latest
     steps:
-      - name: Download math result for job 1
+      - name: Download packages.json
         uses: actions/download-artifact@v3
         with:
-          name: homework
-      - shell: bash
+          name: packages.json
+      # TODO: remove --limit
+      - name: Check dependencies
         run: |
-          value=`cat math-homework.txt`
-          expr $value \* 9 > math-homework.txt
-      - name: Upload math result for job 2
+          rm -f ./validator
+          curl -s -O "https://raw.githubusercontent.com/SwiftPackageIndex/PackageList-Validator/main/validator"
+          chmod +x ./validator
+          ./validator --version
+          ./validator check-dependencies -i packages.json -o packages.json --limit 10
+      - name: Upload packages.json
         uses: actions/upload-artifact@v3
         with:
-          name: homework
-          path: math-homework.txt
-
-  job_3:
-    name: Display results
-    needs: job_2
-    runs-on: macOS-latest
-    steps:
-      - name: Download math result for job 2
-        uses: actions/download-artifact@v3
-        with:
-          name: homework
-      - name: Print the final result
-        shell: bash
-        run: |
-          value=`cat math-homework.txt`
-          echo The result is $value
+          name: packages.json
+          path: packages.json
