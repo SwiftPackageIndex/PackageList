@@ -17,10 +17,10 @@ jobs:
         run: |
           rm -f ./validator
           curl -s -O "https://raw.githubusercontent.com/SwiftPackageIndex/PackageList-Validator/main/validator"
-          chmod +x ./validator
 
       - name: Check redirect
         run: |
+          chmod +x ./validator
           ./validator --version
           ./validator check-redirects -i packages.json -o out.json --chunk 0 --number-of-chunks 2 --limit 10
 
@@ -43,6 +43,7 @@ jobs:
 
       - name: Check redirect
         run: |
+          chmod +x ./validator
           ./validator --version
           ./validator check-redirects -i out.json -o out.json --chunk 1 --number-of-chunks 2
 
@@ -63,6 +64,7 @@ jobs:
 
       - name: Check dependencies
         run: |
+          chmod +x ./validator
           ./validator --version
           ./validator check-dependencies -i out.json -o out.json --chunk 0 --number-of-chunks 3
 
@@ -83,6 +85,7 @@ jobs:
 
       - name: Check dependencies
         run: |
+          chmod +x ./validator
           ./validator --version
           ./validator check-dependencies -i out.json -o out.json --chunk 1 --number-of-chunks 3
 
@@ -107,6 +110,7 @@ jobs:
 
       - name: Check dependencies
         run: |
+          chmod +x ./validator
           ./validator --version
           ./validator check-dependencies -i out.json -o out.json --chunk 2 --number-of-chunks 3
 
