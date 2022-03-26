@@ -22,14 +22,14 @@ jobs:
       - name: Check redirect
         run: |
           ./validator --version
-          ./validator check-redirects -i packages.json -o packages.json --chunk 0 --number-of-chunks 2 --limit 10
+          ./validator check-redirects -i packages.json -o out.json --chunk 0 --number-of-chunks 2 --limit 10
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
           path: |
             validator
-            packages.json
+            out.json
 
   check_redirects_1:
     name: Check redirect 1
@@ -39,22 +39,17 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v3
         with:
-          path: |
-            validator
-            packages.json
+          name: artifact
 
       - name: Check redirect
         run: |
           ./validator --version
-          ./validator check-redirects -i packages.json -o packages.json --chunk 1 --number-of-chunks 2
-          echo
-          echo packages.json diff:
-          git diff packages.json
+          ./validator check-redirects -i out.json -o out.json --chunk 1 --number-of-chunks 2
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          path: packages.json
+          path: out.json
 
   check_dependencies_0:
     name: Check dependencies 0
@@ -63,16 +58,18 @@ jobs:
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v3
+        with:
+          name: artifact
 
       - name: Check dependencies
         run: |
           ./validator --version
-          ./validator check-dependencies -i packages.json -o packages.json --chunk 0 --number-of-chunks 3
+          ./validator check-dependencies -i out.json -o out.json --chunk 0 --number-of-chunks 3
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          path: packages.json
+          path: out.json
 
   check_dependencies_1:
     name: Check dependencies 1
@@ -81,16 +78,18 @@ jobs:
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v3
+        with:
+          name: artifact
 
       - name: Check dependencies
         run: |
           ./validator --version
-          ./validator check-dependencies -i packages.json -o packages.json --chunk 1 --number-of-chunks 3
+          ./validator check-dependencies -i out.json -o out.json --chunk 1 --number-of-chunks 3
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          path: packages.json
+          path: out.json
 
   check_dependencies_last:
     name: Check dependencies 2
@@ -104,13 +103,14 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v3
         with:
-          path: packages.json
+          name: artifact
 
       - name: Check dependencies
         run: |
           ./validator --version
-          ./validator check-dependencies -i packages.json -o packages.json --chunk 2 --number-of-chunks 3
+          ./validator check-dependencies -i out.json -o out.json --chunk 2 --number-of-chunks 3
 
+          mv out.json packages.json
           rm validator  # prevent binary from appearing in the PR
 
       - name: Create pull request
