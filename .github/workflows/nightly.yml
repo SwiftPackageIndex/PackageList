@@ -5,6 +5,11 @@ on:
   schedule:
     - cron: '0 2 * * *'
 
+env:
+  # see https://github.com/actions/virtual-environments for supported Xcode versions
+  DEVELOPER_DIR: /Applications/Xcode_13.2.1.app
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 jobs:
   check_redirects_0:
     name: Check redirect 0
