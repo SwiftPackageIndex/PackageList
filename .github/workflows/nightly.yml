@@ -11,8 +11,8 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
-  check_redirects_0:
-    name: Check redirect 0
+  check_redirects:
+    name: Check redirects
     runs-on: macos-latest
     steps:
       - name: Checkout
@@ -27,7 +27,7 @@ jobs:
         run: |
           chmod +x ./validator
           ./validator --version
-          ./validator check-redirects -i packages.json -o out.json --chunk 0 --number-of-chunks 2
+          ./validator check-redirects -i packages.json -o out.json
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
@@ -36,30 +36,9 @@ jobs:
             validator
             out.json
 
-  check_redirects_1:
-    name: Check redirect 1
-    needs: check_redirects_0
-    runs-on: macos-latest
-    steps:
-      - name: Download artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: artifact
-
-      - name: Check redirect
-        run: |
-          chmod +x ./validator
-          ./validator --version
-          ./validator check-redirects -i out.json -o out.json --chunk 1 --number-of-chunks 2
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          path: out.json
-
   check_dependencies_0:
     name: Check dependencies 0
-    needs: check_redirects_1
+    needs: check_redirects
     runs-on: macos-latest
     steps:
       - name: Download artifacts
