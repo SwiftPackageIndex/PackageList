@@ -96,3 +96,41 @@ jobs:
           path: |
             out_1.json
 
+  check_dependencies_last:
+    name: Check dependencies 2
+    needs: check_dependencies_1
+    runs-on: macos-latest
+    steps:
+      # we need to check out the repo in the last step in order to create a PR
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: artifact
+
+      - name: Check dependencies
+        run: |
+          chmod +x ./validator
+          ./validator check-dependencies -i redirect-checked.json -o out_2.json --chunk 2 --number-of-chunks 3
+          ./validator merge-lists out_*.json -o packages.json
+          rm validator  # prevent binary from appearing in the PR
+
+      - name: Create pull request
+        id: cpr
+        uses: peter-evans/create-pull-request@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: Updated Packages
+          title: '[Nightly] Updated Packages'
+          body: |
+            :robot: This is an automated change
+            
+            - Removed any redirects
+            - Removed any duplicates
+            - Removed any deleted repositories
+            - Added any unknown dependencies
+
+      - name: Check outputs
+        run: echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
