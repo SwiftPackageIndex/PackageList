@@ -38,6 +38,9 @@ jobs:
     needs: install_mint
     runs-on: macos-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
       - name: Mint cache
         id: mint-cache
         uses: actions/cache@v2
@@ -45,11 +48,9 @@ jobs:
             path: ${{ github.workspace }}/.mint
             key: ${{ runner.os }}-mint
 
-      - name: Checkout
-        uses: actions/checkout@v2
-
       - name: Check redirect
         run: |
+          ls -lR .mint
           ./.mint/bin/validator check-redirects -i packages.json -o redirect-checked.json --limit 10
 
       - name: Upload artifacts
