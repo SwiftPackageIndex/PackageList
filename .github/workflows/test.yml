@@ -10,7 +10,7 @@ env:
   # see https://github.com/actions/virtual-environments for supported Xcode versions
   DEVELOPER_DIR: /Applications/Xcode_13.2.1.app
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+  MINT_PATH: $GITHUB_WORKSPACE/mint
 
 jobs:
 
@@ -18,6 +18,13 @@ jobs:
     name: Set up Mint & packages
     runs-on: macos-latest
     steps:
+      - name: Mint cache
+        id: mint-cache
+        uses: actions/cache@v2
+        with:
+            path: ${{ github.workspace }}/mint
+            key: ${{ runner.os }}-mint
+
       - name: Install Mint
         run: |
           brew upgrade mint || brew install mint || true
@@ -25,12 +32,6 @@ jobs:
       - name: Install packages
         run: |
           mint install SwiftPackageIndex/PackageList-Validator@main
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          path: |
-            .mint/bin/validator
 
   check_redirects:
     name: Check redirects
@@ -40,15 +41,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Download artifacts
-        uses: actions/download-artifact@v3
+      - name: Mint cache
+        id: mint-cache
+        uses: actions/cache@v2
         with:
-          name: artifact
+            path: ${{ github.workspace }}/mint
+            key: ${{ runner.os }}-mint
 
       - name: Check redirect
         run: |
           ls -lR .
-          ./.mint/bin/validator check-redirects -i packages.json -o redirect-checked.json --limit 10
+          ./mint/bin/validator check-redirects -i packages.json -o redirect-checked.json --limit 10
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
@@ -66,9 +69,16 @@ jobs:
         with:
           name: artifact
 
+      - name: Mint cache
+        id: mint-cache
+        uses: actions/cache@v2
+        with:
+            path: ${{ github.workspace }}/mint
+            key: ${{ runner.os }}-mint
+
       - name: Check dependencies
         run: |
-          ./.mint/bin/validator check-dependencies -i redirect-checked.json.json -o out_0.json --chunk 0 --number-of-chunks 3
+          ./mint/bin/validator check-dependencies -i redirect-checked.json.json -o out_0.json --chunk 0 --number-of-chunks 3
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
