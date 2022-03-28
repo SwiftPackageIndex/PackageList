@@ -32,7 +32,6 @@ jobs:
       - name: Install packages
         run: |
           mint install SwiftPackageIndex/PackageList-Validator@main
-          mint install SwiftPackageIndex/spi-package-importer@main
   
   check_redirects:
     name: Check redirects
@@ -50,4 +49,25 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           path: |
-            redirect-checked
+            redirect-checked.json
+
+  check_dependencies_0:
+    name: Check dependencies 0
+    needs: check_redirects
+    runs-on: macos-latest
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: artifact
+
+      - name: Check dependencies
+        run: |
+          mint run validator check-dependencies -i redirect-checked.json.json -o out_0.json --chunk 0 --number-of-chunks 3
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          path: |
+            redirect-checked.json
+            out_0.json
