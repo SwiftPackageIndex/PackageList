@@ -93,5 +93,6 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
+          path: |
             out_1.json
 
