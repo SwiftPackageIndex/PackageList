@@ -22,7 +22,7 @@ jobs:
         id: mint-cache
         uses: actions/cache@v2
         with:
-            path: ${{ github.workspace }}/mint
+            path: ${{ github.workspace }}/.mint
             key: ${{ runner.os }}-mint
 
       - name: Install Mint
@@ -32,7 +32,6 @@ jobs:
       - name: Install packages
         run: |
           mint install SwiftPackageIndex/PackageList-Validator@main
-          ls -lR
   
   check_redirects:
     name: Check redirects
@@ -51,8 +50,8 @@ jobs:
 
       - name: Check redirect
         run: |
-          ls -lR
-          ./mint/bin/validator check-redirects -i packages.json -o redirect-checked.json --limit 10
+          ls -laR
+          ./.mint/bin/validator check-redirects -i packages.json -o redirect-checked.json --limit 10
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
@@ -72,7 +71,7 @@ jobs:
 
       - name: Check dependencies
         run: |
-          ./mint/bin/validator check-dependencies -i redirect-checked.json.json -o out_0.json --chunk 0 --number-of-chunks 3
+          ./.mint/bin/validator check-dependencies -i redirect-checked.json.json -o out_0.json --chunk 0 --number-of-chunks 3
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
