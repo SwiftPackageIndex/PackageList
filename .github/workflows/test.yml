@@ -32,6 +32,7 @@ jobs:
       - name: Install packages
         run: |
           mint install SwiftPackageIndex/PackageList-Validator@main
+          ls -lR
   
   check_redirects:
     name: Check redirects
@@ -50,7 +51,6 @@ jobs:
 
       - name: Check redirect
         run: |
-          ls -l
           ls -lR
           ./mint/bin/validator check-redirects -i packages.json -o redirect-checked.json --limit 10
 
