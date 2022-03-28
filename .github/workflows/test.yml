@@ -115,7 +115,8 @@ jobs:
           chmod +x ./validator
           ./validator check-dependencies -i redirect-checked.json -o out_2.json --chunk 2 --number-of-chunks 3
           ./validator merge-lists out_*.json -o packages.json
-          rm validator  # prevent binary from appearing in the PR
+          # artifacts from appearing in the PR
+          rm out_*.json redirect-checked.json validator
 
       - name: Create pull request
         id: cpr
