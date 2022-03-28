@@ -11,30 +11,47 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
-  check_redirects:
-    name: Check redirects
+
+  build_validator:
+    name: Build validator
     runs-on: macos-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Fetch validator
+      - name: Build validator
         run: |
-          rm -f ./validator
-          curl -s -O "https://raw.githubusercontent.com/SwiftPackageIndex/PackageList-Validator/main/validator"
-
-      - name: Check redirect
-        run: |
-          chmod +x ./validator
-          ./validator --version
-          ./validator check-redirects -i packages.json -o out.json
+          git clone https://github.com/SwiftPackageIndex/PackageList-Validator.git --depth 1
+          cd PackageList-Validator
+          swift build
+          cp $(swift build --show-bin-path)/validator $GITHUB_WORKSPACE/
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
           path: |
             validator
-            out.json
+
+  check_redirects:
+    name: Check redirects
+    needs: build_validator
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: artifact
+
+      - name: Check redirect
+        run: |
+          chmod +x ./validator
+          ./validator check-redirects -i packages.json -o redirect-checked.json --limit 10
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          path: |
+            redirect-checked.json
 
   check_dependencies_0:
     name: Check dependencies 0
@@ -49,14 +66,12 @@ jobs:
       - name: Check dependencies
         run: |
           chmod +x ./validator
-          ./validator --version
-          ./validator check-dependencies -i out.json -o out_0.json --chunk 0 --number-of-chunks 3
+          ./validator check-dependencies -i redirect-checked.json -o out_0.json --chunk 0 --number-of-chunks 3
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
           path: |
-            out.json
             out_0.json
 
   check_dependencies_1:
@@ -72,15 +87,12 @@ jobs:
       - name: Check dependencies
         run: |
           chmod +x ./validator
-          ./validator --version
-          ./validator check-dependencies -i out.json -o out_1.json --chunk 1 --number-of-chunks 3
+          ./validator check-dependencies -i redirect-checked.json -o out_1.json --chunk 1 --number-of-chunks 3
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
           path: |
-            out.json
-            out_0.json
             out_1.json
 
   check_dependencies_last:
@@ -100,12 +112,10 @@ jobs:
       - name: Check dependencies
         run: |
           chmod +x ./validator
-          ./validator --version
-          ./validator check-dependencies -i out.json -o out_2.json --chunk 2 --number-of-chunks 3
-
-          # TODO: merge
-          #merge out_*.json packages.json
-          #rm validator  # prevent binary from appearing in the PR
+          ./validator check-dependencies -i redirect-checked.json -o out_2.json --chunk 2 --number-of-chunks 3
+          ./validator merge-lists out_*.json -o packages.json
+          # artifacts from appearing in the PR
+          rm out_*.json redirect-checked.json validator
 
       - name: Create pull request
         id: cpr
