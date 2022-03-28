@@ -14,7 +14,7 @@ env:
 jobs:
 
   install_mint:
-    name: Set up Mint & packages
+    name: Build validator
     runs-on: macos-latest
     steps:
       - name: Build validator
@@ -45,14 +45,13 @@ jobs:
 
       - name: Check redirect
         run: |
-          ls -lR .
-          ./mint/bin/validator check-redirects -i packages.json -o redirect-checked.json --limit 10
+          chmod +x ./validator
+          ./validator check-redirects -i packages.json -o redirect-checked.json --limit 10
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
           path: |
-            validator
             redirect-checked.json
 
   check_dependencies_0:
@@ -65,21 +64,34 @@ jobs:
         with:
           name: artifact
 
-      - name: Mint cache
-        id: mint-cache
-        uses: actions/cache@v2
-        with:
-            path: ${{ github.workspace }}/mint
-            key: ${{ runner.os }}-mint
-
       - name: Check dependencies
         run: |
-          ./mint/bin/validator check-dependencies -i redirect-checked.json.json -o out_0.json --chunk 0 --number-of-chunks 3
+          chmod +x ./validator
+          ./validator check-dependencies -i redirect-checked.json -o out_0.json --chunk 0 --number-of-chunks 3
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
           path: |
-            validator
-            redirect-checked.json
             out_0.json
+
+  check_dependencies_1:
+    name: Check dependencies 1
+    needs: check_dependencies_0
+    runs-on: macos-latest
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: artifact
+
+      - name: Check dependencies
+        run: |
+          chmod +x ./validator
+          ./validator check-dependencies -i redirect-checked.json -o out_1.json --chunk 1 --number-of-chunks 3
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+            out_1.json
+
