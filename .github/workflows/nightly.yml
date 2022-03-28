@@ -50,12 +50,14 @@ jobs:
         run: |
           chmod +x ./validator
           ./validator --version
-          ./validator check-dependencies -i out.json -o out.json --chunk 0 --number-of-chunks 3
+          ./validator check-dependencies -i out.json -o out_0.json --chunk 0 --number-of-chunks 3
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          path: out.json
+          path: |
+            out.json
+            out_0.json
 
   check_dependencies_1:
     name: Check dependencies 1
@@ -71,12 +73,14 @@ jobs:
         run: |
           chmod +x ./validator
           ./validator --version
-          ./validator check-dependencies -i out.json -o out.json --chunk 1 --number-of-chunks 3
+          ./validator check-dependencies -i out.json -o out_1.json --chunk 1 --number-of-chunks 3
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          path: out.json
+            out.json
+            out_0.json
+            out_1.json
 
   check_dependencies_last:
     name: Check dependencies 2
@@ -96,9 +100,10 @@ jobs:
         run: |
           chmod +x ./validator
           ./validator --version
-          ./validator check-dependencies -i out.json -o out.json --chunk 2 --number-of-chunks 3
+          ./validator check-dependencies -i out.json -o out_2.json --chunk 2 --number-of-chunks 3
 
-          mv out.json packages.json
+# TODO: merge
+          merge out_*.json packages.json
           rm validator  # prevent binary from appearing in the PR
 
       - name: Create pull request
