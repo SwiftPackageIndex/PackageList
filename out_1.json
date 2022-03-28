@@ -3,10 +3,10 @@
   "https://github.com/0111b/JSONDecoder-Keypath.git",
   "https://github.com/0111b/UIPreview.git",
   "https://github.com/0x0c/TableViewContent.git",
+  "https://github.com/0xacdc/XCFSodium.git",
+  "https://github.com/0xdeadp00l/bech32.git",
   "https://github.com/0xLeif/Chronicle.git",
   "https://github.com/0xLeif/Closure.git",
   "https://github.com/0xLeif/FlatMany.git",
-  "https://github.com/0xLeif/KeyValueView.git",
-  "https://github.com/0xacdc/XCFSodium.git",
-  "https://github.com/0xdeadp00l/bech32.git"
+  "https://github.com/0xLeif/KeyValueView.git"
 ]
