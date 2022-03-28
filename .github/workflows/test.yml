@@ -1,0 +1,53 @@
+name: Cache test
+
+on:
+  push:
+  workflow_dispatch:
+
+# ===============================
+
+env:
+  # see https://github.com/actions/virtual-environments for supported Xcode versions
+  DEVELOPER_DIR: /Applications/Xcode_13.2.1.app
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+jobs:
+
+  install_mint:
+    name: Set up Mint & packages
+    runs-on: macos-latest
+    steps:
+      # - name: Cache/Restore Mint packages
+      #   id: mint-cache
+      #   uses: actions/cache@v2
+      #   with:
+      #       path: ${{ github.workspace }}/mint
+      #       key: ${{ runner.os }}-mint
+
+      - name: Install Mint
+        run: |
+          brew upgrade mint || brew install mint || true
+
+      - name: Install packages
+        run: |
+          mint install SwiftPackageIndex/spi-validator@main
+          mint install SwiftPackageIndex/spi-package-importer@main
+  
+  check_redirects:
+    name: Check redirects
+    needs: install_mint
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Check redirect
+        run: |
+          mint run validator check-redirects -i packages.json -o redirect-checked.json --limit 10
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          path: |
+            redirect-checked
