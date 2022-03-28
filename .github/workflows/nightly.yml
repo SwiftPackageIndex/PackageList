@@ -45,7 +45,7 @@ jobs:
       - name: Check redirect
         run: |
           chmod +x ./validator
-          ./validator check-redirects -i packages.json -o redirect-checked.json --limit 10
+          ./validator check-redirects -i packages.json -o redirect-checked.json
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
