@@ -102,9 +102,9 @@ jobs:
           ./validator --version
           ./validator check-dependencies -i out.json -o out_2.json --chunk 2 --number-of-chunks 3
 
-# TODO: merge
-          merge out_*.json packages.json
-          rm validator  # prevent binary from appearing in the PR
+          # TODO: merge
+          #merge out_*.json packages.json
+          #rm validator  # prevent binary from appearing in the PR
 
       - name: Create pull request
         id: cpr
