@@ -10,8 +10,6 @@ env:
   # see https://github.com/actions/virtual-environments for supported Xcode versions
   DEVELOPER_DIR: /Applications/Xcode_13.2.1.app
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  MINT_PATH: $GITHUB_WORKSPACE/mint
-  MINT_LINK_PATH: $GITHUB_WORKSPACE/mint/bin
 
 jobs:
 
@@ -19,22 +17,18 @@ jobs:
     name: Set up Mint & packages
     runs-on: macos-latest
     steps:
-      - name: Mint cache
-        id: mint-cache
-        uses: actions/cache@v2
+      - name: Build validator
+        run: |
+          git clone https://github.com/SwiftPackageIndex/PackageList-Validator.git --depth 1
+          cd PackageList-Validator
+          swift build
+          cp $(swift build --show-bin-path)/validator $GITHUB_WORKSPACE/
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
         with:
-            path: ${{ github.workspace }}/mint
-            key: ${{ runner.os }}-mint
-
-      - name: Install Mint
-        run: |
-          brew upgrade mint || brew install mint || true
-
-      - name: Install packages
-        run: |
-          echo MINT_PATH $MINT_PATH
-          echo MINT_LINK_PATH $MINT_LINK_PATH
-          mint install SwiftPackageIndex/PackageList-Validator@main
+          path: |
+            validator
 
   check_redirects:
     name: Check redirects
@@ -44,12 +38,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Mint cache
-        id: mint-cache
-        uses: actions/cache@v2
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
         with:
-            path: ${{ github.workspace }}/mint
-            key: ${{ runner.os }}-mint
+          name: artifact
 
       - name: Check redirect
         run: |
@@ -60,6 +52,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           path: |
+            validator
             redirect-checked.json
 
   check_dependencies_0:
@@ -87,5 +80,6 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           path: |
+            validator
             redirect-checked.json
             out_0.json
