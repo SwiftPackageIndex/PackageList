@@ -31,7 +31,7 @@ jobs:
 
       - name: Install packages
         run: |
-          mint install SwiftPackageIndex/spi-validator@main
+          mint install SwiftPackageIndex/PackageList-Validator@main
           mint install SwiftPackageIndex/spi-package-importer@main
   
   check_redirects:
