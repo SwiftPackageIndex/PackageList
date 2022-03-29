@@ -15,7 +15,7 @@ jobs:
 
   build_validator:
     name: Build validator
-    runs-on: ${{ env.VIRTUAL_ENVIRONMENT }}
+    runs-on: $VIRTUAL_ENVIRONMENT
     steps:
       - uses: fwal/setup-swift@v1
         with:
@@ -37,7 +37,7 @@ jobs:
   check_redirects:
     name: Check redirects
     needs: build_validator
-    runs-on: ${{ env.VIRTUAL_ENVIRONMENT }}
+    runs-on: $VIRTUAL_ENVIRONMENT
     steps:
       - uses: fwal/setup-swift@v1
         with:
@@ -65,7 +65,7 @@ jobs:
   check_dependencies_0:
     name: Check dependencies 0
     needs: check_redirects
-    runs-on: ${{ env.VIRTUAL_ENVIRONMENT }}
+    runs-on: $VIRTUAL_ENVIRONMENT
     steps:
       - uses: fwal/setup-swift@v1
         with:
@@ -90,7 +90,7 @@ jobs:
   check_dependencies_1:
     name: Check dependencies 1
     needs: check_dependencies_0
-    runs-on: ${{ env.VIRTUAL_ENVIRONMENT }}
+    runs-on: $VIRTUAL_ENVIRONMENT
     steps:
       - uses: fwal/setup-swift@v1
         with:
@@ -115,7 +115,7 @@ jobs:
   check_dependencies_last:
     name: Check dependencies 2
     needs: check_dependencies_1
-    runs-on: ${{ env.VIRTUAL_ENVIRONMENT }}
+    runs-on: $VIRTUAL_ENVIRONMENT
     steps:
       - uses: fwal/setup-swift@v1
         with:
