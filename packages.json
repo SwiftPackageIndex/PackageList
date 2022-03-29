@@ -297,7 +297,6 @@
   "https://github.com/apple/swift-distributed-tracing-baggage-core.git",
   "https://github.com/apple/swift-distributed-tracing-baggage.git",
   "https://github.com/apple/swift-distributed-tracing.git",
-  "https://github.com/apple/swift-docc-plugin.git",
   "https://github.com/apple/swift-docc-symbolkit.git",
   "https://github.com/apple/swift-docc.git",
   "https://github.com/apple/swift-driver.git",
