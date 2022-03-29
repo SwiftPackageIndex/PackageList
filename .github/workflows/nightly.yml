@@ -3,19 +3,23 @@ name: Nightly Audit
 on: 
   workflow_dispatch:
   schedule:
-    - cron: '0 2 * * *'
+    - cron: '0 0 * * *'
 
 env:
-  # see https://github.com/actions/virtual-environments for supported Xcode versions
-  DEVELOPER_DIR: /Applications/Xcode_13.2.1.app
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  # see https://github.com/actions/virtual-environments for available environments
+  SWIFT_VERSION: "5.6"
 
 jobs:
 
   build_validator:
     name: Build validator
-    runs-on: macos-latest
+    runs-on: ubuntu-20.04
     steps:
+      - uses: fwal/setup-swift@v1
+        with:
+          swift-version: ${{ env.SWIFT_VERSION }}
+
       - name: Build validator
         run: |
           git clone https://github.com/SwiftPackageIndex/PackageList-Validator.git --depth 1
@@ -32,8 +36,12 @@ jobs:
   check_redirects:
     name: Check redirects
     needs: build_validator
-    runs-on: macos-latest
+    runs-on: ubuntu-20.04
     steps:
+      - uses: fwal/setup-swift@v1
+        with:
+          swift-version: ${{ env.SWIFT_VERSION }}
+
       - name: Checkout
         uses: actions/checkout@v2
 
@@ -56,8 +64,12 @@ jobs:
   check_dependencies_0:
     name: Check dependencies 0
     needs: check_redirects
-    runs-on: macos-latest
+    runs-on: ubuntu-20.04
     steps:
+      - uses: fwal/setup-swift@v1
+        with:
+          swift-version: ${{ env.SWIFT_VERSION }}
+
       - name: Download artifacts
         uses: actions/download-artifact@v3
         with:
@@ -77,8 +89,12 @@ jobs:
   check_dependencies_1:
     name: Check dependencies 1
     needs: check_dependencies_0
-    runs-on: macos-latest
+    runs-on: ubuntu-20.04
     steps:
+      - uses: fwal/setup-swift@v1
+        with:
+          swift-version: ${{ env.SWIFT_VERSION }}
+
       - name: Download artifacts
         uses: actions/download-artifact@v3
         with:
@@ -98,8 +114,12 @@ jobs:
   check_dependencies_last:
     name: Check dependencies 2
     needs: check_dependencies_1
-    runs-on: macos-latest
+    runs-on: ubuntu-20.04
     steps:
+      - uses: fwal/setup-swift@v1
+        with:
+          swift-version: ${{ env.SWIFT_VERSION }}
+
       # we need to check out the repo in the last step in order to create a PR
       - name: Checkout
         uses: actions/checkout@v2
