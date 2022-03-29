@@ -9,17 +9,15 @@ on:
     types: [submitted]
 
 env:
-  # Swift version 5.6-dev (LLVM 542eceb110d8480, Swift 4323d2fa26a6bf8)
-  # Target: x86_64-unknown-linux-gnu
-  SWIFT_IMAGE: swiftlang/swift@sha256:cc3a796de27ef460b7b4a3dc8f2e7e5aff7fcae989ea49674753a87261ae0448
+  SWIFT_IMAGE: swift:5.6-focal
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   validate:
     runs-on: ubuntu-20.04
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-    - name: Validate JSON
-      run: docker run --rm -v "$PWD:/host" -w /host $SWIFT_IMAGE swift validate.swift
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Validate JSON
+        run: docker run --rm -v "$PWD:/host" -w /host $SWIFT_IMAGE swift validate.swift
