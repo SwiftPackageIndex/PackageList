@@ -5,9 +5,8 @@ on:
   schedule:
     - cron: '0 0 * * *'
 
+# see https://github.com/actions/virtual-environments for available environments
 env:
-  # see https://github.com/actions/virtual-environments for supported Xcode versions
-  DEVELOPER_DIR: /Applications/Xcode_13.2.1.app
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
