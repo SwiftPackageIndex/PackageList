@@ -3,7 +3,7 @@ name: Nightly Audit
 on: 
   workflow_dispatch:
   schedule:
-    - cron: '0 2 * * *'
+    - cron: '0 0 * * *'
 
 env:
   # see https://github.com/actions/virtual-environments for supported Xcode versions
