@@ -20,4 +20,4 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Validate JSON
-        run: docker run --rm -v "$PWD:/host" -w /host $SWIFT_IMAGE swift validate.swift
+        run: docker run --rm --env GITHUB_TOKEN=$GITHUB_TOKEN -v "$PWD:/host" -w /host $SWIFT_IMAGE swift validate.swift
