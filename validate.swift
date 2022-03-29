@@ -188,8 +188,20 @@ extension String {
         return self
     }
 
+    func rtrim(_ characterSet: CharacterSet = .whitespacesAndNewlines) -> String {
+        String(
+            reversed()
+                .drop(while: { char in
+                    CharacterSet(charactersIn: String(char)).isSubset(of: characterSet)
+                })
+                .reversed()
+        )
+    }
+
     func normalized() -> String {
-        lowercased().addingGitExtension()
+        lowercased()
+            .rtrim(.init(charactersIn: "/"))
+            .addingGitExtension()
     }
 }
 
@@ -203,7 +215,10 @@ extension URL {
     }
 
     func normalized() -> String {
-        absoluteString.lowercased().addingGitExtension()
+        absoluteString
+            .lowercased()
+            .rtrim(.init(charactersIn: "/"))
+            .addingGitExtension()
     }
 }
 
