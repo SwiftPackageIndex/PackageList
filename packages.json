@@ -304,6 +304,7 @@
   "https://github.com/apple/swift-docc-symbolkit.git",
   "https://github.com/apple/swift-docc.git",
   "https://github.com/apple/swift-driver.git",
+  "https://github.com/apple/swift-experimental-string-processing.git",
   "https://github.com/apple/swift-format.git",
   "https://github.com/apple/swift-llbuild.git",
   "https://github.com/apple/swift-llbuild2.git",
