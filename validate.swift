@@ -35,6 +35,7 @@ enum AppError: Error {
     case noData(URL)
     case noProducts(URL)
     case notFound(URL)
+    case outputIdentical
     case packageDumpError(String)
     case packageDumpTimeout
     case packageListChanged
@@ -56,6 +57,8 @@ enum AppError: Error {
                 return "package has no products: \(url.absoluteString)"
             case .notFound(let url):
                 return "url not found (404): \(url.absoluteString)"
+            case .outputIdentical:
+                return "resulting package.json is unchanged"
             case .packageDumpError(let msg):
                 return "package dump failed: \(msg)"
             case .packageDumpTimeout:
@@ -401,13 +404,17 @@ func processPackageList() throws {
         let original = String(decoding: packageListData, as: UTF8.self).trimmingCharacters(in: .whitespacesAndNewlines)
         let new = String(decoding: newListData, as: UTF8.self).trimmingCharacters(in: .whitespacesAndNewlines)
         if original != new {
-            print("⚠️  Changes have been made to 'packages.json'. Your original version has been")
-            print("⚠️  copied to 'package.backup.json'. Please commit the updated file.")
-            let backupURL = packageListFileURL.deletingLastPathComponent()
-                .appendingPathComponent("packages.backup.json")
-            try packageListData.write(to: backupURL)
-            try newListData.write(to: packageListFileURL)
-            throw AppError.packageListChanged
+            if newList == onlinePackageList.map(\.absoluteString) {
+                throw AppError.outputIdentical
+            } else {
+                print("⚠️  Changes have been made to 'packages.json'. Your original version has been")
+                print("⚠️  copied to 'package.backup.json'. Please commit the updated file.")
+                let backupURL = packageListFileURL.deletingLastPathComponent()
+                    .appendingPathComponent("packages.backup.json")
+                try packageListData.write(to: backupURL)
+                try newListData.write(to: packageListFileURL)
+                throw AppError.packageListChanged
+            }
         }
     }
 }
