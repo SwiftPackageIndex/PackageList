@@ -1038,6 +1038,7 @@
   "https://github.com/dastrobu/geodesic.git",
   "https://github.com/dastrobu/vincenty.git",
   "https://github.com/DataDog/dd-sdk-ios.git",
+  "https://github.com/DataDog/FeatureFlagsController-iOS.git",
   "https://github.com/DataModelGen/DataModelKit.git",
   "https://github.com/davbeck/MultipartForm.git",
   "https://github.com/davbeck/PersistentCacheKit.git",
