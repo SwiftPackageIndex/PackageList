@@ -4073,6 +4073,7 @@
   "https://github.com/swift-extras/swift-extras-json.git",
   "https://github.com/swift-kipple/Core.git",
   "https://github.com/swift-kipple/Networking.git",
+  "https://github.com/swift-kipple/Plugins.git",
   "https://github.com/swift-server-community/APNSwift.git",
   "https://github.com/swift-server-community/mqtt-nio.git",
   "https://github.com/swift-server-community/SwiftPrometheus.git",
