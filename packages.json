@@ -662,6 +662,8 @@
   "https://github.com/brokenhandsio/cmark-gfm.git",
   "https://github.com/brokenhandsio/leaf-error-middleware.git",
   "https://github.com/brokenhandsio/SteamPress.git",
+  "https://github.com/brokenhandsio/vapor-csrf.git",
+  "https://github.com/brokenhandsio/vapor-dynamodb-sessions.git",
   "https://github.com/brokenhandsio/VaporSecurityHeaders.git",
   "https://github.com/broomburgo/Narratore.git",
   "https://github.com/bruno-garcia/SentryCocoaLumberjack.git",
