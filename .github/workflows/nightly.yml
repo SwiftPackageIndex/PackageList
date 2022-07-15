@@ -9,11 +9,11 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   # see https://github.com/actions/virtual-environments for available environments
   SWIFT_VERSION: "5.6"
+  NUMBER_OF_CHUNKS: "10"
 
 jobs:
 
   build_validator:
-    name: Build validator
     runs-on: ubuntu-20.04
     steps:
       - uses: fwal/setup-swift@v1
@@ -34,7 +34,6 @@ jobs:
             validator
 
   check_redirects:
-    name: Check redirects
     needs: build_validator
     runs-on: ubuntu-20.04
     steps:
@@ -61,9 +60,13 @@ jobs:
           path: |
             redirect-checked.json
 
+
   check_dependencies_0:
-    name: Check dependencies 0
-    needs: check_redirects
+    needs: check_redirects  # reference previous step
+    env:
+      CHUNK: "0"
+      OUTPUT_FILE: out_0.json
+    # -- common --
     runs-on: ubuntu-20.04
     steps:
       - uses: fwal/setup-swift@v1
@@ -78,17 +81,21 @@ jobs:
       - name: Check dependencies
         run: |
           chmod +x ./validator
-          ./validator check-dependencies -i redirect-checked.json -o out_0.json --chunk 0 --number-of-chunks 3
+          ./validator check-dependencies -i redirect-checked.json -o $OUTPUT_FILE --chunk $CHUNK --number-of-chunks $NUMBER_OF_CHUNKS
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
           path: |
-            out_0.json
+            ${{ env.OUTPUT_FILE }}
+
 
   check_dependencies_1:
-    name: Check dependencies 1
-    needs: check_dependencies_0
+    needs: check_dependencies_0  # reference previous step
+    env:
+      CHUNK: "1"
+      OUTPUT_FILE: out_1.json
+    # -- common --
     runs-on: ubuntu-20.04
     steps:
       - uses: fwal/setup-swift@v1
@@ -103,18 +110,226 @@ jobs:
       - name: Check dependencies
         run: |
           chmod +x ./validator
-          ./validator check-dependencies -i redirect-checked.json -o out_1.json --chunk 1 --number-of-chunks 3
+          ./validator check-dependencies -i redirect-checked.json -o $OUTPUT_FILE --chunk $CHUNK --number-of-chunks $NUMBER_OF_CHUNKS
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
           path: |
-            out_1.json
+            ${{ env.OUTPUT_FILE }}
 
-  check_dependencies_last:
-    name: Check dependencies 2
-    needs: check_dependencies_1
+
+  check_dependencies_2:
+    needs: check_dependencies_1  # reference previous step
+    env:
+      CHUNK: "2"
+      OUTPUT_FILE: out_2.json
+    # -- common --
     runs-on: ubuntu-20.04
+    steps:
+      - uses: fwal/setup-swift@v1
+        with:
+          swift-version: ${{ env.SWIFT_VERSION }}
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: artifact
+
+      - name: Check dependencies
+        run: |
+          chmod +x ./validator
+          ./validator check-dependencies -i redirect-checked.json -o $OUTPUT_FILE --chunk $CHUNK --number-of-chunks $NUMBER_OF_CHUNKS
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          path: |
+            ${{ env.OUTPUT_FILE }}
+
+
+  check_dependencies_3:
+    needs: check_dependencies_2  # reference previous step
+    env:
+      CHUNK: "3"
+      OUTPUT_FILE: out_3.json
+    # -- common --
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: fwal/setup-swift@v1
+        with:
+          swift-version: ${{ env.SWIFT_VERSION }}
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: artifact
+
+      - name: Check dependencies
+        run: |
+          chmod +x ./validator
+          ./validator check-dependencies -i redirect-checked.json -o $OUTPUT_FILE --chunk $CHUNK --number-of-chunks $NUMBER_OF_CHUNKS
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          path: |
+            ${{ env.OUTPUT_FILE }}
+
+
+  check_dependencies_4:
+    needs: check_dependencies_3  # reference previous step
+    env:
+      CHUNK: "4"
+      OUTPUT_FILE: out_4.json
+    # -- common --
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: fwal/setup-swift@v1
+        with:
+          swift-version: ${{ env.SWIFT_VERSION }}
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: artifact
+
+      - name: Check dependencies
+        run: |
+          chmod +x ./validator
+          ./validator check-dependencies -i redirect-checked.json -o $OUTPUT_FILE --chunk $CHUNK --number-of-chunks $NUMBER_OF_CHUNKS
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          path: |
+            ${{ env.OUTPUT_FILE }}
+
+
+  check_dependencies_5:
+    needs: check_dependencies_4  # reference previous step
+    env:
+      CHUNK: "5"
+      OUTPUT_FILE: out_5.json
+    # -- common --
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: fwal/setup-swift@v1
+        with:
+          swift-version: ${{ env.SWIFT_VERSION }}
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: artifact
+
+      - name: Check dependencies
+        run: |
+          chmod +x ./validator
+          ./validator check-dependencies -i redirect-checked.json -o $OUTPUT_FILE --chunk $CHUNK --number-of-chunks $NUMBER_OF_CHUNKS
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          path: |
+            ${{ env.OUTPUT_FILE }}
+
+
+  check_dependencies_6:
+    needs: check_dependencies_5  # reference previous step
+    env:
+      CHUNK: "6"
+      OUTPUT_FILE: out_6.json
+    # -- common --
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: fwal/setup-swift@v1
+        with:
+          swift-version: ${{ env.SWIFT_VERSION }}
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: artifact
+
+      - name: Check dependencies
+        run: |
+          chmod +x ./validator
+          ./validator check-dependencies -i redirect-checked.json -o $OUTPUT_FILE --chunk $CHUNK --number-of-chunks $NUMBER_OF_CHUNKS
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          path: |
+            ${{ env.OUTPUT_FILE }}
+
+
+  check_dependencies_7:
+    needs: check_dependencies_6  # reference previous step
+    env:
+      CHUNK: "7"
+      OUTPUT_FILE: out_7.json
+    # -- common --
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: fwal/setup-swift@v1
+        with:
+          swift-version: ${{ env.SWIFT_VERSION }}
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: artifact
+
+      - name: Check dependencies
+        run: |
+          chmod +x ./validator
+          ./validator check-dependencies -i redirect-checked.json -o $OUTPUT_FILE --chunk $CHUNK --number-of-chunks $NUMBER_OF_CHUNKS
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          path: |
+            ${{ env.OUTPUT_FILE }}
+
+
+  check_dependencies_8:
+    needs: check_dependencies_7  # reference previous step
+    env:
+      CHUNK: "8"
+      OUTPUT_FILE: out_8.json
+    # -- common --
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: fwal/setup-swift@v1
+        with:
+          swift-version: ${{ env.SWIFT_VERSION }}
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: artifact
+
+      - name: Check dependencies
+        run: |
+          chmod +x ./validator
+          ./validator check-dependencies -i redirect-checked.json -o $OUTPUT_FILE --chunk $CHUNK --number-of-chunks $NUMBER_OF_CHUNKS
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          path: |
+            ${{ env.OUTPUT_FILE }}
+
+
+  # $NUMBER_OF_CHUNKS - 1
+  check_dependencies_last:
+    needs: check_dependencies_8  # $NUMBER_OF_CHUNKS - 2
+    runs-on: ubuntu-20.04
+    env:
+      CHUNK: "9"                 # $NUMBER_OF_CHUNKS - 1
+      OUTPUT_FILE: out_9.json    # $NUMBER_OF_CHUNKS - 1
+    # -- end of config --
     steps:
       - uses: fwal/setup-swift@v1
         with:
@@ -132,7 +347,7 @@ jobs:
       - name: Check dependencies
         run: |
           chmod +x ./validator
-          ./validator check-dependencies -i redirect-checked.json -o out_2.json --chunk 2 --number-of-chunks 3
+          ./validator check-dependencies -i redirect-checked.json -o $OUTPUT_FILE --chunk $CHUNK --number-of-chunks $NUMBER_OF_CHUNKS
           ./validator merge-lists out_*.json -o packages.json
           # artifacts from appearing in the PR
           rm out_*.json redirect-checked.json validator
