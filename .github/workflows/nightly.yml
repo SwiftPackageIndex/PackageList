@@ -88,6 +88,7 @@ jobs:
         with:
           path: |
             ${{ env.OUTPUT_FILE }}
+            .packageDumpCache
 
 
   check_dependencies_1:
@@ -117,6 +118,7 @@ jobs:
         with:
           path: |
             ${{ env.OUTPUT_FILE }}
+            .packageDumpCache
 
 
   check_dependencies_2:
@@ -146,6 +148,7 @@ jobs:
         with:
           path: |
             ${{ env.OUTPUT_FILE }}
+            .packageDumpCache
 
 
   check_dependencies_3:
@@ -175,6 +178,7 @@ jobs:
         with:
           path: |
             ${{ env.OUTPUT_FILE }}
+            .packageDumpCache
 
 
   check_dependencies_4:
@@ -204,6 +208,7 @@ jobs:
         with:
           path: |
             ${{ env.OUTPUT_FILE }}
+            .packageDumpCache
 
 
   check_dependencies_5:
@@ -233,6 +238,7 @@ jobs:
         with:
           path: |
             ${{ env.OUTPUT_FILE }}
+            .packageDumpCache
 
 
   check_dependencies_6:
@@ -262,6 +268,7 @@ jobs:
         with:
           path: |
             ${{ env.OUTPUT_FILE }}
+            .packageDumpCache
 
 
   check_dependencies_7:
@@ -291,6 +298,7 @@ jobs:
         with:
           path: |
             ${{ env.OUTPUT_FILE }}
+            .packageDumpCache
 
 
   check_dependencies_8:
@@ -320,6 +328,7 @@ jobs:
         with:
           path: |
             ${{ env.OUTPUT_FILE }}
+            .packageDumpCache
 
 
   # $NUMBER_OF_CHUNKS - 1
