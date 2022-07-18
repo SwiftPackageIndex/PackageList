@@ -50,9 +50,13 @@ jobs:
           name: artifact
 
       - name: Check redirect
-        run: |
-          chmod +x ./validator
-          ./validator check-redirects -i packages.json -o redirect-checked.json
+        uses: nick-fields/retry@v2
+        with:
+          max_attempts: 3
+          retry_on: error
+          command: |
+            chmod +x ./validator
+            ./validator check-redirects -i packages.json -o redirect-checked.json
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
@@ -79,9 +83,13 @@ jobs:
           name: artifact
 
       - name: Check dependencies
-        run: |
-          chmod +x ./validator
-          ./validator check-dependencies -i redirect-checked.json -o $OUTPUT_FILE --chunk $CHUNK --number-of-chunks $NUMBER_OF_CHUNKS
+        uses: nick-fields/retry@v2
+        with:
+          max_attempts: 3
+          retry_on: error
+          command: |
+            chmod +x ./validator
+            ./validator check-dependencies -i redirect-checked.json -o $OUTPUT_FILE --chunk $CHUNK --number-of-chunks $NUMBER_OF_CHUNKS
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
@@ -109,9 +117,13 @@ jobs:
           name: artifact
 
       - name: Check dependencies
-        run: |
-          chmod +x ./validator
-          ./validator check-dependencies -i redirect-checked.json -o $OUTPUT_FILE --chunk $CHUNK --number-of-chunks $NUMBER_OF_CHUNKS
+        uses: nick-fields/retry@v2
+        with:
+          max_attempts: 3
+          retry_on: error
+          command: |
+            chmod +x ./validator
+            ./validator check-dependencies -i redirect-checked.json -o $OUTPUT_FILE --chunk $CHUNK --number-of-chunks $NUMBER_OF_CHUNKS
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
@@ -139,9 +151,13 @@ jobs:
           name: artifact
 
       - name: Check dependencies
-        run: |
-          chmod +x ./validator
-          ./validator check-dependencies -i redirect-checked.json -o $OUTPUT_FILE --chunk $CHUNK --number-of-chunks $NUMBER_OF_CHUNKS
+        uses: nick-fields/retry@v2
+        with:
+          max_attempts: 3
+          retry_on: error
+          command: |
+            chmod +x ./validator
+            ./validator check-dependencies -i redirect-checked.json -o $OUTPUT_FILE --chunk $CHUNK --number-of-chunks $NUMBER_OF_CHUNKS
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
@@ -169,9 +185,13 @@ jobs:
           name: artifact
 
       - name: Check dependencies
-        run: |
-          chmod +x ./validator
-          ./validator check-dependencies -i redirect-checked.json -o $OUTPUT_FILE --chunk $CHUNK --number-of-chunks $NUMBER_OF_CHUNKS
+        uses: nick-fields/retry@v2
+        with:
+          max_attempts: 3
+          retry_on: error
+          command: |
+            chmod +x ./validator
+            ./validator check-dependencies -i redirect-checked.json -o $OUTPUT_FILE --chunk $CHUNK --number-of-chunks $NUMBER_OF_CHUNKS
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
@@ -199,9 +219,13 @@ jobs:
           name: artifact
 
       - name: Check dependencies
-        run: |
-          chmod +x ./validator
-          ./validator check-dependencies -i redirect-checked.json -o $OUTPUT_FILE --chunk $CHUNK --number-of-chunks $NUMBER_OF_CHUNKS
+        uses: nick-fields/retry@v2
+        with:
+          max_attempts: 3
+          retry_on: error
+          command: |
+            chmod +x ./validator
+            ./validator check-dependencies -i redirect-checked.json -o $OUTPUT_FILE --chunk $CHUNK --number-of-chunks $NUMBER_OF_CHUNKS
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
@@ -229,9 +253,13 @@ jobs:
           name: artifact
 
       - name: Check dependencies
-        run: |
-          chmod +x ./validator
-          ./validator check-dependencies -i redirect-checked.json -o $OUTPUT_FILE --chunk $CHUNK --number-of-chunks $NUMBER_OF_CHUNKS
+        uses: nick-fields/retry@v2
+        with:
+          max_attempts: 3
+          retry_on: error
+          command: |
+            chmod +x ./validator
+            ./validator check-dependencies -i redirect-checked.json -o $OUTPUT_FILE --chunk $CHUNK --number-of-chunks $NUMBER_OF_CHUNKS
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
@@ -259,9 +287,13 @@ jobs:
           name: artifact
 
       - name: Check dependencies
-        run: |
-          chmod +x ./validator
-          ./validator check-dependencies -i redirect-checked.json -o $OUTPUT_FILE --chunk $CHUNK --number-of-chunks $NUMBER_OF_CHUNKS
+        uses: nick-fields/retry@v2
+        with:
+          max_attempts: 3
+          retry_on: error
+          command: |
+            chmod +x ./validator
+            ./validator check-dependencies -i redirect-checked.json -o $OUTPUT_FILE --chunk $CHUNK --number-of-chunks $NUMBER_OF_CHUNKS
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
@@ -289,9 +321,13 @@ jobs:
           name: artifact
 
       - name: Check dependencies
-        run: |
-          chmod +x ./validator
-          ./validator check-dependencies -i redirect-checked.json -o $OUTPUT_FILE --chunk $CHUNK --number-of-chunks $NUMBER_OF_CHUNKS
+        uses: nick-fields/retry@v2
+        with:
+          max_attempts: 3
+          retry_on: error
+          command: |
+            chmod +x ./validator
+            ./validator check-dependencies -i redirect-checked.json -o $OUTPUT_FILE --chunk $CHUNK --number-of-chunks $NUMBER_OF_CHUNKS
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
@@ -319,9 +355,13 @@ jobs:
           name: artifact
 
       - name: Check dependencies
-        run: |
-          chmod +x ./validator
-          ./validator check-dependencies -i redirect-checked.json -o $OUTPUT_FILE --chunk $CHUNK --number-of-chunks $NUMBER_OF_CHUNKS
+        uses: nick-fields/retry@v2
+        with:
+          max_attempts: 3
+          retry_on: error
+          command: |
+            chmod +x ./validator
+            ./validator check-dependencies -i redirect-checked.json -o $OUTPUT_FILE --chunk $CHUNK --number-of-chunks $NUMBER_OF_CHUNKS
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
@@ -354,12 +394,16 @@ jobs:
           name: artifact
 
       - name: Check dependencies
-        run: |
-          chmod +x ./validator
-          ./validator check-dependencies -i redirect-checked.json -o $OUTPUT_FILE --chunk $CHUNK --number-of-chunks $NUMBER_OF_CHUNKS
-          ./validator merge-lists out_*.json -o packages.json
-          # artifacts from appearing in the PR
-          rm out_*.json redirect-checked.json validator .packageDumpCache
+        uses: nick-fields/retry@v2
+        with:
+          max_attempts: 3
+          retry_on: error
+          command: |
+            chmod +x ./validator
+            ./validator check-dependencies -i redirect-checked.json -o $OUTPUT_FILE --chunk $CHUNK --number-of-chunks $NUMBER_OF_CHUNKS
+            ./validator merge-lists out_*.json -o packages.json
+            # artifacts from appearing in the PR
+            rm out_*.json redirect-checked.json validator .packageDumpCache
 
       - name: Create pull request
         id: cpr
