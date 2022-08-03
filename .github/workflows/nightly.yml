@@ -95,7 +95,7 @@ jobs:
 
 
   check_dependencies_0:
-    needs: check_redirects  # reference previous step
+    needs: check_redirects_1  # reference previous step
     env:
       CHUNK: "0"
       OUTPUT_FILE: out_0.json
