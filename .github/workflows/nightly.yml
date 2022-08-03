@@ -33,8 +33,12 @@ jobs:
           path: |
             validator
 
-  check_redirects:
+
+  check_redirects_0:
     needs: build_validator
+    env:
+      CHUNK: "0"
+      OUTPUT_FILE: out_0.json
     runs-on: ubuntu-20.04
     steps:
       - uses: fwal/setup-swift@v1
@@ -57,7 +61,45 @@ jobs:
           retry_on: error
           command: |
             chmod +x ./validator
-            ./validator check-redirects -i packages.json -o redirect-checked.json
+            ./validator check-redirects -i packages.json -o $OUTPUT_FILE --chunk $CHUNK --number-of-chunks 2
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          path: |
+            ${{ env.OUTPUT_FILE }}
+
+
+  check_redirects_1:
+    needs: check_redirects_0
+    env:
+      CHUNK: "1"
+      OUTPUT_FILE: out_1.json
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: fwal/setup-swift@v1
+        with:
+          swift-version: ${{ env.SWIFT_VERSION }}
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: artifact
+
+      - name: Check redirect
+        uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: 60
+          max_attempts: 3
+          retry_on: error
+          command: |
+            chmod +x ./validator
+            ./validator check-redirects -i packages.json -o $OUTPUT_FILE --chunk $CHUNK --number-of-chunks 2
+            ./validator merge-lists out_*.json -o redirect-checked.json
+            rm out_*.json
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
