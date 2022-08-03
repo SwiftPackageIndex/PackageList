@@ -41,13 +41,6 @@ jobs:
       OUTPUT_FILE: out_0.json
     runs-on: ubuntu-20.04
     steps:
-      - uses: fwal/setup-swift@v1
-        with:
-          swift-version: ${{ env.SWIFT_VERSION }}
-
-      - name: Checkout
-        uses: actions/checkout@v2
-
       - name: Download artifacts
         uses: actions/download-artifact@v3
         with:
@@ -77,13 +70,6 @@ jobs:
       OUTPUT_FILE: out_1.json
     runs-on: ubuntu-20.04
     steps:
-      - uses: fwal/setup-swift@v1
-        with:
-          swift-version: ${{ env.SWIFT_VERSION }}
-
-      - name: Checkout
-        uses: actions/checkout@v2
-
       - name: Download artifacts
         uses: actions/download-artifact@v3
         with:
