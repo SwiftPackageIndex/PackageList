@@ -9,7 +9,6 @@ There are a few requirements for inclusion in the index, but they aren't onerous
 - The package repositories must all be publicly accessible.
 - The packages must all contain a valid `Package.swift` file in the root folder.
 - The packages must be written in Swift 5.0 or later.
-- The packages must all contain at least one product (either library, executable, or plugin).
 - The packages should have at least one release tagged as a [semantic version](https://semver.org/).
 - The packages must all output valid JSON when running `swift package dump-package` with the latest Swift toolchain.
 - The package URLs must include the protocol (usually `https`) and the `.git` extension.
