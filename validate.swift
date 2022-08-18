@@ -33,7 +33,6 @@ enum AppError: Error {
     case fetchTimeout(URL)
     case networkingError(Error)
     case noData(URL)
-    case noProducts(URL)
     case notFound(URL)
     case outputIdentical
     case packageDumpError(String)
@@ -53,8 +52,6 @@ enum AppError: Error {
                 return "networking error: \(error.localizedDescription)"
             case .noData(let url):
                 return "no data returned from url: \(url.absoluteString)"
-            case .noProducts(let url):
-                return "package has no products: \(url.absoluteString)"
             case .notFound(let url):
                 return "url not found (404): \(url.absoluteString)"
             case .outputIdentical:
@@ -80,13 +77,8 @@ enum RunMode {
     case processPackageList
 }
 
-struct Product: Decodable {
-    let name: String
-}
-
 struct Package: Decodable {
     let name: String
-    let products: [Product]
 }
 
 // MARK: - Generic helpers
@@ -116,17 +108,17 @@ class RedirectFollower: NSObject, URLSessionDataDelegate {
 extension URL {
     func followingRedirects(timeout: TimeInterval = 30) -> URL? {
         let semaphore = DispatchSemaphore(value: 0)
-        
+
         let follower = RedirectFollower(initialURL: self)
         let session = URLSession(configuration: .default, delegate: follower, delegateQueue: nil)
-        
+
         let task = session.dataTask(with: self) { (_, response, error) in
             semaphore.signal()
         }
-        
+
         task.resume()
         _ = semaphore.wait(timeout: .now() + timeout)
-        
+
         return follower.lastURL
     }
 }
@@ -135,20 +127,20 @@ extension URL {
 
 func fetch(_ url: URL, timeout: Int = 10) throws -> Data {
     var request = URLRequest(url: url)
-    
+
     if let token = Constants.githubToken {
         request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
     }
-    
+
     let semaphore = DispatchSemaphore(value: 0)
-    
+
     var payload: Data?
     var taskError: AppError?
-    
+
     let session = URLSession(configuration: .default)
     let task = session.dataTask(with: request) { (data, response, error) in
         let httpResponse = response as? HTTPURLResponse
-        
+
         if let limit = httpResponse?.value(forHTTPHeaderField: "X-RateLimit-Limit").flatMap(Int.init),
            let remaining = httpResponse?.value(forHTTPHeaderField: "X-RateLimit-Remaining").flatMap(Int.init),
            remaining == 0 {
@@ -158,13 +150,13 @@ func fetch(_ url: URL, timeout: Int = 10) throws -> Data {
         } else if let error = error {
             taskError = .networkingError(error)
         }
-        
+
         payload = data
         semaphore.signal()
     }
-    
+
     task.resume()
-    
+
     switch semaphore.wait(timeout: .now() + .seconds(timeout)) {
     case .timedOut:
         throw AppError.fetchTimeout(url)
@@ -270,7 +262,7 @@ func getManifestURL(_ url: URL) throws -> URL {
     let repository = (url.pathExtension.lowercased() == "git")
         ? url.deletingPathExtension().lastPathComponent
         : url.lastPathComponent
-    let owner = url.deletingLastPathComponent().lastPathComponent    
+    let owner = url.deletingLastPathComponent().lastPathComponent
     let defaultBranch = try getDefaultBranch(owner: owner, repository: repository)
     return URL(string: "https://raw.githubusercontent.com/\(owner)/\(repository)/\(defaultBranch)/Package.swift")!
 }
@@ -304,13 +296,13 @@ func runDumpPackage(at path: URL, timeout: TimeInterval = 20) throws -> Data {
     }
 
     let process = createDumpPackageProcess(at: path, standardOutput: stdoutPipe, standardError: stderrPipe)
-    
+
     DispatchQueue.main.asyncAfter(deadline: .now() + timeout) {
         if process.isRunning { process.terminate() }
     }
     try process.run()
     process.waitUntilExit()
-    
+
     switch process.terminationStatus {
         case 0:
             return stdout
@@ -322,10 +314,11 @@ func runDumpPackage(at path: URL, timeout: TimeInterval = 20) throws -> Data {
     }
 }
 
+@discardableResult
 func dumpPackage(url: URL) throws -> Package {
     let manifestURL = try getManifestURL(url)
     let manifest = try fetch(manifestURL)
-    
+
     let tempDir = try createTempDir()
     let fileURL = tempDir.appendingPathComponent("Package.swift")
     try manifest.write(to: fileURL)
@@ -336,10 +329,7 @@ func dumpPackage(url: URL) throws -> Package {
 
 func verifyURL(_ url: URL) throws -> URL {
     guard let resolvedURL = url.followingRedirects() else { throw AppError.invalidURL(url) }
-    let pkg = try dumpPackage(url: resolvedURL)
-    guard !pkg.products.isEmpty else {
-        throw AppError.noProducts(url)
-    }
+    try dumpPackage(url: resolvedURL)
     return resolvedURL
 }
 
@@ -458,7 +448,7 @@ do {
         if ProcessInfo.processInfo.environment["CI"] == "true" {
             print("::set-output name=validateError::\(error)")
         }
-        
+
         print("ERROR: \(error)")
     }
     exit(EXIT_FAILURE)
