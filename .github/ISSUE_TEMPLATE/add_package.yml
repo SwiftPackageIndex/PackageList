@@ -23,6 +23,8 @@ body:
     attributes:
       label: New Packages
       description: Please list the URLs to all the repositories where the packages you wish to add are hosted. Place each package on a new line.
-      placeholder: https://github.com/daveverwer/LeftPad.git
+      placeholder: |
+        https://github.com/daveverwer/LeftPad.git
+        https://github.com/finestructure/Arena.git
     validations:
       required: true
