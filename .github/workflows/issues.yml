@@ -5,7 +5,7 @@ on:
     types: [opened, reopened]
 
 env:
-  SWIFT_IMAGE: swiftlang/swift:nightly-5.7-focal
+  SWIFT_IMAGE: swiftlang/swift:5.7-focal
 
 jobs:
   add:
