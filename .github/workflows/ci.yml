@@ -9,7 +9,7 @@ on:
     types: [submitted]
 
 env:
-  SWIFT_IMAGE: swiftlang/swift:nightly-5.7-focal
+  SWIFT_IMAGE: swift:5.7-focal
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
