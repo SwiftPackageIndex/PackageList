@@ -46,7 +46,7 @@ jobs:
           swift-version: ${{ env.SWIFT_VERSION }}
 
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Download artifacts
         uses: actions/download-artifact@v3
@@ -82,7 +82,7 @@ jobs:
           swift-version: ${{ env.SWIFT_VERSION }}
 
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Download artifacts
         uses: actions/download-artifact@v3
@@ -438,7 +438,7 @@ jobs:
 
       # we need to check out the repo in the last step in order to create a PR
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Download artifacts
         uses: actions/download-artifact@v3
