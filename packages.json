@@ -3481,6 +3481,8 @@
   "https://github.com/orchetect/TimecodeKit.git",
   "https://github.com/orchetect/XCTestUtils.git",
   "https://github.com/ordo-one/package-benchmark.git",
+  "https://github.com/ordo-one/package-concurrency-helpers.git",
+  "https://github.com/ordo-one/package-datetime.git",
   "https://github.com/ordo-one/package-frostflake.git",
   "https://github.com/ordo-one/package-jemalloc.git",
   "https://github.com/orlandos-nl/BSON.git",
