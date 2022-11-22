@@ -3491,6 +3491,7 @@
   "https://github.com/ordo-one/package-datetime.git",
   "https://github.com/ordo-one/package-frostflake.git",
   "https://github.com/ordo-one/package-jemalloc.git",
+  "https://github.com/ordo-one/package-latency-tools.git",
   "https://github.com/orlandos-nl/BSON.git",
   "https://github.com/orlandos-nl/IkigaJSON.git",
   "https://github.com/orlandos-nl/MongoKitten.git",
