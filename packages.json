@@ -347,6 +347,7 @@
   "https://github.com/apple/swift-docc.git",
   "https://github.com/apple/swift-driver.git",
   "https://github.com/apple/swift-format.git",
+  "https://github.com/apple/swift-http-structured-headers.git",
   "https://github.com/apple/swift-llbuild.git",
   "https://github.com/apple/swift-llbuild2.git",
   "https://github.com/apple/swift-log.git",
