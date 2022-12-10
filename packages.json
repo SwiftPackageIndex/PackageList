@@ -4511,6 +4511,7 @@
   "https://github.com/swift-server-community/SwiftPrometheus.git",
   "https://github.com/swift-server/async-http-client.git",
   "https://github.com/swift-server/security.git",
+  "https://github.com/swift-server/swift-aws-lambda-events.git",
   "https://github.com/swift-server/swift-aws-lambda-runtime.git",
   "https://github.com/swift-server/swift-backtrace.git",
   "https://github.com/swift-server/swift-service-lifecycle.git",
