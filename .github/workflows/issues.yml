@@ -48,8 +48,8 @@ jobs:
             ## Original Message
 
             ${{ github.event.issue.body }}
-          committer: ${{ github.event.issue.user.login }} <${{ github.event.issue.user.login }}@users.noreply.github.com>
-          author: ${{ github.event.issue.user.login }} <${{ github.event.issue.user.login }}@users.noreply.github.com>
+          committer: GitHub <noreply@github.com>
+          author: GitHub <noreply@github.com>
 
       - name: Update Issue (Success)
         if: steps.check.outputs.changes == 'true'
@@ -116,8 +116,8 @@ jobs:
             ## Original Message
 
             ${{ github.event.issue.body }}
-          committer: ${{ github.event.issue.user.login }} <${{ github.event.issue.user.login }}@users.noreply.github.com>
-          author: ${{ github.event.issue.user.login }} <${{ github.event.issue.user.login }}@users.noreply.github.com>
+          committer: GitHub <noreply@github.com>
+          author: GitHub <noreply@github.com>
 
       - name: Update Issue (Success)
         if: steps.check.outputs.changes == 'true'
