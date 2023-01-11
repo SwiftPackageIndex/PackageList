@@ -48,8 +48,8 @@ jobs:
             ## Original Message
 
             ${{ github.event.issue.body }}
-          committer: Swift Package Index <contact@swiftpackageindex.com>
-          author: Swift Package Index <contact@swiftpackageindex.com>
+          committer: GitHub <noreply@github.com>
+          author: GitHub <noreply@github.com>
 
       - name: Update Issue (Success)
         if: steps.check.outputs.changes == 'true'
@@ -116,8 +116,8 @@ jobs:
             ## Original Message
 
             ${{ github.event.issue.body }}
-          committer: Swift Package Index <contact@swiftpackageindex.com>
-          author: Swift Package Index <contact@swiftpackageindex.com>
+          committer: GitHub <noreply@github.com>
+          author: GitHub <noreply@github.com>
 
       - name: Update Issue (Success)
         if: steps.check.outputs.changes == 'true'
