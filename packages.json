@@ -2835,6 +2835,7 @@
   "https://github.com/llvm-swift/llvmswift.git",
   "https://github.com/llvm-swift/prettystacktrace.git",
   "https://github.com/llvm-swift/symbolic.git",
+  "https://github.com/lm/navigation-stack-backport.git",
   "https://github.com/loganwright/penny-api.git",
   "https://github.com/loiclec/fuzzcheck.git",
   "https://github.com/lokalise/lokalise-ios-framework.git",
