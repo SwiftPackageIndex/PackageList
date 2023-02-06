@@ -9,7 +9,7 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   # see https://github.com/actions/virtual-environments for available environments
   SWIFT_VERSION: "5.7"
-  NUMBER_OF_CHUNKS: "10"
+  NUMBER_OF_CHUNKS: "12"
 
 jobs:
 
@@ -423,9 +423,79 @@ jobs:
             .packageDumpCache
 
 
+  check_dependencies_9:
+    needs: check_dependencies_8  # reference previous step
+    env:
+      CHUNK: "9"
+      OUTPUT_FILE: out_9.json
+    # -- common --
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: fwal/setup-swift@v1
+        with:
+          swift-version: ${{ env.SWIFT_VERSION }}
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: artifact
+
+      - name: Check dependencies
+        uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: 60
+          max_attempts: 3
+          retry_on: error
+          command: |
+            chmod +x ./validator
+            ./validator check-dependencies -i redirect-checked.json -o $OUTPUT_FILE --chunk $CHUNK --number-of-chunks $NUMBER_OF_CHUNKS
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          path: |
+            ${{ env.OUTPUT_FILE }}
+            .packageDumpCache
+
+
+  check_dependencies_10:
+    needs: check_dependencies_9  # reference previous step
+    env:
+      CHUNK: "10"
+      OUTPUT_FILE: out_10.json
+    # -- common --
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: fwal/setup-swift@v1
+        with:
+          swift-version: ${{ env.SWIFT_VERSION }}
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: artifact
+
+      - name: Check dependencies
+        uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: 60
+          max_attempts: 3
+          retry_on: error
+          command: |
+            chmod +x ./validator
+            ./validator check-dependencies -i redirect-checked.json -o $OUTPUT_FILE --chunk $CHUNK --number-of-chunks $NUMBER_OF_CHUNKS
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          path: |
+            ${{ env.OUTPUT_FILE }}
+            .packageDumpCache
+
+
   # $NUMBER_OF_CHUNKS - 1
   check_dependencies_last:
-    needs: check_dependencies_8  # $NUMBER_OF_CHUNKS - 2
+    needs: check_dependencies_10 # $NUMBER_OF_CHUNKS - 2
     runs-on: ubuntu-20.04
     env:
       CHUNK: "9"                 # $NUMBER_OF_CHUNKS - 1
