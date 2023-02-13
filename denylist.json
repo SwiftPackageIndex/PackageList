@@ -1,0 +1,5 @@
+[
+  "https://github.com/firebase/abseil-cpp-SwiftPM.git",
+  "https://github.com/firebase/boringSSL-SwiftPM.git",
+  "https://github.com/firebase/grpc-SwiftPM.git"
+]
