@@ -1,5 +1,14 @@
 [
-  "https://github.com/firebase/abseil-cpp-SwiftPM.git",
-  "https://github.com/firebase/boringSSL-SwiftPM.git",
-  "https://github.com/firebase/grpc-SwiftPM.git"
+    {
+        "package_url": "https://github.com/firebase/abseil-cpp-SwiftPM.git",
+        "notes": "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/3540."
+    },
+    {
+        "package_url": "https://github.com/firebase/boringSSL-SwiftPM.git",
+        "notes": "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/3540."
+    },
+    {
+        "package_url": "https://github.com/firebase/grpc-SwiftPM.git",
+        "notes": "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/3540."
+    }
 ]
