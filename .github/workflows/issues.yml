@@ -88,6 +88,7 @@ jobs:
         run: bash .github/remove_package.sh
         env:
           GH_BODY: ${{ github.event.issue.body }}
+          GH_ISSUE: ${{ github.event.issue.number }}
 
       - name: Validate JSON
         run: docker run --rm --env CI=true -v "$PWD:/host" -w /host $SWIFT_IMAGE swift validate.swift
