@@ -36,7 +36,7 @@ echo "${GH_BODY}" | while read url ; do
     echo "- '$url'."
 
     # 1e. Add Item to Denylist
-    jq '. |= . + [{"package_url": "'$url'", "notes": "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/'$GH_ISSUE'."}]' -S denylist.json > temp.json
+    jq '. |= . + [{"notes": "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/'$GH_ISSUE'.", "package_url": "'$url'"}]' -S denylist.json > temp.json
     mv temp.json denylist.json
     echo "+ '$url' (denylist)."
 done

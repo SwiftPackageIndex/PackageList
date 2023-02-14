@@ -107,6 +107,7 @@ jobs:
         with:
           add-paths: |
             packages.json
+            denylist.json
           commit-message: ${{ github.event.issue.title }}
           title: ${{ github.event.issue.title }}
           branch: spi-auto-${{ github.event.issue.number }}
