@@ -34,4 +34,9 @@ echo "${GH_BODY}" | while read url ; do
     jq 'del(.[] | select((.|ascii_downcase) == ("'$url'"|ascii_downcase)))' packages.json > temp.json
     mv temp.json packages.json
     echo "- '$url'."
+
+    # 1e. Add Item to Denylist
+    jq '. |= . + [{"package_url": "'$url'", "notes": "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/'$GH_ISSUE'."}]' -S denylist.json > temp.json
+    mv temp.json denylist.json
+    echo "+ '$url' (denylist)."
 done
