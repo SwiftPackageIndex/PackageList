@@ -14,5 +14,9 @@
   {
     "notes": "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/3556.",
     "package_url": "https://github.com/sloik/Major.Minor.Patch.git"
+  },
+  {
+    "notes": "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/3730.",
+    "package_url": "https://github.com/toastersocks/Helpers.git"
   }
 ]
