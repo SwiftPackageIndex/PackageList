@@ -8,7 +8,7 @@ on:
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   # see https://github.com/actions/virtual-environments for available environments
-  SWIFT_VERSION: "5.7"
+  SWIFT_VERSION: "5.8"
   NUMBER_OF_CHUNKS: "12"
 
 jobs:
