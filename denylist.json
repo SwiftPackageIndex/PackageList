@@ -18,5 +18,9 @@
   {
     "notes": "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/3757.",
     "package_url": "https://github.com/DedicatedDev/aes.git"
+  },
+  {
+    "notes": "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/3791.",
+    "package_url": "https://github.com/sajjon/ForkHyugitEllipticCurve.git"
   }
 ]
