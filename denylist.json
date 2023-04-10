@@ -22,5 +22,9 @@
   {
     "notes": "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/3791.",
     "package_url": "https://github.com/sajjon/ForkHyugitEllipticCurve.git"
+  },
+  {
+    "notes": "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/3974.",
+    "package_url": "https://github.com/DevYeom/StackUI.git"
   }
 ]
