@@ -380,6 +380,7 @@
   "https://github.com/apple/swift-docc.git",
   "https://github.com/apple/swift-driver.git",
   "https://github.com/apple/swift-format.git",
+  "https://github.com/apple/swift-foundation-icu.git",
   "https://github.com/apple/swift-foundation.git",
   "https://github.com/apple/swift-http-structured-headers.git",
   "https://github.com/apple/swift-llbuild.git",
