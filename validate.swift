@@ -55,7 +55,7 @@ enum AppError: Error {
             case .notFound(let url):
                 return "url not found (404): \(url.absoluteString)"
             case .outputIdentical:
-                return "resulting package.json is unchanged"
+                return "resulting package.json is unchanged. This typically means the package is already in the index."
             case .packageDumpError(let msg):
                 return "package dump failed: \(msg)"
             case .packageDumpTimeout:
