@@ -30,5 +30,9 @@
   {
     "notes": "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/4040.",
     "package_url": "https://github.com/mkaulfers/iconoir-swift.git"
+  },
+  {
+    "notes": "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/4152.",
+    "package_url": "https://github.com/proxyco/swift-jwe.git"
   }
 ]
