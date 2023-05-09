@@ -38,5 +38,9 @@
   {
     "notes": "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/4177.",
     "package_url": "https://github.com/edsonlima19/Images.git"
+  },
+  {
+    "notes": "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/4180.",
+    "package_url": "https://github.com/edsonlima19/Images.git"
   }
 ]
