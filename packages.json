@@ -405,6 +405,7 @@
   "https://github.com/apple/swift-nio-transport-services.git",
   "https://github.com/apple/swift-nio.git",
   "https://github.com/apple/swift-numerics.git",
+  "https://github.com/apple/swift-openapi-generator.git",
   "https://github.com/apple/swift-package-collection-generator.git",
   "https://github.com/apple/swift-package-manager.git",
   "https://github.com/apple/swift-protobuf.git",
