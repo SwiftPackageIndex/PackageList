@@ -3426,6 +3426,7 @@
   "https://github.com/MobileNativeFoundation/XCLogParser.git",
   "https://github.com/mochidev/AsyncSequenceReader.git",
   "https://github.com/mochidev/Bytes.git",
+  "https://github.com/mochidev/CodableDatastore.git",
   "https://github.com/mochidev/DynamicCodable.git",
   "https://github.com/mochidev/URLSessionBackport.git",
   "https://github.com/mochidev/XCTAsync.git",
