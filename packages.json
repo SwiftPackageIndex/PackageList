@@ -403,6 +403,7 @@
   "https://github.com/apple/swift-nio-transport-services.git",
   "https://github.com/apple/swift-nio.git",
   "https://github.com/apple/swift-numerics.git",
+  "https://github.com/apple/swift-openapi-generator.git",
   "https://github.com/apple/swift-openapi-runtime.git",
   "https://github.com/apple/swift-openapi-urlsession.git",
   "https://github.com/apple/swift-package-collection-generator.git",
