@@ -8,14 +8,14 @@ on:
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   NUMBER_OF_CHUNKS: "12"
+  SWIFT_IMAGE: swiftlang/swift@sha256:61b96c099daf37c07dd03cc4c7a8c07f41c91df1a6ed8cf3d433387f0a719a9c  # swiftlang/swift:nightly-5.9-focal
 
 jobs:
 
   build_validator:
     runs-on: ubuntu-latest
     container:
-      # FIXME: change to nightly
-      image: swift:5.8.1-focal
+      image: ${{ env.SWIFT_IMAGE }}
     steps:
       - name: Build validator
         run: |
@@ -38,8 +38,7 @@ jobs:
       OUTPUT_FILE: out_0.json
     runs-on: ubuntu-latest
     container:
-      # FIXME: change to nightly
-      image: swift:5.8.1-focal
+      image: ${{ env.SWIFT_IMAGE }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
