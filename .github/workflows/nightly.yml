@@ -7,19 +7,16 @@ on:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  # see https://github.com/actions/virtual-environments for available environments
-  SWIFT_VERSION: "5.8"
   NUMBER_OF_CHUNKS: "12"
 
 jobs:
 
   build_validator:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
+    container:
+      # FIXME: change to nightly
+      image: swift:5.8.1-focal
     steps:
-      - uses: swift-actions/setup-swift@main
-        with:
-          swift-version: ${{ env.SWIFT_VERSION }}
-
       - name: Build validator
         run: |
           git clone https://github.com/SwiftPackageIndex/PackageList-Validator.git --depth 1
