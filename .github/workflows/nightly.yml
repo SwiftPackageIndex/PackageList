@@ -7,19 +7,15 @@ on:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  # see https://github.com/actions/virtual-environments for available environments
-  SWIFT_VERSION: "5.8"
   NUMBER_OF_CHUNKS: "12"
 
 jobs:
 
   build_validator:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
+    container:
+      image: swiftlang/swift@sha256:61b96c099daf37c07dd03cc4c7a8c07f41c91df1a6ed8cf3d433387f0a719a9c  # swiftlang/swift:nightly-5.9-focal
     steps:
-      - uses: swift-actions/setup-swift@main
-        with:
-          swift-version: ${{ env.SWIFT_VERSION }}
-
       - name: Build validator
         run: |
           git clone https://github.com/SwiftPackageIndex/PackageList-Validator.git --depth 1
@@ -39,12 +35,10 @@ jobs:
     env:
       CHUNK: "0"
       OUTPUT_FILE: out_0.json
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
+    container:
+      image: swiftlang/swift@sha256:61b96c099daf37c07dd03cc4c7a8c07f41c91df1a6ed8cf3d433387f0a719a9c  # swiftlang/swift:nightly-5.9-focal
     steps:
-      - uses: swift-actions/setup-swift@main
-        with:
-          swift-version: ${{ env.SWIFT_VERSION }}
-
       - name: Checkout
         uses: actions/checkout@v3
 
@@ -75,12 +69,10 @@ jobs:
     env:
       CHUNK: "1"
       OUTPUT_FILE: out_1.json
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
+    container:
+      image: swiftlang/swift@sha256:61b96c099daf37c07dd03cc4c7a8c07f41c91df1a6ed8cf3d433387f0a719a9c  # swiftlang/swift:nightly-5.9-focal
     steps:
-      - uses: swift-actions/setup-swift@main
-        with:
-          swift-version: ${{ env.SWIFT_VERSION }}
-
       - name: Checkout
         uses: actions/checkout@v3
 
@@ -114,12 +106,10 @@ jobs:
       CHUNK: "0"
       OUTPUT_FILE: out_0.json
     # -- common --
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
+    container:
+      image: swiftlang/swift@sha256:61b96c099daf37c07dd03cc4c7a8c07f41c91df1a6ed8cf3d433387f0a719a9c  # swiftlang/swift:nightly-5.9-focal  
     steps:
-      - uses: swift-actions/setup-swift@main
-        with:
-          swift-version: ${{ env.SWIFT_VERSION }}
-
       - name: Download artifacts
         uses: actions/download-artifact@v3
         with:
@@ -149,12 +139,10 @@ jobs:
       CHUNK: "1"
       OUTPUT_FILE: out_1.json
     # -- common --
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
+    container:
+      image: swiftlang/swift@sha256:61b96c099daf37c07dd03cc4c7a8c07f41c91df1a6ed8cf3d433387f0a719a9c  # swiftlang/swift:nightly-5.9-focal
     steps:
-      - uses: swift-actions/setup-swift@main
-        with:
-          swift-version: ${{ env.SWIFT_VERSION }}
-
       - name: Download artifacts
         uses: actions/download-artifact@v3
         with:
@@ -184,12 +172,10 @@ jobs:
       CHUNK: "2"
       OUTPUT_FILE: out_2.json
     # -- common --
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
+    container:
+      image: swiftlang/swift@sha256:61b96c099daf37c07dd03cc4c7a8c07f41c91df1a6ed8cf3d433387f0a719a9c  # swiftlang/swift:nightly-5.9-focal
     steps:
-      - uses: swift-actions/setup-swift@main
-        with:
-          swift-version: ${{ env.SWIFT_VERSION }}
-
       - name: Download artifacts
         uses: actions/download-artifact@v3
         with:
@@ -219,12 +205,10 @@ jobs:
       CHUNK: "3"
       OUTPUT_FILE: out_3.json
     # -- common --
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
+    container:
+      image: swiftlang/swift@sha256:61b96c099daf37c07dd03cc4c7a8c07f41c91df1a6ed8cf3d433387f0a719a9c  # swiftlang/swift:nightly-5.9-focal
     steps:
-      - uses: swift-actions/setup-swift@main
-        with:
-          swift-version: ${{ env.SWIFT_VERSION }}
-
       - name: Download artifacts
         uses: actions/download-artifact@v3
         with:
@@ -254,12 +238,10 @@ jobs:
       CHUNK: "4"
       OUTPUT_FILE: out_4.json
     # -- common --
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
+    container:
+      image: swiftlang/swift@sha256:61b96c099daf37c07dd03cc4c7a8c07f41c91df1a6ed8cf3d433387f0a719a9c  # swiftlang/swift:nightly-5.9-focal
     steps:
-      - uses: swift-actions/setup-swift@main
-        with:
-          swift-version: ${{ env.SWIFT_VERSION }}
-
       - name: Download artifacts
         uses: actions/download-artifact@v3
         with:
@@ -289,12 +271,10 @@ jobs:
       CHUNK: "5"
       OUTPUT_FILE: out_5.json
     # -- common --
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
+    container:
+      image: swiftlang/swift@sha256:61b96c099daf37c07dd03cc4c7a8c07f41c91df1a6ed8cf3d433387f0a719a9c  # swiftlang/swift:nightly-5.9-focal
     steps:
-      - uses: swift-actions/setup-swift@main
-        with:
-          swift-version: ${{ env.SWIFT_VERSION }}
-
       - name: Download artifacts
         uses: actions/download-artifact@v3
         with:
@@ -324,12 +304,10 @@ jobs:
       CHUNK: "6"
       OUTPUT_FILE: out_6.json
     # -- common --
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
+    container:
+      image: swiftlang/swift@sha256:61b96c099daf37c07dd03cc4c7a8c07f41c91df1a6ed8cf3d433387f0a719a9c  # swiftlang/swift:nightly-5.9-focal
     steps:
-      - uses: swift-actions/setup-swift@main
-        with:
-          swift-version: ${{ env.SWIFT_VERSION }}
-
       - name: Download artifacts
         uses: actions/download-artifact@v3
         with:
@@ -359,12 +337,10 @@ jobs:
       CHUNK: "7"
       OUTPUT_FILE: out_7.json
     # -- common --
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
+    container:
+      image: swiftlang/swift@sha256:61b96c099daf37c07dd03cc4c7a8c07f41c91df1a6ed8cf3d433387f0a719a9c  # swiftlang/swift:nightly-5.9-focal
     steps:
-      - uses: swift-actions/setup-swift@main
-        with:
-          swift-version: ${{ env.SWIFT_VERSION }}
-
       - name: Download artifacts
         uses: actions/download-artifact@v3
         with:
@@ -394,12 +370,10 @@ jobs:
       CHUNK: "8"
       OUTPUT_FILE: out_8.json
     # -- common --
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
+    container:
+      image: swiftlang/swift@sha256:61b96c099daf37c07dd03cc4c7a8c07f41c91df1a6ed8cf3d433387f0a719a9c  # swiftlang/swift:nightly-5.9-focal
     steps:
-      - uses: swift-actions/setup-swift@main
-        with:
-          swift-version: ${{ env.SWIFT_VERSION }}
-
       - name: Download artifacts
         uses: actions/download-artifact@v3
         with:
@@ -429,12 +403,10 @@ jobs:
       CHUNK: "9"
       OUTPUT_FILE: out_9.json
     # -- common --
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
+    container:
+      image: swiftlang/swift@sha256:61b96c099daf37c07dd03cc4c7a8c07f41c91df1a6ed8cf3d433387f0a719a9c  # swiftlang/swift:nightly-5.9-focal
     steps:
-      - uses: swift-actions/setup-swift@main
-        with:
-          swift-version: ${{ env.SWIFT_VERSION }}
-
       - name: Download artifacts
         uses: actions/download-artifact@v3
         with:
@@ -464,12 +436,10 @@ jobs:
       CHUNK: "10"
       OUTPUT_FILE: out_10.json
     # -- common --
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
+    container:
+      image: swiftlang/swift@sha256:61b96c099daf37c07dd03cc4c7a8c07f41c91df1a6ed8cf3d433387f0a719a9c  # swiftlang/swift:nightly-5.9-focal
     steps:
-      - uses: swift-actions/setup-swift@main
-        with:
-          swift-version: ${{ env.SWIFT_VERSION }}
-
       - name: Download artifacts
         uses: actions/download-artifact@v3
         with:
@@ -496,16 +466,14 @@ jobs:
   # $NUMBER_OF_CHUNKS - 1
   check_dependencies_last:
     needs: check_dependencies_10 # $NUMBER_OF_CHUNKS - 2
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
+    container:
+      image: swiftlang/swift@sha256:61b96c099daf37c07dd03cc4c7a8c07f41c91df1a6ed8cf3d433387f0a719a9c  # swiftlang/swift:nightly-5.9-focal
     env:
       CHUNK: "9"                 # $NUMBER_OF_CHUNKS - 1
       OUTPUT_FILE: out_9.json    # $NUMBER_OF_CHUNKS - 1
     # -- end of config --
     steps:
-      - uses: swift-actions/setup-swift@main
-        with:
-          swift-version: ${{ env.SWIFT_VERSION }}
-
       # we need to check out the repo in the last step in order to create a PR
       - name: Checkout
         uses: actions/checkout@v3
