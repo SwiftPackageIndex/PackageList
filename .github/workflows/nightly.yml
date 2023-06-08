@@ -36,7 +36,10 @@ jobs:
     env:
       CHUNK: "0"
       OUTPUT_FILE: out_0.json
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
+    container:
+      # FIXME: change to nightly
+      image: swift:5.8.1-focal
     steps:
       - name: Checkout
         uses: actions/checkout@v3
