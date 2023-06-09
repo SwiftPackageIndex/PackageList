@@ -358,6 +358,7 @@
   "https://github.com/appcues/appcues-ios-sdk.git",
   "https://github.com/appcues/segment-appcues-ios.git",
   "https://github.com/appdecentral/replicatingtypes.git",
+  "https://github.com/apple/app-store-server-library-swift.git",
   "https://github.com/apple/example-package-dealer.git",
   "https://github.com/apple/example-package-deckofplayingcards.git",
   "https://github.com/apple/example-package-fisheryates.git",
