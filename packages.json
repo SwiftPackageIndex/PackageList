@@ -5100,6 +5100,7 @@
   "https://github.com/swift-kipple/Plugins.git",
   "https://github.com/swift-kipple/Tools.git",
   "https://github.com/swift-kipple/UI.git",
+  "https://github.com/swift-quic/swift-quic.git",
   "https://github.com/swift-server-community/APNSwift.git",
   "https://github.com/swift-server-community/mqtt-nio.git",
   "https://github.com/swift-server-community/SwiftPrometheus.git",
