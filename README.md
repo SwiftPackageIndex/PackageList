@@ -13,6 +13,7 @@ There are a few requirements for inclusion in the index, but they aren't onerous
 - The packages must all output valid JSON when running `swift package dump-package` with the latest Swift toolchain.
 - The package URLs must include the protocol (usually `https`) and the `.git` extension.
 - The packages must all compile without errors.
+- All package content must comply with our [code of conduct](https://github.com/SwiftPackageIndex/SwiftPackageIndex-Server/blob/main/CODE_OF_CONDUCT.md).
 
 <a href="https://github.com/SwiftPackageIndex/PackageList/issues/new/choose"><img src="https://user-images.githubusercontent.com/5180/156020907-8bebd0ca-c1ca-4a6f-9771-11a4037002a3.png" width="170" alt="Add Packages Button"></a>
 
