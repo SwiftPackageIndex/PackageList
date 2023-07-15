@@ -34,5 +34,9 @@
   {
     "notes": "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/4152.",
     "package_url": "https://github.com/proxyco/swift-jwe.git"
+  },
+  {
+    "notes": "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/4728.",
+    "package_url": "https://github.com/FelixHerrmann/intercom-ios.git"
   }
 ]
