@@ -5,7 +5,7 @@ on:
     types: [opened, reopened]
 
 env:
-  SWIFT_IMAGE: swiftlang/swift@sha256:61b96c099daf37c07dd03cc4c7a8c07f41c91df1a6ed8cf3d433387f0a719a9c  # swiftlang/swift:nightly-5.9-focal
+  SWIFT_IMAGE: swiftlang/swift@sha256:8019d8ab3de09d6707ad97c7d36e7e4f4cb45c04df99527ebd295d7cbea95b11  # swiftlang/swift:nightly-5.9-focal
 
 jobs:
   add:
