@@ -38,5 +38,9 @@
   {
     "notes": "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/4728.",
     "package_url": "https://github.com/FelixHerrmann/intercom-ios.git"
+  },
+  {
+    "notes": "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/4891.",
+    "package_url": "https://github.com/Progressive-Insurance/Swerkin.git"
   }
 ]
