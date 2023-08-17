@@ -14,7 +14,7 @@ jobs:
   build_validator:
     runs-on: ubuntu-latest
     container:
-      image: swiftlang/swift@sha256:8019d8ab3de09d6707ad97c7d36e7e4f4cb45c04df99527ebd295d7cbea95b11  # swiftlang/swift:nightly-5.9-focal
+      image: swiftlang/swift@sha256:f212429011a4c3592ffaa660fd78b5bc149e9df7920da02dfc0e7a761582fa10  # swiftlang/swift:nightly-5.9-focal 2023-08-16
     steps:
       - name: Build validator
         run: |
@@ -37,7 +37,7 @@ jobs:
       OUTPUT_FILE: out_0.json
     runs-on: ubuntu-latest
     container:
-      image: swiftlang/swift@sha256:8019d8ab3de09d6707ad97c7d36e7e4f4cb45c04df99527ebd295d7cbea95b11  # swiftlang/swift:nightly-5.9-focal
+      image: swiftlang/swift@sha256:f212429011a4c3592ffaa660fd78b5bc149e9df7920da02dfc0e7a761582fa10  # swiftlang/swift:nightly-5.9-focal 2023-08-16
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -71,7 +71,7 @@ jobs:
       OUTPUT_FILE: out_1.json
     runs-on: ubuntu-latest
     container:
-      image: swiftlang/swift@sha256:8019d8ab3de09d6707ad97c7d36e7e4f4cb45c04df99527ebd295d7cbea95b11  # swiftlang/swift:nightly-5.9-focal
+      image: swiftlang/swift@sha256:f212429011a4c3592ffaa660fd78b5bc149e9df7920da02dfc0e7a761582fa10  # swiftlang/swift:nightly-5.9-focal 2023-08-16
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -108,7 +108,7 @@ jobs:
     # -- common --
     runs-on: ubuntu-latest
     container:
-      image: swiftlang/swift@sha256:8019d8ab3de09d6707ad97c7d36e7e4f4cb45c04df99527ebd295d7cbea95b11  # swiftlang/swift:nightly-5.9-focal  
+      image: swiftlang/swift@sha256:f212429011a4c3592ffaa660fd78b5bc149e9df7920da02dfc0e7a761582fa10  # swiftlang/swift:nightly-5.9-focal 2023-08-16  
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v3
@@ -141,7 +141,7 @@ jobs:
     # -- common --
     runs-on: ubuntu-latest
     container:
-      image: swiftlang/swift@sha256:8019d8ab3de09d6707ad97c7d36e7e4f4cb45c04df99527ebd295d7cbea95b11  # swiftlang/swift:nightly-5.9-focal
+      image: swiftlang/swift@sha256:f212429011a4c3592ffaa660fd78b5bc149e9df7920da02dfc0e7a761582fa10  # swiftlang/swift:nightly-5.9-focal 2023-08-16
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v3
@@ -174,7 +174,7 @@ jobs:
     # -- common --
     runs-on: ubuntu-latest
     container:
-      image: swiftlang/swift@sha256:8019d8ab3de09d6707ad97c7d36e7e4f4cb45c04df99527ebd295d7cbea95b11  # swiftlang/swift:nightly-5.9-focal
+      image: swiftlang/swift@sha256:f212429011a4c3592ffaa660fd78b5bc149e9df7920da02dfc0e7a761582fa10  # swiftlang/swift:nightly-5.9-focal 2023-08-16
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v3
@@ -207,7 +207,7 @@ jobs:
     # -- common --
     runs-on: ubuntu-latest
     container:
-      image: swiftlang/swift@sha256:8019d8ab3de09d6707ad97c7d36e7e4f4cb45c04df99527ebd295d7cbea95b11  # swiftlang/swift:nightly-5.9-focal
+      image: swiftlang/swift@sha256:f212429011a4c3592ffaa660fd78b5bc149e9df7920da02dfc0e7a761582fa10  # swiftlang/swift:nightly-5.9-focal 2023-08-16
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v3
@@ -240,7 +240,7 @@ jobs:
     # -- common --
     runs-on: ubuntu-latest
     container:
-      image: swiftlang/swift@sha256:8019d8ab3de09d6707ad97c7d36e7e4f4cb45c04df99527ebd295d7cbea95b11  # swiftlang/swift:nightly-5.9-focal
+      image: swiftlang/swift@sha256:f212429011a4c3592ffaa660fd78b5bc149e9df7920da02dfc0e7a761582fa10  # swiftlang/swift:nightly-5.9-focal 2023-08-16
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v3
@@ -273,7 +273,7 @@ jobs:
     # -- common --
     runs-on: ubuntu-latest
     container:
-      image: swiftlang/swift@sha256:8019d8ab3de09d6707ad97c7d36e7e4f4cb45c04df99527ebd295d7cbea95b11  # swiftlang/swift:nightly-5.9-focal
+      image: swiftlang/swift@sha256:f212429011a4c3592ffaa660fd78b5bc149e9df7920da02dfc0e7a761582fa10  # swiftlang/swift:nightly-5.9-focal 2023-08-16
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v3
@@ -306,7 +306,7 @@ jobs:
     # -- common --
     runs-on: ubuntu-latest
     container:
-      image: swiftlang/swift@sha256:8019d8ab3de09d6707ad97c7d36e7e4f4cb45c04df99527ebd295d7cbea95b11  # swiftlang/swift:nightly-5.9-focal
+      image: swiftlang/swift@sha256:f212429011a4c3592ffaa660fd78b5bc149e9df7920da02dfc0e7a761582fa10  # swiftlang/swift:nightly-5.9-focal 2023-08-16
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v3
@@ -339,7 +339,7 @@ jobs:
     # -- common --
     runs-on: ubuntu-latest
     container:
-      image: swiftlang/swift@sha256:8019d8ab3de09d6707ad97c7d36e7e4f4cb45c04df99527ebd295d7cbea95b11  # swiftlang/swift:nightly-5.9-focal
+      image: swiftlang/swift@sha256:f212429011a4c3592ffaa660fd78b5bc149e9df7920da02dfc0e7a761582fa10  # swiftlang/swift:nightly-5.9-focal 2023-08-16
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v3
@@ -372,7 +372,7 @@ jobs:
     # -- common --
     runs-on: ubuntu-latest
     container:
-      image: swiftlang/swift@sha256:8019d8ab3de09d6707ad97c7d36e7e4f4cb45c04df99527ebd295d7cbea95b11  # swiftlang/swift:nightly-5.9-focal
+      image: swiftlang/swift@sha256:f212429011a4c3592ffaa660fd78b5bc149e9df7920da02dfc0e7a761582fa10  # swiftlang/swift:nightly-5.9-focal 2023-08-16
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v3
@@ -405,7 +405,7 @@ jobs:
     # -- common --
     runs-on: ubuntu-latest
     container:
-      image: swiftlang/swift@sha256:8019d8ab3de09d6707ad97c7d36e7e4f4cb45c04df99527ebd295d7cbea95b11  # swiftlang/swift:nightly-5.9-focal
+      image: swiftlang/swift@sha256:f212429011a4c3592ffaa660fd78b5bc149e9df7920da02dfc0e7a761582fa10  # swiftlang/swift:nightly-5.9-focal 2023-08-16
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v3
@@ -438,7 +438,7 @@ jobs:
     # -- common --
     runs-on: ubuntu-latest
     container:
-      image: swiftlang/swift@sha256:8019d8ab3de09d6707ad97c7d36e7e4f4cb45c04df99527ebd295d7cbea95b11  # swiftlang/swift:nightly-5.9-focal
+      image: swiftlang/swift@sha256:f212429011a4c3592ffaa660fd78b5bc149e9df7920da02dfc0e7a761582fa10  # swiftlang/swift:nightly-5.9-focal 2023-08-16
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v3
@@ -468,7 +468,7 @@ jobs:
     needs: check_dependencies_10 # $NUMBER_OF_CHUNKS - 2
     runs-on: ubuntu-latest
     container:
-      image: swiftlang/swift@sha256:8019d8ab3de09d6707ad97c7d36e7e4f4cb45c04df99527ebd295d7cbea95b11  # swiftlang/swift:nightly-5.9-focal
+      image: swiftlang/swift@sha256:f212429011a4c3592ffaa660fd78b5bc149e9df7920da02dfc0e7a761582fa10  # swiftlang/swift:nightly-5.9-focal 2023-08-16
     env:
       CHUNK: "9"                 # $NUMBER_OF_CHUNKS - 1
       OUTPUT_FILE: out_9.json    # $NUMBER_OF_CHUNKS - 1
