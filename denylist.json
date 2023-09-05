@@ -38,5 +38,9 @@
   {
     "notes": "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/4728.",
     "package_url": "https://github.com/FelixHerrmann/intercom-ios.git"
+  },
+  {
+    "notes": "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/5026.",
+    "package_url": "https://github.com/ordo-one/package-histogram.git"
   }
 ]
