@@ -71,10 +71,10 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             github.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: 'Oh no! We were unable to detect any valid packages in your submission. If you submitted the wrong URL and would like to update it, please [open a new issue](https://github.com/SwiftPackageIndex/PackageList/issues/new/choose).\n\n>Validate Error: ${{ steps.validate.outputs.validateError || 'None' }}'
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: 'It looks like there’s nothing to do here!\n\nThe package may [already be in the package list](https://github.com/SwiftPackageIndex/PackageList/blob/main/packages.json) or on the [denylist](https://github.com/SwiftPackageIndex/PackageList/blob/main/denylist.json). Or, if you submitted the wrong URL or there’s a typo, please close this issue and [start a new one](https://github.com/SwiftPackageIndex/PackageList/issues/new/choose).\n\n>Validate Error: ${{ steps.validate.outputs.validateError || 'None' }}'
             })
   remove:
     runs-on: ubuntu-20.04
