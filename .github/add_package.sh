@@ -24,3 +24,7 @@ echo "${GH_BODY}" | while read url ; do
     mv temp.json packages.json
     echo "+ '$url'."
 done
+
+jq --slurpfile denylist denylist.json 'map(select((ascii_downcase as $item | . as $origitem |
+    ($denylist[0] | map(.package_url | ascii_downcase)) | index($item) | not) as $found |
+    if $found then . else empty end))' packages.json
