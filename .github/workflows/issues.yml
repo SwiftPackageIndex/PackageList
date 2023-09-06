@@ -70,12 +70,11 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const spiUrl = `https://swiftpackageindex.com/${ context.repo.owner }/${ context.repo.repo }`
             github.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: 'It looks like there’s nothing to do here!\n\nThe package may [already be in the index](${{ spiUrl }}) or on the [denylist](https://github.com/SwiftPackageIndex/PackageList/blob/main/denylist.json).\n\nIf you submitted the wrong URL or there’s a typo, please close this issue and [start a new one](https://github.com/SwiftPackageIndex/PackageList/issues/new/choose).\n\n>Validate Error: ${{ steps.validate.outputs.validateError || 'None' }}'
+              body: 'It looks like there’s nothing to do here!\n\nThe package may [already be in the index](${{ context.repo.repo }}) or on the [denylist](https://github.com/SwiftPackageIndex/PackageList/blob/main/denylist.json).\n\nIf you submitted the wrong URL or there’s a typo, please close this issue and [start a new one](https://github.com/SwiftPackageIndex/PackageList/issues/new/choose).\n\n>Validate Error: ${{ steps.validate.outputs.validateError || 'None' }}'
             })
   remove:
     runs-on: ubuntu-20.04
