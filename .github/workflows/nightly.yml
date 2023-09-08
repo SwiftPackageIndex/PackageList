@@ -493,13 +493,6 @@ jobs:
             chmod +x ./validator
             ./validator check-dependencies -i redirect-checked.json -o $OUTPUT_FILE --chunk $CHUNK --number-of-chunks $NUMBER_OF_CHUNKS
             ./validator merge-lists out_*.json -o packages.json
-
-            # Remove anything in the denylist
-            jq --slurpfile denylist denylist.json 'map(select((ascii_downcase as $item | . as $origitem |
-                ($denylist[0] | map(.package_url | ascii_downcase)) | index($item) | not) as $found |
-                if $found then . else empty end))' packages.json > temp.json
-            mv temp.json packages.json
-
             # artifacts from appearing in the PR
             rm out_*.json redirect-checked.json validator .packageDumpCache
 
