@@ -493,9 +493,9 @@ jobs:
             chmod +x ./validator
             ./validator check-dependencies -i redirect-checked.json -o $OUTPUT_FILE --chunk $CHUNK --number-of-chunks $NUMBER_OF_CHUNKS
             ./validator merge-lists out_*.json -o packages.json
-            # artifacts from appearing in the PR
+            ./validator apply-deny-list -p packages.json -d denylist.json
+            # Stop artifacts from appearing in the PR
             rm out_*.json redirect-checked.json validator .packageDumpCache
-
       - name: Create pull request
         id: cpr
         uses: peter-evans/create-pull-request@v5
