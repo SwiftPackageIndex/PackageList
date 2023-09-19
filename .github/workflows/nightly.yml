@@ -92,8 +92,6 @@ jobs:
             ./validator check-redirects -i packages.json -o $OUTPUT_FILE --chunk $CHUNK --number-of-chunks 2
             ./validator merge-lists out_*.json -o redirect-checked.json
             rm out_*.json
-            echo "redirect-checked.json"
-            cat redirect-checked.json
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
@@ -494,14 +492,8 @@ jobs:
           command: |
             chmod +x ./validator
             ./validator check-dependencies -i redirect-checked.json -o $OUTPUT_FILE --chunk $CHUNK --number-of-chunks $NUMBER_OF_CHUNKS
-            ls
-            cat out_*.json
             ./validator merge-lists out_*.json -o packages.json
-            echo packages.json before deny list
-            cat packages.json
             ./validator apply-deny-list -p packages.json -d denylist.json
-            echo packages.json after deny list
-            cat packages.json
             # Stop artifacts from appearing in the PR
             rm out_*.json redirect-checked.json validator .packageDumpCache
       - name: Create pull request
