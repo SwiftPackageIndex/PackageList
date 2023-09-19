@@ -472,8 +472,8 @@ jobs:
     container:
       image: swiftlang/swift@sha256:f212429011a4c3592ffaa660fd78b5bc149e9df7920da02dfc0e7a761582fa10  # swiftlang/swift:nightly-5.9-focal 2023-08-16
     env:
-      CHUNK: "9"                 # $NUMBER_OF_CHUNKS - 1
-      OUTPUT_FILE: out_9.json    # $NUMBER_OF_CHUNKS - 1
+      CHUNK: "11"                 # $NUMBER_OF_CHUNKS - 1
+      OUTPUT_FILE: out_11.json    # $NUMBER_OF_CHUNKS - 1
     # -- end of config --
     steps:
       # we need to check out the repo in the last step in order to create a PR
