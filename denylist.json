@@ -42,5 +42,9 @@
   {
     "notes": "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/5026.",
     "package_url": "https://github.com/ordo-one/package-histogram.git"
+  },
+  {
+    "notes": "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/5228.",
+    "package_url": "https://github.com/skaik-mo/MSSPhoneNumber.git"
   }
 ]
