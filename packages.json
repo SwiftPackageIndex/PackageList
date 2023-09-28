@@ -396,6 +396,7 @@
   "https://github.com/apple/swift-argument-parser.git",
   "https://github.com/apple/swift-asn1.git",
   "https://github.com/apple/swift-async-algorithms.git",
+  "https://github.com/apple/swift-async-dns-resolver.git",
   "https://github.com/apple/swift-atomics.git",
   "https://github.com/apple/swift-cassandra-client.git",
   "https://github.com/apple/swift-certificates.git",
