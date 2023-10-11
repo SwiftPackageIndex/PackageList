@@ -5452,6 +5452,7 @@
   "https://github.com/swift-server/swift-aws-lambda-events.git",
   "https://github.com/swift-server/swift-aws-lambda-runtime.git",
   "https://github.com/swift-server/swift-backtrace.git",
+  "https://github.com/swift-server/swift-kafka-client.git",
   "https://github.com/swift-server/swift-openapi-async-http-client.git",
   "https://github.com/swift-server/swift-openapi-hummingbird.git",
   "https://github.com/swift-server/swift-openapi-vapor.git",
