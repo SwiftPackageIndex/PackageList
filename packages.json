@@ -2317,6 +2317,7 @@
   "https://github.com/groue/CombineExpectations.git",
   "https://github.com/groue/GRDB.swift.git",
   "https://github.com/groue/GRDBQuery.git",
+  "https://github.com/groue/GRDBSnapshotTesting.git",
   "https://github.com/groue/GRMustache.swift.git",
   "https://github.com/groue/Semaphore.git",
   "https://github.com/GroupeMINASTE/DonateViewController.git",
