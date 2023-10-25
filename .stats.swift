@@ -22,6 +22,6 @@ while date <= Date.now {
         try shellOut(to: "git checkout \(rev)")
         let data = try Data(contentsOf: URL(fileURLWithPath: packageList))
         let packages = try JSONDecoder().decode([String].self, from: data)
-        print(fmt.string(from: date), ",", packages.count, separator: "")
+        print(fmt.string(from: date), " ", packages.count, separator: "")
     }
 }
