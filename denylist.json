@@ -50,5 +50,9 @@
   {
     "notes": "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/5387.",
     "package_url": "https://github.com/lvnkmn/zoomy.git"
+  },
+  {
+    "notes": "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/5460.",
+    "package_url": "https://github.com/jectivex/JXKit.git"
   }
 ]
