@@ -58,5 +58,13 @@
   {
     "notes": "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/5470.",
     "package_url": "https://github.com/insub4067/MVIKit.git"
+  },
+  {
+    "notes": "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/5597.",
+    "package_url": "https://github.com/William-Weng/WWSignInWith3rd_Weibo.git"
+  },
+  {
+    "notes": "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/5597.",
+    "package_url": "https://github.com/William-Weng/WWSignInWith3rd_Weibo.git"
   }
 ]
