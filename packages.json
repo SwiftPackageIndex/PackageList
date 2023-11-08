@@ -2343,6 +2343,8 @@
   "https://github.com/google/swift-benchmark.git",
   "https://github.com/google/swiftlogfirecloud.git",
   "https://github.com/googleads/swift-package-manager-google-mobile-ads.git",
+  "https://github.com/googleads/swift-package-manager-google-programmatic-access-library-ios.git",
+  "https://github.com/googleads/swift-package-manager-google-programmatic-access-library-tvos.git",
   "https://github.com/googleads/swift-package-manager-google-user-messaging-platform.git",
   "https://github.com/googleanalytics/google-tag-manager-ios-sdk.git",
   "https://github.com/googleapis/google-auth-library-swift.git",
