@@ -2420,6 +2420,7 @@
   "https://github.com/googleanalytics/google-tag-manager-ios-sdk.git",
   "https://github.com/googleapis/google-auth-library-swift.git",
   "https://github.com/GoogleCloudPlatform/recaptcha-enterprise-mobile-sdk.git",
+  "https://github.com/googlemaps/ios-maps-sdk.git",
   "https://github.com/gor-gyolchanyan-swift/attribute-kit.git",
   "https://github.com/gor-gyolchanyan-swift/introspection-kit.git",
   "https://github.com/gotranseo/vapor-recaptcha.git",
