@@ -58,5 +58,9 @@
   {
     "notes": "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/5470.",
     "package_url": "https://github.com/insub4067/MVIKit.git"
+  },
+  {
+    "notes": "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/5980.",
+    "package_url": "https://github.com/William-Weng/WWExpandView.git"
   }
 ]
