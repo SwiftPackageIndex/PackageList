@@ -62,5 +62,9 @@
   {
     "notes": "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/5980.",
     "package_url": "https://github.com/William-Weng/WWExpandView.git"
+  },
+  {
+    "notes": "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/6005.",
+    "package_url": "https://github.com/insub4067/UINavigator.git"
   }
 ]
