@@ -1066,6 +1066,7 @@
   "https://github.com/ChimeHQ/JSONRPC.git",
   "https://github.com/ChimeHQ/KeyCodes.git",
   "https://github.com/ChimeHQ/LanguageClient.git",
+  "https://github.com/ChimeHQ/LanguageServer.git",
   "https://github.com/ChimeHQ/LanguageServerProtocol.git",
   "https://github.com/ChimeHQ/Meter.git",
   "https://github.com/ChimeHQ/MeterReporter.git",
