@@ -19,9 +19,7 @@ jobs:
     steps:
       - name: Build validator
         run: |
-          # FIXME: drop -b parameter after testing is complete
-          git clone https://github.com/SwiftPackageIndex/PackageList-Validator.git --depth 1 \
-            -b api-based-dependency-check
+          git clone https://github.com/SwiftPackageIndex/PackageList-Validator.git --depth 1
           cd PackageList-Validator
           swift build
           cp $(swift build --show-bin-path)/validator $GITHUB_WORKSPACE/
