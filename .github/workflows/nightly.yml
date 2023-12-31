@@ -133,7 +133,7 @@ jobs:
                 --input redirect-checked.json --output packages.json
             ./validator apply-deny-list -p packages.json -d denylist.json
             # Stop artifacts from appearing in the PR
-            rm redirect-checked.json validator .packageDumpCache
+            rm -f redirect-checked.json validator
       - name: Create pull request
         id: cpr
         uses: peter-evans/create-pull-request@v5
