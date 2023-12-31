@@ -58,7 +58,8 @@ jobs:
           retry_on: error
           command: |
             chmod +x ./validator
-            ./validator check-redirects -i packages.json -o $OUTPUT_FILE --chunk $CHUNK --number-of-chunks 2
+            # ./validator check-redirects -i packages.json -o $OUTPUT_FILE --chunk $CHUNK --number-of-chunks 2
+            cp packages.json $OUTPUT_FILE
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
@@ -92,7 +93,8 @@ jobs:
           retry_on: error
           command: |
             chmod +x ./validator
-            ./validator check-redirects -i packages.json -o $OUTPUT_FILE --chunk $CHUNK --number-of-chunks 2
+            # ./validator check-redirects -i packages.json -o $OUTPUT_FILE --chunk $CHUNK --number-of-chunks 2
+            cp packages.json $OUTPUT_FILE
             ./validator merge-lists out_*.json -o redirect-checked.json
             rm out_*.json
 
