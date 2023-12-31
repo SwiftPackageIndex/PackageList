@@ -7,6 +7,7 @@ on:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  SPI_API_TOKEN: ${{ secrets.SPI_API_TOKEN }}
   NUMBER_OF_CHUNKS: "12"
 
 jobs:
@@ -125,7 +126,9 @@ jobs:
           retry_on: error
           command: |
             chmod +x ./validator
-            ./validator check-dependencies2 -i redirect-checked.json -o packages.json
+            ./validator check-dependencies2 \
+                --spi-api-token $SPI_API_TOKEN \
+                --input redirect-checked.json --output packages.json
             ./validator apply-deny-list -p packages.json -d denylist.json
             # Stop artifacts from appearing in the PR
             rm redirect-checked.json validator .packageDumpCache
