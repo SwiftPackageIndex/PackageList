@@ -126,7 +126,8 @@ jobs:
             chmod +x ./validator
             ./validator check-dependencies2 \
                 --spi-api-token $SPI_API_TOKEN \
-                --input redirect-checked.json --output packages.json
+                --input redirect-checked.json --output packages.json \
+                --limit 10
             ./validator apply-deny-list -p packages.json -d denylist.json
             # Stop artifacts from appearing in the PR
             rm -f redirect-checked.json validator
