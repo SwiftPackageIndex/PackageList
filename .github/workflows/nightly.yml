@@ -130,7 +130,7 @@ jobs:
                 --limit 50
             ./validator apply-deny-list -p packages.json -d denylist.json
             # Stop artifacts from appearing in the PR
-            rm -f redirect-checked.json validator
+            rm -f out_*.json redirect-checked.json validator
       - name: Create pull request
         id: cpr
         uses: peter-evans/create-pull-request@v5

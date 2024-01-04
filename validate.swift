@@ -328,6 +328,7 @@ func dumpPackage(url: URL) throws -> Package {
 }
 
 func verifyURL(_ url: URL) throws -> URL {
+    print("verifying", url)
     guard let resolvedURL = url.followingRedirects() else { throw AppError.invalidURL(url) }
     try dumpPackage(url: resolvedURL)
     return resolvedURL
