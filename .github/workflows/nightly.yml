@@ -124,7 +124,7 @@ jobs:
           retry_on: error
           command: |
             chmod +x ./validator
-            ./validator check-dependencies2 \
+            ./validator check-dependencies \
                 --spi-api-token $SPI_API_TOKEN \
                 --input redirect-checked.json --output packages.json \
                 --limit 20
