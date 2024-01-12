@@ -55,7 +55,7 @@ jobs:
           retry_on: error
           command: |
             chmod +x ./validator
-            ./validator check-redirects -i packages.json -o $redirect-checked.json --concurrency $CONCURRENCY
+            ./validator check-redirects -i packages.json -o redirect-checked.json --concurrency $CONCURRENCY
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
