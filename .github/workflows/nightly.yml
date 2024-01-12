@@ -18,8 +18,7 @@ jobs:
     steps:
       - name: Build validator
         run: |
-          git clone https://github.com/SwiftPackageIndex/PackageList-Validator.git --depth 1 \
-            --branch concurrent-redirect-checks
+          git clone https://github.com/SwiftPackageIndex/PackageList-Validator.git --depth 1
           cd PackageList-Validator
           swift build
           cp $(swift build --show-bin-path)/validator $GITHUB_WORKSPACE/
