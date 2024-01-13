@@ -66,5 +66,9 @@
   {
     "notes": "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/6005.",
     "package_url": "https://github.com/insub4067/UINavigator.git"
+  },
+  {
+    "notes": "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/6172.",
+    "package_url": "https://github.com/Kjuly/KYImageProcessing.git"
   }
 ]
