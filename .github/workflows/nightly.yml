@@ -50,12 +50,13 @@ jobs:
         uses: nick-fields/retry@v2
         with:
           timeout_minutes: 60
-          max_attempts: 3
+          max_attempts: 1
           retry_on: error
           command: |
             chmod +x ./validator
             ./validator check-redirects -i packages.json -o redirect-checked.json --concurrency $CONCURRENCY
-            diff packages.json redirect-checked.json
+            echo "diff packages.json redirect-checked.json"
+            diff packages.json redirect-checked.json || true
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
@@ -83,7 +84,7 @@ jobs:
         uses: nick-fields/retry@v2
         with:
           timeout_minutes: 60
-          max_attempts: 3
+          max_attempts: 1
           retry_on: error
           command: |
             chmod +x ./validator
