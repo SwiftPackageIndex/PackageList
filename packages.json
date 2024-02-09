@@ -429,6 +429,7 @@
   "https://github.com/apple/FHIRModels.git",
   "https://github.com/apple/indexstore-db.git",
   "https://github.com/apple/ml-stable-diffusion.git",
+  "https://github.com/apple/pkl-swift.git",
   "https://github.com/apple/sourcekit-lsp.git",
   "https://github.com/apple/swift-algorithms.git",
   "https://github.com/apple/swift-argument-parser.git",
