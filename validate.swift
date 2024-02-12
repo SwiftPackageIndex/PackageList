@@ -288,7 +288,7 @@ func listFilesInRepo(owner: String, repository: String, branch: String) throws -
     return try JSONDecoder().decode(Response.self, from: json).tree
 }
 
-func getManifestURL(_ url: URL) throws -> URL {
+func getManifestURLs(_ url: URL) throws -> [URL] {
     let (owner, repository) = parseOwnerRepo(from: url)
     let branch = try getDefaultBranch(owner: owner, repository: repository)
     let manifestFiles = try listFilesInRepo(owner: owner, repository: repository, branch: branch)
@@ -297,8 +297,10 @@ func getManifestURL(_ url: URL) throws -> URL {
       .filter { $0.path.hasSuffix(".swift") }
       .map(\.path)
       .sorted()
-    guard let manifestFile = manifestFiles.last else { throw AppError.manifestNotFound(url) }
-    return URL(string: "https://raw.githubusercontent.com/\(owner)/\(repository)/\(branch)/\(manifestFile)")!
+    guard !manifestFiles.isEmpty else { throw AppError.manifestNotFound(url) }
+    return manifestFiles.map {
+        URL(string: "https://raw.githubusercontent.com/\(owner)/\(repository)/\(branch)/\($0)")!
+    }
 }
 
 func createTempDir() throws -> URL {
@@ -350,12 +352,13 @@ func runDumpPackage(at path: URL, timeout: TimeInterval = 20) throws -> Data {
 
 @discardableResult
 func dumpPackage(url: URL) throws -> Package {
-    let manifestURL = try getManifestURL(url)
-    let manifest = try fetch(manifestURL)
-
     let tempDir = try createTempDir()
-    let fileURL = tempDir.appendingPathComponent("Package.swift")
-    try manifest.write(to: fileURL)
+    
+    for manifestURL in try getManifestURLs(url) {
+        let manifest = try fetch(manifestURL)
+        let fileURL = tempDir.appendingPathComponent(manifestURL.lastPathComponent)
+        try manifest.write(to: fileURL)
+    }
 
     let json = try runDumpPackage(at: tempDir)
     return try JSONDecoder().decode(Package.self, from: json)
