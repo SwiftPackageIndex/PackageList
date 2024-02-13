@@ -9,7 +9,7 @@ on:
     types: [submitted]
 
 env:
-  SWIFT_IMAGE: swift:5.9-jammy
+  SWIFT_IMAGE: swiftlang/swift@sha256:0cc4c5d0a11bcd52476787883c662ce295a6b90d477156660918401f9ed98469  # swiftlang/swift:nightly-5.10-jammy
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
