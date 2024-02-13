@@ -14,7 +14,7 @@ jobs:
   build_validator:
     runs-on: ubuntu-latest
     container:
-      image: swift:5.9-jammy
+      image: swiftlang/swift@sha256:0cc4c5d0a11bcd52476787883c662ce295a6b90d477156660918401f9ed98469  # swiftlang/swift:nightly-5.10-jammy
     steps:
       - name: Build validator
         run: |
@@ -36,7 +36,7 @@ jobs:
       CONCURRENCY: "10"
     runs-on: ubuntu-latest
     container:
-      image: swift:5.9-jammy
+      image: swiftlang/swift@sha256:0cc4c5d0a11bcd52476787883c662ce295a6b90d477156660918401f9ed98469  # swiftlang/swift:nightly-5.10-jammy
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -69,7 +69,7 @@ jobs:
     needs: check_redirects
     runs-on: ubuntu-latest
     container:
-      image: swift:5.9-jammy
+      image: swiftlang/swift@sha256:0cc4c5d0a11bcd52476787883c662ce295a6b90d477156660918401f9ed98469  # swiftlang/swift:nightly-5.10-jammy
     steps:
       # we need to check out the repo in the last step in order to create a PR
       - name: Checkout
