@@ -262,13 +262,8 @@ func getDefaultBranch(owner: String, repository: String) throws -> String {
 }
 
 struct RepoFile: Codable {
-    var type: FileType
+    var type: String
     var path: String
-    
-    enum FileType: String, Codable {
-        case blob
-        case tree
-    }
 }
 
 func parseOwnerRepo(from url: URL) -> (owner: String, repository: String) {
@@ -285,14 +280,20 @@ func listFilesInRepo(owner: String, repository: String, branch: String) throws -
     struct Response: Codable {
         var tree: [RepoFile]
     }
-    return try JSONDecoder().decode(Response.self, from: json).tree
+    do {
+        return try JSONDecoder().decode(Response.self, from: json).tree
+    } catch {
+        print("failed to parse listFilesInRepo response:")
+        print(String(decoding: json, as: UTF8.self))
+        throw error
+    }
 }
 
 func getManifestURLs(_ url: URL) throws -> [URL] {
     let (owner, repository) = parseOwnerRepo(from: url)
     let branch = try getDefaultBranch(owner: owner, repository: repository)
     let manifestFiles = try listFilesInRepo(owner: owner, repository: repository, branch: branch)
-      .filter { $0.type == .blob }
+      .filter { $0.type == "blob" }
       .filter { $0.path.hasPrefix("Package") }
       .filter { $0.path.hasSuffix(".swift") }
       .map(\.path)
