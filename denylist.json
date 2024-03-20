@@ -66,5 +66,21 @@
   {
     "notes": "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/6005.",
     "package_url": "https://github.com/insub4067/UINavigator.git"
+  },
+  {
+    "notes": "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/6652.",
+    "package_url": "https://github.com/swift-sprinter/swift-sls-adapter.git"
+  },
+  {
+    "notes": "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/6652.",
+    "package_url": "https://github.com/swift-sprinter/Breeze.git"
+  },
+  {
+    "notes": "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/6652.",
+    "package_url": "https://github.com/swift-serverless/swift-sls-adapter.git"
+  },
+  {
+    "notes": "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/6652.",
+    "package_url": "https://github.com/swift-serverless/Breeze.git"
   }
 ]
