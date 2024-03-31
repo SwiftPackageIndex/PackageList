@@ -458,6 +458,7 @@
   "https://github.com/apple/swift-crypto.git",
   "https://github.com/apple/swift-distributed-actors.git",
   "https://github.com/apple/swift-distributed-tracing-baggage-core.git",
+  "https://github.com/apple/swift-distributed-tracing-extras.git",
   "https://github.com/apple/swift-distributed-tracing.git",
   "https://github.com/apple/swift-docc-plugin.git",
   "https://github.com/apple/swift-docc-symbolkit.git",
