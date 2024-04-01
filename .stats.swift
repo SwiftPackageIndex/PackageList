@@ -9,7 +9,7 @@ let fmt = DateFormatter()
 fmt.dateFormat = "yyyy-MM-dd"
 fmt.timeZone = .init(abbreviation: "UTC")
 
-let start = fmt.date(from: "2019-05-15")!
+let start = fmt.date(from: "2019-05-13")!
 let reportFrom = calendar.date(byAdding: .day, value: -30, to: .now)!
 var date = start
 while date <= Date.now {
