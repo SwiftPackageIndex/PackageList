@@ -70,5 +70,9 @@
   {
     "notes": "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/6837.",
     "package_url": "https://github.com/siundu254/Printer.git"
+  },
+  {
+    "notes": "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/7142.",
+    "package_url": "https://github.com/Devbrail/trc_ios_sdk.git"
   }
 ]
