@@ -1669,6 +1669,7 @@
   "https://github.com/Data-swift/ManagedModels.git",
   "https://github.com/DataDog/dd-sdk-ios.git",
   "https://github.com/DataDog/FeatureFlagsController-iOS.git",
+  "https://github.com/Datadog/swift-jsonapi.git",
   "https://github.com/datatheorem/TrustKit.git",
   "https://github.com/davbeck/MultipartForm.git",
   "https://github.com/davbeck/PersistentCacheKit.git",
