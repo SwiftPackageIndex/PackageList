@@ -6183,6 +6183,7 @@
   "https://github.com/slashmo/swift-otel-jaeger.git",
   "https://github.com/slashmo/swift-otel-xray.git",
   "https://github.com/slashmo/swift-otel.git",
+  "https://github.com/slashmo/swift-w3c-trace-context.git",
   "https://github.com/SlaunchaMan/ErrorAssertions.git",
   "https://github.com/SlaunchaMan/IsNotEmpty.git",
   "https://github.com/SlaunchaMan/RomanNumeralFormatter.git",
