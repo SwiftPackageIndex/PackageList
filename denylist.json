@@ -74,5 +74,13 @@
   {
     "notes": "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/7142.",
     "package_url": "https://github.com/Devbrail/trc_ios_sdk.git"
+  },
+  {
+    "notes": "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/7300.",
+    "package_url": "https://github.com/slashmo/swift-otel-jaeger.git"
+  },
+  {
+    "notes": "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/7300.",
+    "package_url": "https://github.com/slashmo/gsoc-swift-baggage-context.git"
   }
 ]
