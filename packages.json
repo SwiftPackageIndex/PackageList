@@ -1369,6 +1369,7 @@
   "https://github.com/composed-swift/composedui.git",
   "https://github.com/computer-graphics-tools/core-video-tools.git",
   "https://github.com/computer-graphics-tools/metal-tools.git",
+  "https://github.com/computer-graphics-tools/simd-tools.git",
   "https://github.com/comScore/Comscore-Swift-Package-Manager.git",
   "https://github.com/configcat/swift-sdk.git",
   "https://github.com/ConfusedVorlon/HSHelpers.git",
