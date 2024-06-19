@@ -6494,6 +6494,7 @@
   "https://github.com/swift-server/swift-kafka-client.git",
   "https://github.com/swift-server/swift-openapi-async-http-client.git",
   "https://github.com/swift-server/swift-openapi-hummingbird.git",
+  "https://github.com/swift-server/swift-openapi-lambda.git",
   "https://github.com/swift-server/swift-openapi-vapor.git",
   "https://github.com/swift-server/swift-prometheus.git",
   "https://github.com/swift-server/swift-service-lifecycle.git",
