@@ -1029,6 +1029,7 @@
   "https://github.com/brokenhandsio/SteamPress.git",
   "https://github.com/brokenhandsio/vapor-csrf.git",
   "https://github.com/brokenhandsio/vapor-dynamodb-sessions.git",
+  "https://github.com/brokenhandsio/vapor-oauth.git",
   "https://github.com/brokenhandsio/VaporSecurityHeaders.git",
   "https://github.com/broomburgo/Narratore.git",
   "https://github.com/bruno-garcia/SentryCocoaLumberjack.git",
