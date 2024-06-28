@@ -33,6 +33,11 @@ func main() throws {
             print("Invalid url:", line)
             exit(1)
         }
+        guard url.host?.lowercased() == "github.com" else {
+            print("Invalid url:", url)
+            print("Only packages hosted on github.com are currently supported.")
+            exit(1)
+        }
         if !packages.contains(url) {
             packages.append(url)
             print("+ \(url)")
