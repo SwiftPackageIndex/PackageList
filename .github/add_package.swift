@@ -1,7 +1,7 @@
 import Foundation
 
 func loadPackages(at path: String) throws -> [URL] {
-    let data = try Data(contentsOf: URL(filePath: path))
+    let data = try Data(contentsOf: URL(fileURLWithPath: path))
     return try JSONDecoder().decode([URL].self, from: data)
 }
 
@@ -9,12 +9,12 @@ func savePackages(_ packages: [URL], to path: String) throws {
     let encoder = JSONEncoder()
     encoder.outputFormatting = [.withoutEscapingSlashes, .prettyPrinted]
     let data = try encoder.encode(packages)
-    try data.write(to: URL(filePath: path))   
+    try data.write(to: URL(fileURLWithPath: path))   
 }
 
 func loadDenyList() throws -> [URL] {
     struct Item: Decodable { var packageUrl: URL }
-    let data = try Data(contentsOf: URL(filePath: "denyList.json"))
+    let data = try Data(contentsOf: URL(fileURLWithPath: "denyList.json"))
     let decoder = JSONDecoder()
     decoder.keyDecodingStrategy = .convertFromSnakeCase
     return try decoder.decode([Item].self, from: data).map(\.packageUrl)
