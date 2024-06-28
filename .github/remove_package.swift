@@ -90,6 +90,9 @@ func main() throws {
                             packageUrl: $0)
         }
         try saveDenyList(originalDenyList + newItems, to: "denylist.json")
+        for url in urlsToAdd {
+            print("+ \(url) (denyList.json)")
+        }
     }
 }
 
