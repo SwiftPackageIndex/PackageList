@@ -82,7 +82,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Remove Package from JSON
-        run: bash .github/remove_package.sh
+        run: swift .github/remove_package.swift
         env:
           GH_BODY: ${{ github.event.issue.body }}
           GH_ISSUE: ${{ github.event.issue.number }}
