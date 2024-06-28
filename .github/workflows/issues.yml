@@ -19,7 +19,7 @@ jobs:
           GH_BODY: ${{ github.event.issue.body }}
 
       - name: Validate JSON
-        run: docker run --rm --env CI=true -v "$PWD:/host" -w /host $SWIFT_IMAGE swift validate.swift
+        run: swift validate.swift
         id: validate
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -88,7 +88,7 @@ jobs:
           GH_ISSUE: ${{ github.event.issue.number }}
 
       - name: Validate JSON
-        run: docker run --rm --env CI=true -v "$PWD:/host" -w /host $SWIFT_IMAGE swift validate.swift
+        run: swift validate.swift
         id: validate
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
