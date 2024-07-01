@@ -18,7 +18,7 @@ struct PackageToDelete: Codable {
 }
 
 func loadDenyList() throws -> [PackageToDelete] {
-    let data = try Data(contentsOf: URL(fileURLWithPath: "denyList.json"))
+    let data = try Data(contentsOf: URL(fileURLWithPath: "denylist.json"))
     let decoder = JSONDecoder()
     decoder.keyDecodingStrategy = .convertFromSnakeCase
     return try decoder.decode([PackageToDelete].self, from: data)

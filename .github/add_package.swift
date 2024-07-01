@@ -14,7 +14,7 @@ func savePackages(_ packages: [URL], to path: String) throws {
 
 func loadDenyList() throws -> [URL] {
     struct Item: Decodable { var packageUrl: URL }
-    let data = try Data(contentsOf: URL(fileURLWithPath: "denyList.json"))
+    let data = try Data(contentsOf: URL(fileURLWithPath: "denylist.json"))
     let decoder = JSONDecoder()
     decoder.keyDecodingStrategy = .convertFromSnakeCase
     return try decoder.decode([Item].self, from: data).map(\.packageUrl)
