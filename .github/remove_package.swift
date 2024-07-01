@@ -32,6 +32,16 @@ func saveDenyList(_ packages: [PackageToDelete], to path: String) throws {
     try data.write(to: URL(fileURLWithPath: path))   
 }
 
+extension URL {
+    var normalized: Self? {
+        guard var components = URLComponents(url: self, resolvingAgainstBaseURL: false) else { return nil }
+        if components.scheme == "http" { components.scheme = "https" }
+        if !components.path.hasSuffix(".git") { components.path = components.path + ".git" }
+        if components.host?.lowercased() == "swiftpackageindex.com" { components.host = "github.com" }
+        return components.url!
+    }
+}
+
 func main() throws {
     guard let issueNumber = ProcessInfo.processInfo.environment["GH_ISSUE"] else {
         print("Issue number (GH_ISSUE) not set")
@@ -45,28 +55,19 @@ func main() throws {
     var urlsToDelete = [URL]()
     
     for line in body.split(whereSeparator: \.isWhitespace) {
-        guard var url = URL(string: String(line)) else {
-            print("Invalid url:", line)
+        guard let url = URL(string: String(line)),
+              let scheme = url.scheme,
+              scheme.starts(with: "http") else {
+            continue
+        }
+        
+        guard let normalizedUrl = url.normalized else {
+            print("Failed to normalize URL")
             exit(1)
         }
-        
-        guard var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
-            print("Failed to parse URL components")
-            exit(1)
-        }
-        
-        if components.host?.lowercased() == "swiftpackageindex.com" {
-            components.host = "github.com"
-            url = components.url!
-        }
-        
-        if !components.path.hasSuffix(".git") {
-            components.path = components.path + ".git"
-            url = components.url!
-        } 
 
-        urlsToDelete.append(url)
-        print("- \(url)")
+        urlsToDelete.append(normalizedUrl)
+        print("- \(normalizedUrl)")
     }
     
     do {  // Remove urlsToDelete from packages.json
@@ -75,6 +76,10 @@ func main() throws {
         let filtered = packages
             .filter { !denyList.contains($0.absoluteString.lowercased()) }
             .sorted { $0.absoluteString.lowercased() < $1.absoluteString.lowercased() }
+        if filtered.count != packages.count - urlsToDelete.count {
+            print("Not all URLs requested to delete were found in packages.json.")
+            exit(1)
+        }
         try savePackages(filtered, to: "packages.json")
     }
     
