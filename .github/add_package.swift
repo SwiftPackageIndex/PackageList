@@ -29,15 +29,14 @@ func main() throws {
     var packages = try loadPackages(at: "packages.json")
     
     for line in body.split(whereSeparator: \.isWhitespace) {
-        guard let url = URL(string: String(line)) else {
-            print("Invalid url:", line)
-            exit(1)
-        }
+        guard let url = URL(string: String(line)) else { continue }
+        
         guard url.host?.lowercased() == "github.com" else {
             print("Invalid url:", url)
             print("Only packages hosted on github.com are currently supported.")
             exit(1)
         }
+        
         if !packages.contains(url) {
             packages.append(url)
             print("+ \(url)")
