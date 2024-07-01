@@ -85,7 +85,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Remove Package from JSON
-        run: docker run --rm -e CI=true -e GH_BODY="$GH_BODY" -v "$PWD:/host" -w /host $SWIFT_IMAGE swift .github/remove_package.swift
+        run: docker run --rm -e CI=true -e GH_BODY="$GH_BODY" -e GH_ISSUE="$GH_ISSUE" -v "$PWD:/host" -w /host $SWIFT_IMAGE swift .github/remove_package.swift
         env:
           GH_BODY: ${{ github.event.issue.body }}
           GH_ISSUE: ${{ github.event.issue.number }}
