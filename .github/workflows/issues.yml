@@ -17,12 +17,12 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Add Package to JSON
-        run: docker run --rm --env CI=true GH_BODY="$GH_BODY" -v "$PWD:/host" -w /host $SWIFT_IMAGE swift .github/add_package.swift
+        run: docker run --rm -e CI=true -e GH_BODY="$GH_BODY" -v "$PWD:/host" -w /host $SWIFT_IMAGE swift .github/add_package.swift
         env:
           GH_BODY: ${{ github.event.issue.body }}
 
       - name: Validate JSON
-        run: docker run --rm --env CI=true GITHUB_TOKEN=$GITHUB_TOKEN -v "$PWD:/host" -w /host $SWIFT_IMAGE swift validate.swift
+        run: docker run --rm -e CI=true -e GITHUB_TOKEN=$GITHUB_TOKEN -v "$PWD:/host" -w /host $SWIFT_IMAGE swift validate.swift
         id: validate
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -85,13 +85,13 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Remove Package from JSON
-        run: docker run --rm --env CI=true GH_BODY="$GH_BODY" -v "$PWD:/host" -w /host $SWIFT_IMAGE swift .github/remove_package.swift
+        run: docker run --rm -e CI=true -e GH_BODY="$GH_BODY" -v "$PWD:/host" -w /host $SWIFT_IMAGE swift .github/remove_package.swift
         env:
           GH_BODY: ${{ github.event.issue.body }}
           GH_ISSUE: ${{ github.event.issue.number }}
 
       - name: Validate JSON
-        run: docker run --rm --env CI=true GITHUB_TOKEN=$GITHUB_TOKEN -v "$PWD:/host" -w /host $SWIFT_IMAGE swift validate.swift
+        run: docker run --rm -e CI=true -e GITHUB_TOKEN=$GITHUB_TOKEN -v "$PWD:/host" -w /host $SWIFT_IMAGE swift validate.swift
         id: validate
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
