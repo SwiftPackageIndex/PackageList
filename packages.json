@@ -6687,6 +6687,7 @@
   "https://github.com/swiftlang/swift-docc-symbolkit.git",
   "https://github.com/swiftlang/swift-docc.git",
   "https://github.com/swiftlang/swift-driver.git",
+  "https://github.com/swiftlang/swift-evolution-metadata-extractor.git",
   "https://github.com/swiftlang/swift-format.git",
   "https://github.com/swiftlang/swift-llbuild.git",
   "https://github.com/swiftlang/swift-lmdb.git",
