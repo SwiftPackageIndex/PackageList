@@ -6738,6 +6738,7 @@
   "https://github.com/swiftlang/swift-se0288-is-power.git",
   "https://github.com/swiftlang/swift-syntax.git",
   "https://github.com/swiftlang/swift-testing.git",
+  "https://github.com/swiftlang/swift-toolchain-sqlite.git",
   "https://github.com/swiftlang/swift-tools-support-core.git",
   "https://github.com/swiftlang/swiftly.git",
   "https://github.com/SwiftNIOExtras/swift-nio-irc.git",
