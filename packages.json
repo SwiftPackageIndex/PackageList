@@ -7425,6 +7425,8 @@
   "https://github.com/vapor/vapor.git",
   "https://github.com/vapor/websocket-kit.git",
   "https://github.com/vberihuete/swift-download-manager.git",
+  "https://github.com/vbmobile/VBDependencyInjector.git",
+  "https://github.com/vbmobile/VBImageProcessor.git",
   "https://github.com/vbmobile/VBNetworkClient.git",
   "https://github.com/vcgmobile/firebasekitura.git",
   "https://github.com/vdka/SecretsManager.git",
