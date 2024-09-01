@@ -86,9 +86,5 @@
   {
     "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/7859.",
     "package_url" : "https://github.com/rezojoglidze/RJSwiftMacros.git"
-  },
-  {
-    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/7885.",
-    "package_url" : "https://github.com/manisrini/TournamentBracketSUI.git"
   }
 ]
