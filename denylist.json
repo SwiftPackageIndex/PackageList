@@ -86,5 +86,9 @@
   {
     "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/7859.",
     "package_url" : "https://github.com/rezojoglidze/RJSwiftMacros.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/7977.",
+    "package_url" : "https://github.com/insub4067/RequestBuilder.git"
   }
 ]
