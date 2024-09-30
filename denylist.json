@@ -86,5 +86,17 @@
   {
     "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/7859.",
     "package_url" : "https://github.com/rezojoglidze/RJSwiftMacros.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/8076.",
+    "package_url" : "https://github.com/FlineDev/HandyUIKit.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/8076.",
+    "package_url" : "https://github.com/FlineDev/Microya.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/8076.",
+    "package_url" : "https://github.com/FlineDev/MungoHealer.git"
   }
 ]
