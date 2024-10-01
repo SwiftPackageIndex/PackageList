@@ -2878,6 +2878,8 @@
   "https://github.com/growthbook/growthbook-swift.git",
   "https://github.com/grpc/grpc-ios.git",
   "https://github.com/grpc/grpc-swift-extras.git",
+  "https://github.com/grpc/grpc-swift-nio-transport.git",
+  "https://github.com/grpc/grpc-swift-protobuf.git",
   "https://github.com/grpc/grpc-swift.git",
   "https://github.com/grype/RWLock-Swift.git",
   "https://github.com/grype/SwiftAnnouncements.git",
