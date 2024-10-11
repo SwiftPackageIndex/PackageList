@@ -1,0 +1,20 @@
+[
+    {
+        "name": "SSWG graduated packages",
+        "description": "SSWG packages that are in 'graduated' state",
+        "badge": "SSWG",
+        "url": "https://raw.githubusercontent.com/finestructure/sswg-package-lists/refs/heads/main/graduated.json"
+    },
+    {
+        "name": "SSWG incubating packages",
+        "description": "SSWG packages that are in 'incubating' state",
+        "badge": "SSWG",
+        "url": "https://raw.githubusercontent.com/finestructure/sswg-package-lists/refs/heads/main/incubating.json"
+    },
+    {
+        "name": "SSWG sandbox packages",
+        "description": "SSWG packages that are in 'sandbox' state",
+        "badge": "SSWG",
+        "url": "https://raw.githubusercontent.com/finestructure/sswg-package-lists/refs/heads/main/sandbox.json"
+    }
+]
