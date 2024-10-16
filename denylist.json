@@ -98,5 +98,9 @@
   {
     "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/8076.",
     "package_url" : "https://github.com/FlineDev/MungoHealer.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/8208.",
+    "package_url" : "https://github.com/Fleuronic/ReactiveSwift.git"
   }
 ]
