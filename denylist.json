@@ -102,5 +102,25 @@
   {
     "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/8208.",
     "package_url" : "https://github.com/Fleuronic/ReactiveSwift.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/8231.",
+    "package_url" : "https://github.com/AparokshaUI/adwaita-swift.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/8231.",
+    "package_url" : "https://github.com/AparokshaUI/CodeEditor.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/8231.",
+    "package_url" : "https://github.com/AparokshaUI/Localized.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/8231.",
+    "package_url" : "https://github.com/AparokshaUI/meta-sqlite.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/8231.",
+    "package_url" : "https://github.com/AparokshaUI/Meta.git"
   }
 ]
