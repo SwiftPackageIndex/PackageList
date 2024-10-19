@@ -106,5 +106,9 @@
   {
     "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/8244.",
     "package_url" : "https://github.com/Fleuronic/AsyncExtensions.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/8246.",
+    "package_url" : "https://github.com/Fleuronic/Emissary.git"
   }
 ]
