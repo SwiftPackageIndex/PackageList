@@ -110,5 +110,9 @@
   {
     "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/8246.",
     "package_url" : "https://github.com/Fleuronic/Emissary.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/8322.",
+    "package_url" : "https://github.com/Fleuronic/Identity.git"
   }
 ]
