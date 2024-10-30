@@ -120,6 +120,10 @@
     "package_url" : "https://github.com/Fleuronic/workflow-swift.git"
   },
   {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/8343.",
+    "package_url" : "https://github.com/Fleuronic/PersistDB.git"
+  },
+  {
     "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/8344.",
     "package_url" : "https://github.com/Fleuronic/Schemata.git"
   }
