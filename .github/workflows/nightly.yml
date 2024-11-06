@@ -24,7 +24,7 @@ jobs:
           cp $(swift build --show-bin-path)/validator $GITHUB_WORKSPACE/
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           path: |
             validator
@@ -42,7 +42,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Download artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: artifact
 
@@ -59,7 +59,7 @@ jobs:
             diff packages.json redirect-checked.json || true
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           path: |
             redirect-checked.json
@@ -76,7 +76,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Download artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: artifact
 
