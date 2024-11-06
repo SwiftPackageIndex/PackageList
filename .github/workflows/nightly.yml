@@ -26,8 +26,8 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          path: |
-            validator
+          name: validator
+          path: validator
 
 
   check_redirects:
@@ -61,8 +61,8 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          path: |
-            redirect-checked.json
+          name: redirect-checked.json
+          path: redirect-checked.json
 
 
   check_dependencies:
