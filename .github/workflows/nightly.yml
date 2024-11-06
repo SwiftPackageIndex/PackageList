@@ -23,11 +23,11 @@ jobs:
           swift build
           cp $(swift build --show-bin-path)/validator $GITHUB_WORKSPACE/
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+      - name: Upload validator
+        uses: actions/upload-artifact@v4
         with:
-          path: |
-            validator
+          name: validator
+          path: validator
 
 
   check_redirects:
@@ -41,10 +41,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Download artifacts
-        uses: actions/download-artifact@v3
+      - name: Download validator
+        uses: actions/download-artifact@v4
         with:
-          name: artifact
+          name: validator
 
       - name: Check redirect
         uses: nick-fields/retry@v2
@@ -58,11 +58,11 @@ jobs:
             echo "diff packages.json redirect-checked.json"
             diff packages.json redirect-checked.json || true
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+      - name: Upload redirect-checked.json
+        uses: actions/upload-artifact@v4
         with:
-          path: |
-            redirect-checked.json
+          name: redirect-checked.json
+          path: redirect-checked.json
 
 
   check_dependencies:
@@ -75,10 +75,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Download artifacts
-        uses: actions/download-artifact@v3
+      - name: Download validator
+        uses: actions/download-artifact@v4
         with:
-          name: artifact
+          name: validator
+
+      - name: Download redirect-checked.json
+        uses: actions/download-artifact@v4
+        with:
+          name: redirect-checked.json
 
       - name: Check dependencies
         uses: nick-fields/retry@v2
