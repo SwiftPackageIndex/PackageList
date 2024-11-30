@@ -126,5 +126,9 @@
   {
     "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/8344.",
     "package_url" : "https://github.com/Fleuronic/Schemata.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/8569.",
+    "package_url" : "https://github.com/slashmo/swift-otel.git"
   }
 ]
