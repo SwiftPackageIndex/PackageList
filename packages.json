@@ -7539,6 +7539,7 @@
   "https://github.com/tuist/Command.git",
   "https://github.com/tuist/FileSystem.git",
   "https://github.com/tuist/GraphViz.git",
+  "https://github.com/tuist/noora.git",
   "https://github.com/tuist/path.git",
   "https://github.com/tuist/ProjectAutomation.git",
   "https://github.com/tuist/swift-glob.git",
