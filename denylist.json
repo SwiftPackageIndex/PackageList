@@ -128,6 +128,10 @@
     "package_url" : "https://github.com/Fleuronic/Schemata.git"
   },
   {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/8714.",
+    "package_url" : "https://github.com/LinBowen9656/ChainableUIKit.git"
+  },
+  {
     "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/8716.",
     "package_url" : "https://github.com/LinBowen9656/LooseTypingJSONDecoder.git"
   }
