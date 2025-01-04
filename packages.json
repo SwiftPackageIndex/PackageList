@@ -8134,6 +8134,7 @@
   "https://github.com/xcode-actions/gha-logger.git",
   "https://github.com/xcode-actions/json-logger.git",
   "https://github.com/xcode-actions/LocMapper.git",
+  "https://github.com/xcode-actions/loki-logger.git",
   "https://github.com/xcode-actions/oslog-logger.git",
   "https://github.com/xcode-actions/stream-reader.git",
   "https://github.com/xcode-actions/swift-process-invocation.git",
