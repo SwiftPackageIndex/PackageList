@@ -134,5 +134,9 @@
   {
     "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/8716.",
     "package_url" : "https://github.com/LinBowen9656/LooseTypingJSONDecoder.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/8937.",
+    "package_url" : "https://github.com/fborelli/OfflineStoreKit2.git"
   }
 ]
