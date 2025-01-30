@@ -6285,6 +6285,7 @@
   "https://github.com/rosecoder/google-cloud-bigquery-swift.git",
   "https://github.com/rosecoder/google-cloud-error-reporting-swift.git",
   "https://github.com/rosecoder/google-cloud-logging-swift.git",
+  "https://github.com/rosecoder/google-cloud-pubsub-swift.git",
   "https://github.com/rosecoder/google-cloud-service-context.git",
   "https://github.com/rosecoder/google-cloud-tracing-swift.git",
   "https://github.com/rosecoder/retryable-task.git",
