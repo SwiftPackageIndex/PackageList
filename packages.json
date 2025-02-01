@@ -7252,6 +7252,7 @@
   "https://github.com/swiftkube/model.git",
   "https://github.com/swiftlang/indexstore-db.git",
   "https://github.com/swiftlang/sourcekit-lsp.git",
+  "https://github.com/swiftlang/swift-build.git",
   "https://github.com/swiftlang/swift-cmark.git",
   "https://github.com/swiftlang/swift-corelibs-xctest.git",
   "https://github.com/swiftlang/swift-docc-plugin.git",
