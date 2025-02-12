@@ -9,12 +9,12 @@ on:
     types: [submitted]
 
 env:
-  SWIFT_IMAGE: swift:6.0.1-jammy
+  SWIFT_IMAGE: swift:6.0.3-jammy
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   validate:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
