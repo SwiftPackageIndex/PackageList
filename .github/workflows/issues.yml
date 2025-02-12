@@ -5,11 +5,11 @@ on:
     types: [opened, reopened]
 
 env:
-  SWIFT_IMAGE: swift:6.0.1-jammy
+  SWIFT_IMAGE: swift:6.0.3-jammy
 
 jobs:
   add:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     if: contains(github.event.issue.labels.*.name, 'Add Package')
 
     steps:
@@ -77,7 +77,7 @@ jobs:
                 body: 'It looks like there’s nothing to do here!\n\nThe package may [already be in the package list](https://github.com/SwiftPackageIndex/PackageList/blob/main/packages.json) or on the [denylist](https://github.com/SwiftPackageIndex/PackageList/blob/main/denylist.json). Or, if you submitted the wrong URL or there’s a typo, please close this issue and [start a new one](https://github.com/SwiftPackageIndex/PackageList/issues/new/choose).\n\n>Validate Error: ${{ steps.validate.outputs.validateError || 'None' }}'
             })
   remove:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     if: contains(github.event.issue.labels.*.name, 'Remove Package')
 
     steps:
