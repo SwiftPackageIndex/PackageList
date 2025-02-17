@@ -138,5 +138,13 @@
   {
     "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/8937.",
     "package_url" : "https://github.com/fborelli/OfflineStoreKit2.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/9160.",
+    "package_url" : "https://github.com/AndyHeardApps/ErrorCode.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/9160.",
+    "package_url" : "https://github.com/AndyHeardApps/Revertible.git"
   }
 ]
