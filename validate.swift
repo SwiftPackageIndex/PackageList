@@ -86,12 +86,46 @@ struct Package: Decodable {
     let name: String
 }
 
-// MARK: - Generic helpers
+// MARK: - Shell helpers
+
+// Via Tim Condon
+
+@discardableResult
+func shell(_ args: String..., returnStdOut: Bool = false, returnStdErr: Bool = false, stdIn: Pipe? = nil) throws -> (status: Int32, stdout: Pipe, stderr: Pipe) {
+    return try shell(args, returnStdOut: returnStdOut, returnStdErr: returnStdErr, stdIn: stdIn)
+}
+
+@discardableResult
+func shell(_ args: [String], returnStdOut: Bool = false, returnStdErr: Bool = false, stdIn: Pipe? = nil) throws -> (status: Int32, stdout: Pipe, stderr: Pipe) {
+    let task = Process()
+    task.executableURL = URL(fileURLWithPath: "/usr/bin/env")
+    task.arguments = args
+    let stdout = Pipe()
+    let stderr = Pipe()
+    if returnStdOut {
+        task.standardOutput = stdout
+    }
+    if returnStdErr {
+        task.standardError = stderr
+    }
+    if let stdIn = stdIn {
+        task.standardInput = stdIn
+    }
+    try task.run()
+    task.waitUntilExit()
+    return (status: task.terminationStatus, stdout: stdout, stderr: stderr)
+}
 
 extension Pipe {
-    convenience init(readabilityHandler: ((FileHandle) -> Void)?) {
-        self.init()
-        self.fileHandleForReading.readabilityHandler = readabilityHandler
+    func string() -> String? {
+        let data = self.fileHandleForReading.readDataToEndOfFile()
+        let result: String?
+        if let string = String(data: data, encoding: String.Encoding.utf8) {
+            result = string
+        } else {
+            result = nil
+        }
+        return result
     }
 }
 
@@ -326,31 +360,15 @@ func createDumpPackageProcess(at path: URL, standardOutput: Pipe, standardError:
 }
 
 func runDumpPackage(at path: URL, timeout: TimeInterval = 20) throws -> Data {
-    let queue = DispatchQueue(label: "process-pipe-read-queue")
-    var stdout = Data()
-    var stderr = Data()
-    let stdoutPipe = Pipe { handler in
-        queue.async { stdout.append(handler.availableData) }
-    }
-    let stderrPipe = Pipe { handler in
-        queue.async { stderr.append(handler.availableData) }
-    }
+    let (status, stdout, stderr) = try shell("swift", "package", "dump-package", returnStdOut: true, returnStdErr: true)
 
-    let process = createDumpPackageProcess(at: path, standardOutput: stdoutPipe, standardError: stderrPipe)
-
-    DispatchQueue.main.asyncAfter(deadline: .now() + timeout) {
-        if process.isRunning { process.terminate() }
-    }
-    try process.run()
-    process.waitUntilExit()
-
-    switch process.terminationStatus {
+    switch status {
         case 0:
-            return stdout
+            return stdout.string().map { Data($0.utf8) } ?? Data()
         case 15:
             throw AppError.packageDumpTimeout
         default:
-            let error = String(data: stderr, encoding: .utf8) ?? "(nil)"
+            let error = stderr.string() ?? "(nil)"
             throw AppError.packageDumpError(error)
     }
 }
