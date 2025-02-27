@@ -90,15 +90,16 @@ struct Package: Decodable {
 // Via Tim Condon
 
 @discardableResult
-func shell(_ args: String..., returnStdOut: Bool = false, returnStdErr: Bool = false, stdIn: Pipe? = nil) throws -> (status: Int32, stdout: Pipe, stderr: Pipe) {
-    return try shell(args, returnStdOut: returnStdOut, returnStdErr: returnStdErr, stdIn: stdIn)
+func shell(_ args: String..., at path: URL, returnStdOut: Bool = false, returnStdErr: Bool = false, stdIn: Pipe? = nil) throws -> (status: Int32, stdout: Pipe, stderr: Pipe) {
+    return try shell(args, at: path, returnStdOut: returnStdOut, returnStdErr: returnStdErr, stdIn: stdIn)
 }
 
 @discardableResult
-func shell(_ args: [String], returnStdOut: Bool = false, returnStdErr: Bool = false, stdIn: Pipe? = nil) throws -> (status: Int32, stdout: Pipe, stderr: Pipe) {
+func shell(_ args: [String], at path: URL, returnStdOut: Bool = false, returnStdErr: Bool = false, stdIn: Pipe? = nil) throws -> (status: Int32, stdout: Pipe, stderr: Pipe) {
     let task = Process()
     task.executableURL = URL(fileURLWithPath: "/usr/bin/env")
     task.arguments = args
+    task.currentDirectoryURL = path
     let stdout = Pipe()
     let stderr = Pipe()
     if returnStdOut {
@@ -377,18 +378,9 @@ func createTempDir() throws -> URL {
     return tempDir
 }
 
-func createDumpPackageProcess(at path: URL, standardOutput: Pipe, standardError: Pipe) -> Process {
-    let process = Process()
-    process.executableURL = URL(fileURLWithPath: "/usr/bin/swift")
-    process.arguments = ["package", "dump-package"]
-    process.currentDirectoryURL = path
-    process.standardOutput = standardOutput
-    process.standardError = standardError
-    return process
-}
-
 func runDumpPackage(at path: URL, timeout: TimeInterval = 20) throws -> Data {
-    let (status, stdout, stderr) = try shell("swift", "package", "dump-package", returnStdOut: true, returnStdErr: true)
+    let (status, stdout, stderr) = try shell("swift", "package", "dump-package",
+                                             at: path, returnStdOut: true, returnStdErr: true)
 
     switch status {
         case 0:
