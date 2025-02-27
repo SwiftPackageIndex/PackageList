@@ -31,10 +31,8 @@ enum Constants {
 
 enum AppError: Error {
     case invalidURL(URL)
-    // case fetchTimeout(URL)
     case manifestNotFound(URL)
     case networkingError(Error)
-    // case noData(URL)
     case notFound(URL)
     case outputIdentical
     case packageDumpError(String)
@@ -48,14 +46,10 @@ enum AppError: Error {
         switch self {
             case .invalidURL(let url):
                 return "invalid url: \(url)"
-            // case .fetchTimeout(let url):
-            //     return "timeout while fetching url: \(url)"
             case .manifestNotFound(let url):
                 return "no package manifest found at url: \(url)"
             case .networkingError(let error):
                 return "networking error: \(error.localizedDescription)"
-            // case .noData(let url):
-            //     return "no data returned from url: \(url)"
             case .notFound(let url):
                 return "url not found (404): \(url)"
             case .outputIdentical:
