@@ -19,6 +19,7 @@ import Foundation
 import FoundationNetworking
 #endif
 
+
 // MARK: - Constants
 
 enum Constants {
@@ -30,10 +31,8 @@ enum Constants {
 
 enum AppError: Error {
     case invalidURL(URL)
-    case fetchTimeout(URL)
     case manifestNotFound(URL)
     case networkingError(Error)
-    case noData(URL)
     case notFound(URL)
     case outputIdentical
     case packageDumpError(String)
@@ -47,14 +46,10 @@ enum AppError: Error {
         switch self {
             case .invalidURL(let url):
                 return "invalid url: \(url)"
-            case .fetchTimeout(let url):
-                return "timeout while fetching url: \(url)"
             case .manifestNotFound(let url):
                 return "no package manifest found at url: \(url)"
             case .networkingError(let error):
                 return "networking error: \(error.localizedDescription)"
-            case .noData(let url):
-                return "no data returned from url: \(url)"
             case .notFound(let url):
                 return "url not found (404): \(url)"
             case .outputIdentical:
@@ -84,25 +79,108 @@ struct Package: Decodable {
     let name: String
 }
 
-// MARK: - Generic helpers
+// MARK: - Shell helpers
+
+// Via Tim Condon
+
+@discardableResult
+func shell(_ args: String..., at path: URL, returnStdOut: Bool = false, returnStdErr: Bool = false, stdIn: Pipe? = nil) throws -> (status: Int32, stdout: Pipe, stderr: Pipe) {
+    return try shell(args, at: path, returnStdOut: returnStdOut, returnStdErr: returnStdErr, stdIn: stdIn)
+}
+
+@discardableResult
+func shell(_ args: [String], at path: URL, returnStdOut: Bool = false, returnStdErr: Bool = false, stdIn: Pipe? = nil) throws -> (status: Int32, stdout: Pipe, stderr: Pipe) {
+    let task = Process()
+    task.executableURL = URL(fileURLWithPath: "/usr/bin/env")
+    task.arguments = args
+    task.currentDirectoryURL = path
+    let stdout = Pipe()
+    let stderr = Pipe()
+    if returnStdOut {
+        task.standardOutput = stdout
+    }
+    if returnStdErr {
+        task.standardError = stderr
+    }
+    if let stdIn = stdIn {
+        task.standardInput = stdIn
+    }
+    try task.run()
+    task.waitUntilExit()
+    return (status: task.terminationStatus, stdout: stdout, stderr: stderr)
+}
 
 extension Pipe {
-    convenience init(readabilityHandler: ((FileHandle) -> Void)?) {
-        self.init()
-        self.fileHandleForReading.readabilityHandler = readabilityHandler
+    func string() -> String? {
+        let data = self.fileHandleForReading.readDataToEndOfFile()
+        let result: String?
+        if let string = String(data: data, encoding: String.Encoding.utf8) {
+            result = string
+        } else {
+            result = nil
+        }
+        return result
+    }
+}
+
+// Other helpers
+
+extension Sequence {
+    func mapAsync<T>(_ transform: (Element) async throws -> T) async rethrows -> [T] {
+        var results = [T]()
+        for element in self {
+            try await results.append(transform(element))
+        }
+        return results
+    }
+}
+
+// Ideally we'd be using Mutex from the Synchronization framework but it's causing
+// JIT session error: Symbols not found: [ __tlsdesc_resolver, __aarch64_cas4_rel, __aarch64_cas4_acq ]
+// errors on arm64 Linux (6.0.3-jammy).
+@dynamicMemberLookup
+public final class QueueIsolated<Value: Sendable>: @unchecked Sendable {
+    private let _queue = DispatchQueue(label: "queue-isolated")
+
+    private var _value: Value
+
+    public init(_ value: Value) {
+        self._value = value
+    }
+
+    public var value: Value {
+        get { _queue.sync { self._value } }
+    }
+
+    public subscript<Subject>(dynamicMember keyPath: KeyPath<Value, Subject>) -> Subject {
+        _queue.sync { self._value[keyPath: keyPath] }
+    }
+
+    public func withValue<T>(_ operation: (inout Value) throws -> T) rethrows -> T {
+        try _queue.sync {
+            var value = self._value
+            defer { self._value = value }
+            return try operation(&value)
+        }
+    }
+
+    public func setValue(_ newValue: Value) {
+        _queue.async { self._value = newValue }
     }
 }
 
 // MARK: - Redirect handling
 
-class RedirectFollower: NSObject, URLSessionDataDelegate {
-    var lastURL: URL?
+final class RedirectFollower: NSObject, URLSessionDataDelegate {
+    let lastURL: QueueIsolated<URL?> = .init(nil)
     init(initialURL: URL) {
-        self.lastURL = initialURL
+        self.lastURL.setValue(initialURL)
     }
 
     func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
-        lastURL = request.url ?? lastURL
+        if let url = request.url {
+            lastURL.setValue(url)
+        }
         // FIXME: port 404 and 429 handling from PackageList/Validator
         completionHandler(request)
     }
@@ -122,52 +200,35 @@ extension URL {
         task.resume()
         _ = semaphore.wait(timeout: .now() + timeout)
 
-        return follower.lastURL
+        return follower.lastURL.value
     }
 }
 
 // MARK: - Networking
 
-func fetch(_ url: URL, timeout: Int = 10) throws -> Data {
-    var request = URLRequest(url: url)
+func fetch(_ url: URL, timeout: TimeInterval = 10) async throws -> Data {
+    var request = URLRequest(url: url, timeoutInterval: timeout)
 
     if let token = Constants.githubToken {
         request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
     }
 
-    let semaphore = DispatchSemaphore(value: 0)
-
-    var payload: Data?
-    var taskError: AppError?
-
     let session = URLSession(configuration: .default)
-    let task = session.dataTask(with: request) { (data, response, error) in
+    
+    do {
+        let (data, response) = try await session.data(for: request)
         let httpResponse = response as? HTTPURLResponse
-
+    
         if let limit = httpResponse?.value(forHTTPHeaderField: "X-RateLimit-Limit").flatMap(Int.init),
-           let remaining = httpResponse?.value(forHTTPHeaderField: "X-RateLimit-Remaining").flatMap(Int.init),
-           remaining == 0 {
-            taskError = .rateLimitExceeded(url, reportedLimit: limit)
+        let remaining = httpResponse?.value(forHTTPHeaderField: "X-RateLimit-Remaining").flatMap(Int.init),
+        remaining == 0 {
+            throw AppError.rateLimitExceeded(url, reportedLimit: limit)
         } else if httpResponse?.statusCode == 404 {
-            taskError = .notFound(url)
-        } else if let error = error {
-            taskError = .networkingError(error)
+            throw AppError.notFound(url)
         }
-
-        payload = data
-        semaphore.signal()
-    }
-
-    task.resume()
-
-    switch semaphore.wait(timeout: .now() + .seconds(timeout)) {
-    case .timedOut:
-        throw AppError.fetchTimeout(url)
-    case .success where taskError != nil:
-        throw taskError!
-    case .success:
-        guard let payload = payload else { throw AppError.noData(url) }
-        return payload
+        return data
+    } catch {
+        throw AppError.networkingError(error)
     }
 }
 
@@ -250,9 +311,9 @@ func parseArgs(_ args: [String]) throws -> RunMode {
     return .processURL(url)
 }
 
-func getDefaultBranch(owner: String, repository: String) throws -> String {
+func getDefaultBranch(owner: String, repository: String) async throws -> String {
     let url = URL(string: "https://api.github.com/repos/\(owner)/\(repository)")!
-    let json = try fetch(url)
+    let json = try await fetch(url)
 
     struct Repository: Decodable {
         let default_branch: String
@@ -274,9 +335,9 @@ func parseOwnerRepo(from url: URL) -> (owner: String, repository: String) {
     return (owner, repository)
 }
 
-func listFilesInRepo(owner: String, repository: String, branch: String) throws -> [RepoFile] {
+func listFilesInRepo(owner: String, repository: String, branch: String) async throws -> [RepoFile] {
     let apiURL = URL(string: "https://api.github.com/repos/\(owner)/\(repository)/git/trees/\(branch)")!
-    let json = try fetch(apiURL)
+    let json = try await fetch(apiURL)
     struct Response: Codable {
         var tree: [RepoFile]
     }
@@ -289,10 +350,10 @@ func listFilesInRepo(owner: String, repository: String, branch: String) throws -
     }
 }
 
-func getManifestURLs(_ url: URL) throws -> [URL] {
+func getManifestURLs(_ url: URL) async throws -> [URL] {
     let (owner, repository) = parseOwnerRepo(from: url)
-    let branch = try getDefaultBranch(owner: owner, repository: repository)
-    let manifestFiles = try listFilesInRepo(owner: owner, repository: repository, branch: branch)
+    let branch = try await getDefaultBranch(owner: owner, repository: repository)
+    let manifestFiles = try await listFilesInRepo(owner: owner, repository: repository, branch: branch)
       .filter { $0.type == "blob" }
       .filter { $0.path.hasPrefix("Package") }
       .filter { $0.path.hasSuffix(".swift") }
@@ -311,52 +372,27 @@ func createTempDir() throws -> URL {
     return tempDir
 }
 
-func createDumpPackageProcess(at path: URL, standardOutput: Pipe, standardError: Pipe) -> Process {
-    let process = Process()
-    process.executableURL = URL(fileURLWithPath: "/usr/bin/swift")
-    process.arguments = ["package", "dump-package"]
-    process.currentDirectoryURL = path
-    process.standardOutput = standardOutput
-    process.standardError = standardError
-    return process
-}
-
 func runDumpPackage(at path: URL, timeout: TimeInterval = 20) throws -> Data {
-    let queue = DispatchQueue(label: "process-pipe-read-queue")
-    var stdout = Data()
-    var stderr = Data()
-    let stdoutPipe = Pipe { handler in
-        queue.async { stdout.append(handler.availableData) }
-    }
-    let stderrPipe = Pipe { handler in
-        queue.async { stderr.append(handler.availableData) }
-    }
+    let (status, stdout, stderr) = try shell("swift", "package", "dump-package",
+                                             at: path, returnStdOut: true, returnStdErr: true)
 
-    let process = createDumpPackageProcess(at: path, standardOutput: stdoutPipe, standardError: stderrPipe)
-
-    DispatchQueue.main.asyncAfter(deadline: .now() + timeout) {
-        if process.isRunning { process.terminate() }
-    }
-    try process.run()
-    process.waitUntilExit()
-
-    switch process.terminationStatus {
+    switch status {
         case 0:
-            return stdout
+            return stdout.string().map { Data($0.utf8) } ?? Data()
         case 15:
             throw AppError.packageDumpTimeout
         default:
-            let error = String(data: stderr, encoding: .utf8) ?? "(nil)"
+            let error = stderr.string() ?? "(nil)"
             throw AppError.packageDumpError(error)
     }
 }
 
 @discardableResult
-func dumpPackage(url: URL) throws -> Package {
+func dumpPackage(url: URL) async throws -> Package {
     let tempDir = try createTempDir()
     
-    for manifestURL in try getManifestURLs(url) {
-        let manifest = try fetch(manifestURL)
+    for manifestURL in try await getManifestURLs(url) {
+        let manifest = try await fetch(manifestURL)
         let fileURL = tempDir.appendingPathComponent(manifestURL.lastPathComponent)
         try manifest.write(to: fileURL)
     }
@@ -365,21 +401,21 @@ func dumpPackage(url: URL) throws -> Package {
     return try JSONDecoder().decode(Package.self, from: json)
 }
 
-func verifyURL(_ url: URL) throws -> URL {
+func verifyURL(_ url: URL) async throws -> URL {
     print("verifying", url)
     guard let resolvedURL = url.followingRedirects() else { throw AppError.invalidURL(url) }
-    try dumpPackage(url: resolvedURL)
+    try await dumpPackage(url: resolvedURL)
     return resolvedURL
 }
 
-func fetchGithubPackageList() throws -> [URL] {
-    let json = try fetch(Constants.githubPackageListURL)
+func fetchGithubPackageList() async throws -> [URL] {
+    let json = try await fetch(Constants.githubPackageListURL)
     return try JSONDecoder().decode([URL].self, from: json)
 }
 
-func processPackageList() throws {
+func processPackageList() async throws {
     print("Processing package list ...")
-    let onlinePackageList = try fetchGithubPackageList()
+    let onlinePackageList = try await fetchGithubPackageList()
         .map { url -> URL in
             let updated = url.appendingGitExtension()
             if updated != url {
@@ -398,9 +434,9 @@ func processPackageList() throws {
         print("The packages.json file contained duplicate rows")
     }
 
-    let additions = try localPackageList // use localPackageList to preserve original casing
+    let additions = try await localPackageList // use localPackageList to preserve original casing
         .filter { !normalizedOnlineList.contains($0.normalized()) }
-        .map { try verifyURL($0).appendingGitExtension() }
+        .mapAsync { try await verifyURL($0).appendingGitExtension() }
         .filter {
             // filter again, in case a redirect happens to be in the list already
             !normalizedOnlineList.contains($0.normalized())
@@ -448,20 +484,20 @@ func processPackageList() throws {
     }
 }
 
-func main(args: [String]) throws {
+func main(args: [String]) async throws {
     if Constants.githubToken == nil {
         print("Warning: Using anonymous authentication -- may run into rate limiting issues\n")
     }
 
     switch try parseArgs(args) {
         case .processURL(let url):
-            let resolvedURL = try verifyURL(url)
+            let resolvedURL = try await verifyURL(url)
             if resolvedURL.absoluteString != url.absoluteString {
                 print("ℹ️  package moved: \(url) -> \(resolvedURL)")
                 throw AppError.packageMoved
             }
         case .processPackageList:
-            try processPackageList()
+            try await processPackageList()
     }
     print("✅ validation succeeded")
     exit(EXIT_SUCCESS)
@@ -470,7 +506,7 @@ func main(args: [String]) throws {
 // MARK: - main
 
 do {
-    try main(args: CommandLine.arguments)
+    try await main(args: CommandLine.arguments)
 } catch {
     if let appError = error as? AppError {
         print("ERROR: \(appError.localizedDescription)")
@@ -492,4 +528,3 @@ do {
     }
     exit(EXIT_FAILURE)
 }
-RunLoop.main.run()
