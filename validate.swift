@@ -18,7 +18,6 @@ import Foundation
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
-import Synchronization
 
 
 // MARK: - Constants
@@ -141,17 +140,51 @@ extension Sequence {
     }
 }
 
+// Ideally we'd be using Mutex from the Synchronization framework but it's causing
+// JIT session error: Symbols not found: [ __tlsdesc_resolver, __aarch64_cas4_rel, __aarch64_cas4_acq ]
+// errors on arm64 Linux (6.0.3-jammy).
+@dynamicMemberLookup
+public final class QueueIsolated<Value: Sendable>: @unchecked Sendable {
+    private let _queue = DispatchQueue(label: "queue-isolated")
+
+    private var _value: Value
+
+    public init(_ value: Value) {
+        self._value = value
+    }
+
+    public var value: Value {
+        get { _queue.sync { self._value } }
+    }
+
+    public subscript<Subject>(dynamicMember keyPath: KeyPath<Value, Subject>) -> Subject {
+        _queue.sync { self._value[keyPath: keyPath] }
+    }
+
+    public func withValue<T>(_ operation: (inout Value) throws -> T) rethrows -> T {
+        try _queue.sync {
+            var value = self._value
+            defer { self._value = value }
+            return try operation(&value)
+        }
+    }
+
+    public func setValue(_ newValue: Value) {
+        _queue.async { self._value = newValue }
+    }
+}
+
 // MARK: - Redirect handling
 
 final class RedirectFollower: NSObject, URLSessionDataDelegate {
-    let lastURL: Mutex<URL?> = .init(nil)
+    let lastURL: QueueIsolated<URL?> = .init(nil)
     init(initialURL: URL) {
-        self.lastURL.withLock { $0 = initialURL }
+        self.lastURL.setValue(initialURL)
     }
 
     func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
         if let url = request.url {
-            lastURL.withLock { $0 = url }
+            lastURL.setValue(url)
         }
         // FIXME: port 404 and 429 handling from PackageList/Validator
         completionHandler(request)
@@ -172,7 +205,7 @@ extension URL {
         task.resume()
         _ = semaphore.wait(timeout: .now() + timeout)
 
-        return follower.lastURL.withLock { $0 }
+        return follower.lastURL.value
     }
 }
 
