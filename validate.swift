@@ -18,6 +18,8 @@ import Foundation
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
+import Synchronization
+
 
 // MARK: - Constants
 
@@ -95,14 +97,16 @@ extension Pipe {
 
 // MARK: - Redirect handling
 
-class RedirectFollower: NSObject, URLSessionDataDelegate {
-    var lastURL: URL?
+final class RedirectFollower: NSObject, URLSessionDataDelegate {
+    let lastURL: Mutex<URL?> = .init(nil)
     init(initialURL: URL) {
-        self.lastURL = initialURL
+        self.lastURL.withLock { $0 = initialURL }
     }
 
     func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
-        lastURL = request.url ?? lastURL
+        if let url = request.url {
+            lastURL.withLock { $0 = url }
+        }
         // FIXME: port 404 and 429 handling from PackageList/Validator
         completionHandler(request)
     }
@@ -122,7 +126,7 @@ extension URL {
         task.resume()
         _ = semaphore.wait(timeout: .now() + timeout)
 
-        return follower.lastURL
+        return follower.lastURL.withLock { $0 }
     }
 }
 
