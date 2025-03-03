@@ -138,5 +138,13 @@
   {
     "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/8937.",
     "package_url" : "https://github.com/fborelli/OfflineStoreKit2.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/9275.",
+    "package_url" : "https://github.com/StanfordSpezi/SpeziFHIRtoFirestoreAdapter.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/9275.",
+    "package_url" : "https://github.com/StanfordSpezi/SpeziHealthKitToFHIRAdapter.git"
   }
 ]
