@@ -146,5 +146,9 @@
   {
     "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/9275.",
     "package_url" : "https://github.com/StanfordSpezi/SpeziHealthKitToFHIRAdapter.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/9277.",
+    "package_url" : "https://github.com/lfroms/fluid-menu-bar-extra.git"
   }
 ]
