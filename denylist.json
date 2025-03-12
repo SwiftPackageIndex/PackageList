@@ -150,5 +150,9 @@
   {
     "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/9277.",
     "package_url" : "https://github.com/lfroms/fluid-menu-bar-extra.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/9359.",
+    "package_url" : "https://github.com/dongjoon-hyun/spark-connect-swift.git"
   }
 ]
