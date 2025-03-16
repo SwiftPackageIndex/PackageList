@@ -154,5 +154,21 @@
   {
     "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/9359.",
     "package_url" : "https://github.com/dongjoon-hyun/spark-connect-swift.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/9398.",
+    "package_url" : "https://github.com/William-Weng/WWSimpleChatGPT.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/9398.",
+    "package_url" : "https://github.com/William-Weng/WWSimpleDeepSeekAI.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/9398.",
+    "package_url" : "https://github.com/William-Weng/WWSimpleGeminiAI.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/9398.",
+    "package_url" : "https://github.com/William-Weng/WWSimpleOllamaAI.git"
   }
 ]
