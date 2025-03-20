@@ -170,5 +170,9 @@
   {
     "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/9398.",
     "package_url" : "https://github.com/William-Weng/WWSimpleOllamaAI.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/9450.",
+    "package_url" : "https://github.com/meraj-lt/smartui-xcui-swift.git"
   }
 ]
