@@ -174,5 +174,9 @@
   {
     "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/9450.",
     "package_url" : "https://github.com/meraj-lt/smartui-xcui-swift.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/9492.",
+    "package_url" : "https://github.com/sergeipritula/ChingariRaceSDK.git"
   }
 ]
