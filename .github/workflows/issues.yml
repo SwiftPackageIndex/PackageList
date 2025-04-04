@@ -5,7 +5,7 @@ on:
     types: [opened, reopened]
 
 env:
-  SWIFT_IMAGE: swift:6.0.3-jammy
+  SWIFT_IMAGE: swift:6.1-jammy
 
 jobs:
   add:
