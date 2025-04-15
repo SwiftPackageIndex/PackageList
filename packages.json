@@ -3081,7 +3081,7 @@
   "https://github.com/GoodHatsLLC/StateTree.git",
   "https://github.com/GoodHatsLLC/swift-collections-v1_1-fork.git",
   "https://github.com/google-ar/arcore-ios-sdk.git",
-  "https://github.com/google-gemini/generative-ai-swift.git",
+  "https://github.com/google-gemini/deprecated-generative-ai-swift.git",
   "https://github.com/google/abseil-cpp-binary.git",
   "https://github.com/google/app-check.git",
   "https://github.com/google/flatbuffers.git",
