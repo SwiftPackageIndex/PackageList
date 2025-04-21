@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [[ $(git status --porcelain) ]]; then
-    echo '::set-output name=changes::true'
+    echo "changes=true" >> $GITHUB_OUTPUT
 else
-    echo '::set-output name=changes::false'
+    echo "changes=false" >> $GITHUB_OUTPUT
 fi

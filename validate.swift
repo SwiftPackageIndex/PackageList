@@ -512,7 +512,12 @@ do {
         print("ERROR: \(appError.localizedDescription)")
 
         if ProcessInfo.processInfo.environment["CI"] == "true" {
-            print("::set-output name=validateError::\(appError.localizedDescription)")
+            let output = "validateError=\(appError.localizedDescription)\n"
+            if let githubOutput = ProcessInfo.processInfo.environment["GITHUB_OUTPUT"] {
+                try? output.write(toFile: githubOutput, atomically: true, encoding: .utf8)
+            } else {
+                print(output)
+            }
 
             if case .packageListChanged = appError {
                 // For CI it's acceptable for the package list to change as we'll simply take the output of this script
@@ -521,7 +526,12 @@ do {
         }
     } else {
         if ProcessInfo.processInfo.environment["CI"] == "true" {
-            print("::set-output name=validateError::\(error)")
+            let output = "validateError=\(error)\n"
+            if let githubOutput = ProcessInfo.processInfo.environment["GITHUB_OUTPUT"] {
+                try? output.write(toFile: githubOutput, atomically: true, encoding: .utf8)
+            } else {
+                print(output)
+            }
         }
 
         print("ERROR: \(error)")
