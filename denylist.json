@@ -178,5 +178,9 @@
   {
     "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/9492.",
     "package_url" : "https://github.com/sergeipritula/ChingariRaceSDK.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/9807.",
+    "package_url" : "https://github.com/valeriyvan/jpeg.git"
   }
 ]
