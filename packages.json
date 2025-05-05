@@ -579,6 +579,7 @@
   "https://github.com/apple/swift-nio-transport-services.git",
   "https://github.com/apple/swift-nio-zlib-support.git",
   "https://github.com/apple/swift-nio.git",
+  "https://github.com/apple/swift-ntp.git",
   "https://github.com/apple/swift-numerics.git",
   "https://github.com/apple/swift-openapi-generator.git",
   "https://github.com/apple/swift-openapi-runtime.git",
