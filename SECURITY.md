@@ -8,7 +8,7 @@ We take all security bugs in the Swift Package Index project seriously. We appre
 
 Please report security bugs via the “[Security](https://github.com/SwiftPackageIndex/SwiftPackageIndex-Server/security)” tab in the [Server GitHub repository](https://github.com/SwiftPackageIndex/SwiftPackageIndex-Server) or directly via the “[Report a Vulnerability](https://github.com/SwiftPackageIndex/SwiftPackageIndex-Server/security/advisories/new)” form. This will open a private conversation with the Swift Package Index project maintainers.
 
-Once we resolve a security issue, where appropriate, we will publish a security advisory on the GitHub repository’s “Security” tab.
+Once we resolve a security issue, we will publish a security advisory on the GitHub repository’s “Security” tab, where appropriate.
 
 ## Reporting Security Issues in Packages in the Index
 
