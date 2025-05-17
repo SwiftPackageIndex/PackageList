@@ -182,5 +182,9 @@
   {
     "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/9807.",
     "package_url" : "https://github.com/valeriyvan/jpeg.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/9952.",
+    "package_url" : "https://github.com/xtool-org/xtool.git"
   }
 ]
