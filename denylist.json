@@ -186,5 +186,9 @@
   {
     "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/9952.",
     "package_url" : "https://github.com/xtool-org/xtool.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/9954.",
+    "package_url" : "https://github.com/xtool-org/xtool-core.git"
   }
 ]
