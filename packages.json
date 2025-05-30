@@ -7586,6 +7586,7 @@
   "https://github.com/swift-libp2p/swift-multihash.git",
   "https://github.com/swift-libp2p/swift-varint.git",
   "https://github.com/swift-nest/clutch.git",
+  "https://github.com/swift-otel/swift-otel-semantic-conventions.git",
   "https://github.com/swift-otel/swift-otel.git",
   "https://github.com/swift-otel/swift-w3c-trace-context.git",
   "https://github.com/Swift-Package/AppleDarthVader.git",
