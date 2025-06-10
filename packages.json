@@ -551,6 +551,7 @@
   "https://github.com/apple/swift-async-algorithms.git",
   "https://github.com/apple/swift-async-dns-resolver.git",
   "https://github.com/apple/swift-atomics.git",
+  "https://github.com/apple/swift-binary-parsing.git",
   "https://github.com/apple/swift-cassandra-client.git",
   "https://github.com/apple/swift-certificates.git",
   "https://github.com/apple/swift-cluster-membership.git",
