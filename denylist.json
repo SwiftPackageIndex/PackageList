@@ -194,5 +194,9 @@
   {
     "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/10127.",
     "package_url" : "https://github.com/finestructure/swift-package-manager.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/10194.",
+    "package_url" : "https://github.com/finestructure/SemanticVersion.git"
   }
 ]
