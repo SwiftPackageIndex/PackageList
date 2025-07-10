@@ -14,7 +14,7 @@ jobs:
   build_validator:
     runs-on: ubuntu-latest
     container:
-      image: swiftlang/swift@sha256:c40cd00d376c8a06fd4769cadd6d6cfa7c205275437b795b564ecea3d8b8f913  # swift-6.2-DEVELOPMENT-SNAPSHOT-2025-05-30-a
+      image: swiftlang/swift@sha256:5765a1bd4c7ff05e35a1095598a70bcaf6a5a8e3e8fc48141e5cb0307a295852  # swift-6.2-DEVELOPMENT-SNAPSHOT-2025-07-09-a
     steps:
       - name: Build validator
         run: |
@@ -36,7 +36,7 @@ jobs:
       CONCURRENCY: "10"
     runs-on: ubuntu-latest
     container:
-      image: swiftlang/swift@sha256:c40cd00d376c8a06fd4769cadd6d6cfa7c205275437b795b564ecea3d8b8f913  # swift-6.2-DEVELOPMENT-SNAPSHOT-2025-05-30-a
+      image: swiftlang/swift@sha256:5765a1bd4c7ff05e35a1095598a70bcaf6a5a8e3e8fc48141e5cb0307a295852  # swift-6.2-DEVELOPMENT-SNAPSHOT-2025-07-09-a
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -69,7 +69,7 @@ jobs:
     needs: check_redirects
     runs-on: ubuntu-latest
     container:
-      image: swiftlang/swift@sha256:c40cd00d376c8a06fd4769cadd6d6cfa7c205275437b795b564ecea3d8b8f913  # swift-6.2-DEVELOPMENT-SNAPSHOT-2025-05-30-a
+      image: swiftlang/swift@sha256:5765a1bd4c7ff05e35a1095598a70bcaf6a5a8e3e8fc48141e5cb0307a295852  # swift-6.2-DEVELOPMENT-SNAPSHOT-2025-07-09-a
     steps:
       # we need to check out the repo in the last step in order to create a PR
       - name: Checkout
