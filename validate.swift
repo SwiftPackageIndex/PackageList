@@ -40,6 +40,8 @@ enum AppError: Error {
     case packageListChanged
     case packageMoved
     case rateLimitExceeded(URL, reportedLimit: Int)
+    case shellCommandFailed(command: String, terminationStatus: Int, errorMessage: String)
+    case shellCommandTimeout(command: String)
     case syntaxError(String)
 
     var localizedDescription: String {
@@ -64,6 +66,10 @@ enum AppError: Error {
                 return "package moved"
             case let .rateLimitExceeded(url, limit):
                 return "rate limit of \(limit) exceeded while requesting url: \(url)"
+            case let .shellCommandFailed(command: cmd, terminationStatus: status, errorMessage: message):
+                return "command failed: \(cmd), status: \(status), error: \(message)"
+            case let .shellCommandTimeout(command: cmd):
+                return "command `\(cmd)` timed out"
             case .syntaxError(let msg):
                 return msg
         }
@@ -84,12 +90,12 @@ struct Package: Decodable {
 // Via Tim Condon
 
 @discardableResult
-func shell(_ args: String..., at path: URL, returnStdOut: Bool = false, returnStdErr: Bool = false, stdIn: Pipe? = nil) throws -> (status: Int32, stdout: Pipe, stderr: Pipe) {
+func shell(_ args: String..., at path: URL, returnStdOut: Bool = false, returnStdErr: Bool = false, stdIn: Pipe? = nil) throws -> (status: Int32, stdout: String?, stderr: String?) {
     return try shell(args, at: path, returnStdOut: returnStdOut, returnStdErr: returnStdErr, stdIn: stdIn)
 }
 
 @discardableResult
-func shell(_ args: [String], at path: URL, returnStdOut: Bool = false, returnStdErr: Bool = false, stdIn: Pipe? = nil) throws -> (status: Int32, stdout: Pipe, stderr: Pipe) {
+func shell(_ args: [String], at path: URL, returnStdOut: Bool = false, returnStdErr: Bool = false, stdIn: Pipe? = nil) throws -> (status: Int32, stdout: String?, stderr: String?) {
     let task = Process()
     task.executableURL = URL(fileURLWithPath: "/usr/bin/env")
     task.arguments = args
@@ -105,21 +111,49 @@ func shell(_ args: [String], at path: URL, returnStdOut: Bool = false, returnStd
     if let stdIn = stdIn {
         task.standardInput = stdIn
     }
+    
+    // Workaround https://github.com/swiftlang/swift-corelibs-foundation/issues/5197
+    let group = DispatchGroup()
+    
     try task.run()
+
+    let outputData = QueueIsolated<Data?>(nil)
+    let errorData = QueueIsolated<Data?>(nil)
+
+    group.enter()
+    Thread { // read full output in a separate thread
+        let data = try? stdout.fileHandleForReading.readToEnd()
+        outputData.withValue { $0 = data } 
+        group.leave()
+    }.start()
+    
+    group.enter()
+    Thread {  // read full error output in a separate thread
+        let data = try? stderr.fileHandleForReading.readToEnd()
+        errorData.withValue { $0 = data }
+        group.leave()
+    }.start()
+    
     task.waitUntilExit()
-    return (status: task.terminationStatus, stdout: stdout, stderr: stderr)
+    
+    // wait until the reader threads complete
+    if .timedOut == group.wait(timeout: .now() + .seconds(30)) {
+        throw AppError.shellCommandTimeout(command: args.joined(separator: " "))
+    }
+    
+    guard task.terminationStatus == 0 else {
+        let message = errorData.withValue { $0.map(\.string)?.trimmingCharacters(in: .whitespacesAndNewlines) } ?? ""
+        throw AppError.shellCommandFailed(command: args.joined(separator: " "), terminationStatus: Int(task.terminationStatus), errorMessage: message)
+    }
+    
+    return (status: task.terminationStatus,
+            stdout: outputData.withValue { $0 }.map(\.string),
+            stderr: errorData.withValue { $0 }.map(\.string))
 }
 
-extension Pipe {
-    func string() -> String? {
-        let data = self.fileHandleForReading.readDataToEndOfFile()
-        let result: String?
-        if let string = String(data: data, encoding: String.Encoding.utf8) {
-            result = string
-        } else {
-            result = nil
-        }
-        return result
+extension Data {
+    var string: String {
+        String(decoding: self, as: UTF8.self)
     }
 }
 
@@ -378,11 +412,11 @@ func runDumpPackage(at path: URL, timeout: TimeInterval = 20) throws -> Data {
 
     switch status {
         case 0:
-            return stdout.string().map { Data($0.utf8) } ?? Data()
+            return stdout.map { Data($0.utf8) } ?? Data()
         case 15:
             throw AppError.packageDumpTimeout
         default:
-            let error = stderr.string() ?? "(nil)"
+            let error = stderr ?? "(nil)"
             throw AppError.packageDumpError(error)
     }
 }
