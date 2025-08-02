@@ -100,6 +100,7 @@ func shell(_ args: [String], at path: URL, returnStdOut: Bool = false, returnStd
     task.executableURL = URL(fileURLWithPath: "/usr/bin/env")
     task.arguments = args
     task.currentDirectoryURL = path
+    task.environment = ["SPI_PROCESSING": "1"]
     let stdout = Pipe()
     let stderr = Pipe()
     if returnStdOut {
