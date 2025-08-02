@@ -100,7 +100,7 @@ func shell(_ args: [String], at path: URL, returnStdOut: Bool = false, returnStd
     task.executableURL = URL(fileURLWithPath: "/usr/bin/env")
     task.arguments = args
     task.currentDirectoryURL = path
-    task.environment = ["SPI_PROCESSING": "1"]
+    task.environment = ProcessInfo.processInfo.environment.merging(["SPI_PROCESSING": "1"], uniquingKeysWith: { $1 })
     let stdout = Pipe()
     let stderr = Pipe()
     if returnStdOut {
