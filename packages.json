@@ -622,6 +622,7 @@
   "https://github.com/apple/swift-system.git",
   "https://github.com/apple/swift-tools-support-async.git",
   "https://github.com/apple/swiftpm-on-llbuild2.git",
+  "https://github.com/apple/SwiftUsd.git",
   "https://github.com/ApplebaumIan/SwiftUI-Apple-Watch-Decimal-Pad.git",
   "https://github.com/AppLovin/AppLovin-MAX-Swift-Package.git",
   "https://github.com/appmetrica/appmetrica-sdk-ios.git",
