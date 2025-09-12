@@ -140,6 +140,7 @@
   "https://github.com/ably/ably-chat-swift.git",
   "https://github.com/ably/ably-cocoa-plugin-support.git",
   "https://github.com/ably/ably-cocoa.git",
+  "https://github.com/ably/ably-liveobjects-swift-plugin.git",
   "https://github.com/ably/delta-codec-cocoa.git",
   "https://github.com/ABridoux/BooleanExpressionEvaluation.git",
   "https://github.com/ABridoux/lux.git",
