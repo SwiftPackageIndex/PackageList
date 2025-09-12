@@ -202,5 +202,9 @@
   {
     "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/10345.",
     "package_url" : "https://github.com/nashysolutions/error-presentation.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/10969.",
+    "package_url" : "https://github.com/yordgenome03/SwiftUIFlutterLikeForm.git"
   }
 ]
