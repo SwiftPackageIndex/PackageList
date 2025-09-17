@@ -214,5 +214,9 @@
   {
     "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/11023.",
     "package_url" : "https://github.com/nashysolutions/json-support.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/11025.",
+    "package_url" : "https://github.com/carsxe/carsxe-swift-package.git"
   }
 ]
