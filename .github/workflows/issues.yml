@@ -5,7 +5,7 @@ on:
     types: [opened, reopened]
 
 env:
-  SWIFT_IMAGE: swiftlang/swift@sha256:5765a1bd4c7ff05e35a1095598a70bcaf6a5a8e3e8fc48141e5cb0307a295852  # swift-6.2-DEVELOPMENT-SNAPSHOT-2025-07-09-a
+  SWIFT_IMAGE: swift:6.2-jammy
 
 jobs:
   add:
