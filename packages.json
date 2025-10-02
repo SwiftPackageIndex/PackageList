@@ -628,6 +628,7 @@
   "https://github.com/apple/swift-openapi-runtime.git",
   "https://github.com/apple/swift-openapi-urlsession.git",
   "https://github.com/apple/swift-play-experimental.git",
+  "https://github.com/apple/swift-profile-recorder.git",
   "https://github.com/apple/swift-protobuf.git",
   "https://github.com/apple/swift-service-context.git",
   "https://github.com/apple/swift-service-discovery.git",
