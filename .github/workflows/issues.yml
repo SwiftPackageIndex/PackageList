@@ -1,7 +1,7 @@
 name: Automatic Pull Request
 
 on:
-  issues:
+  issues: 4599
     types: [opened, reopened]
 
 env:
