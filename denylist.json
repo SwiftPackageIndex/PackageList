@@ -214,5 +214,9 @@
   {
     "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/11023.",
     "package_url" : "https://github.com/nashysolutions/json-support.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/11584.",
+    "package_url" : "https://github.com/alexey1312/Swiftlane.git"
   }
 ]
