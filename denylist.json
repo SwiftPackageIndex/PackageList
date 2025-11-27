@@ -218,5 +218,9 @@
   {
     "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/11584.",
     "package_url" : "https://github.com/alexey1312/Swiftlane.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/11593.",
+    "package_url" : "https://github.com/Wowmysql/wowmysql-swift.git"
   }
 ]
