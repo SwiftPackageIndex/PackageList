@@ -209,6 +209,7 @@
   "https://github.com/adobe/aepsdk-analytics-ios.git",
   "https://github.com/adobe/aepsdk-core-ios.git",
   "https://github.com/adobe/aepsdk-edge-ios.git",
+  "https://github.com/adobe/aepsdk-edgeidentity-ios.git",
   "https://github.com/adobe/aepsdk-rulesengine-ios.git",
   "https://github.com/Adobels/CodeCallTracker.git",
   "https://github.com/Adobels/UIViewKit.git",
