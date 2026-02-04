@@ -222,5 +222,9 @@
   {
     "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/11622.",
     "package_url" : "https://github.com/edgeengineer/cbor.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/12229.",
+    "package_url" : "https://github.com/dewangga18/qtrust_sequre_realtime_sdk.git"
   }
 ]
