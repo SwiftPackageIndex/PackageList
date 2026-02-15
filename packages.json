@@ -8539,6 +8539,7 @@
   "https://github.com/Swift-Package/AppleDarthVader.git",
   "https://github.com/swift-psychrometrics/swift-psychrometrics.git",
   "https://github.com/swift-quic/swift-quic.git",
+  "https://github.com/swift-server-community/dynamo-db-tables.git",
   "https://github.com/swift-server-community/mqtt-nio.git",
   "https://github.com/swift-server/async-http-client.git",
   "https://github.com/swift-server/RediStack.git",
