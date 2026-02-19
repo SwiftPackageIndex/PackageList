@@ -9476,6 +9476,7 @@
   "https://github.com/vapor-community/multilogging.git",
   "https://github.com/vapor-community/node.git",
   "https://github.com/vapor-community/pagination.git",
+  "https://github.com/vapor-community/passage.git",
   "https://github.com/vapor-community/postman-provider.git",
   "https://github.com/vapor-community/queues-database-hooks.git",
   "https://github.com/vapor-community/queues-mongo-driver.git",
