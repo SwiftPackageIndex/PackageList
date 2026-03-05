@@ -101,7 +101,7 @@ func shell(_ args: [String], at path: URL, returnStdOut: Bool = false, returnStd
     task.arguments = args
     task.currentDirectoryURL = path
     task.environment = ProcessInfo.processInfo.environment
-        .filter { $0.key != "GITHUB_TOKEN" }
+        .filter { !["GITHUB_TOKEN", "SPI_API_TOKEN"].contains($0.key) }
         .merging(["SPI_PROCESSING": "1"], uniquingKeysWith: { $1 })
     let stdout = Pipe()
     let stderr = Pipe()
