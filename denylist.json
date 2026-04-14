@@ -226,5 +226,13 @@
   {
     "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/12965.",
     "package_url" : "https://github.com/harshil-gandhi-us/tryPod.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/13166.",
+    "package_url" : "https://github.com/skiptools/swift-android-native.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/13166.",
+    "package_url" : "https://github.com/swift-android-sdk/swift-android-native.git"
   }
 ]
