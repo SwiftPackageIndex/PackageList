@@ -2034,6 +2034,8 @@
   "https://github.com/cyberbeni/typednotificationcenter.git",
   "https://github.com/cybozu/WebUI.git",
   "https://github.com/cyphera-labs/cyphera-swift.git",
+  "https://github.com/cyphera-labs/keychain-swift.git",
+  "https://github.com/cyphera-labs/kmip-swift.git",
   "https://github.com/CypherPoet/AlphabetEncoder.git",
   "https://github.com/CypherPoet/AnimatableGradients.git",
   "https://github.com/CypherPoet/ClampedPropertyWrapper.git",
