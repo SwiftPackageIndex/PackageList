@@ -230,5 +230,9 @@
   {
     "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/13166.",
     "package_url" : "https://github.com/skiptools/swift-android-native.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/13396.",
+    "package_url" : "https://github.com/hummingbird-project/hummingbird-redis.git"
   }
 ]
