@@ -4014,6 +4014,8 @@
   "https://github.com/hummingbird-project/hummingbird-redis.git",
   "https://github.com/hummingbird-project/hummingbird-websocket.git",
   "https://github.com/hummingbird-project/hummingbird.git",
+  "https://github.com/hummingbird-project/swift-jobs-postgres.git",
+  "https://github.com/hummingbird-project/swift-jobs-valkey.git",
   "https://github.com/hummingbird-project/swift-jobs.git",
   "https://github.com/hummingbird-project/swift-mustache.git",
   "https://github.com/hummingbird-project/swift-openapi-hummingbird.git",
