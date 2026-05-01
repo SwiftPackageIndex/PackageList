@@ -4012,6 +4012,7 @@
   "https://github.com/hummingbird-project/hummingbird-fluent.git",
   "https://github.com/hummingbird-project/hummingbird-lambda.git",
   "https://github.com/hummingbird-project/hummingbird-redis.git",
+  "https://github.com/hummingbird-project/hummingbird-valkey.git",
   "https://github.com/hummingbird-project/hummingbird-websocket.git",
   "https://github.com/hummingbird-project/hummingbird.git",
   "https://github.com/hummingbird-project/swift-jobs-postgres.git",
