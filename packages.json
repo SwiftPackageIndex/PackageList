@@ -7462,6 +7462,7 @@
   "https://github.com/pointfreeco/swift-composable-architecture.git",
   "https://github.com/pointfreeco/swift-concurrency-extras.git",
   "https://github.com/pointfreeco/swift-custom-dump.git",
+  "https://github.com/pointfreeco/swift-debug-snapshots.git",
   "https://github.com/pointfreeco/swift-dependencies.git",
   "https://github.com/pointfreeco/swift-gen.git",
   "https://github.com/pointfreeco/swift-html-vapor.git",
