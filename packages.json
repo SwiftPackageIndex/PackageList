@@ -726,6 +726,7 @@
   "https://github.com/apple/app-store-server-library-swift.git",
   "https://github.com/apple/container.git",
   "https://github.com/apple/containerization.git",
+  "https://github.com/apple/coreai-models.git",
   "https://github.com/apple/example-package-fisheryates.git",
   "https://github.com/apple/FHIRModels.git",
   "https://github.com/apple/foundation-models-utilities.git",
