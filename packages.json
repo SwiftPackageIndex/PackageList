@@ -728,6 +728,7 @@
   "https://github.com/apple/containerization.git",
   "https://github.com/apple/example-package-fisheryates.git",
   "https://github.com/apple/FHIRModels.git",
+  "https://github.com/apple/foundation-models-utilities.git",
   "https://github.com/apple/ml-stable-diffusion.git",
   "https://github.com/apple/pir-service-example.git",
   "https://github.com/apple/pkl-swift.git",
