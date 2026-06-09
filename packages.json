@@ -731,6 +731,7 @@
   "https://github.com/apple/FHIRModels.git",
   "https://github.com/apple/foundation-models-utilities.git",
   "https://github.com/apple/ml-stable-diffusion.git",
+  "https://github.com/apple/pass-builder.git",
   "https://github.com/apple/pir-service-example.git",
   "https://github.com/apple/pkl-swift.git",
   "https://github.com/apple/swift-algorithms.git",
