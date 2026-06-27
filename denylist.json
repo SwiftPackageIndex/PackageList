@@ -238,5 +238,13 @@
   {
     "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/13686.",
     "package_url" : "https://github.com/nashysolutions/feature-flags.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/14190.",
+    "package_url" : "https://github.com/edfapay/edfapay-spm-distribution.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/14190.",
+    "package_url" : "https://github.com/edfapay/pg-ios-spm-distribution.git"
   }
 ]
