@@ -2366,6 +2366,8 @@
   "https://github.com/dankinsoid/VDLayout.git",
   "https://github.com/dankinsoid/VDPin.git",
   "https://github.com/dankinsoid/VDTransition.git",
+  "https://github.com/dankogai/swift-bigint-gmp.git",
+  "https://github.com/dankogai/swift-bigint-javascriptcore.git",
   "https://github.com/dankogai/swift-bignum.git",
   "https://github.com/dankogai/swift-combinatorics.git",
   "https://github.com/dankogai/swift-complex.git",
