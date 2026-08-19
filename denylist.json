@@ -242,5 +242,9 @@
   {
     "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/14464.",
     "package_url" : "https://github.com/CassetteLab/crate-digger.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/14892.",
+    "package_url" : "https://github.com/dankogai/swift-floatingpointmath.git"
   }
 ]
