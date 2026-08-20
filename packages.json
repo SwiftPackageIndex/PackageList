@@ -1558,6 +1558,7 @@
   "https://github.com/brokenhandsio/soto-elasticsearch-nio-client.git",
   "https://github.com/brokenhandsio/SteamPress.git",
   "https://github.com/brokenhandsio/swift-cbor.git",
+  "https://github.com/brokenhandsio/swift-fuzz.git",
   "https://github.com/brokenhandsio/swift-webauthn.git",
   "https://github.com/brokenhandsio/vapor-csrf.git",
   "https://github.com/brokenhandsio/vapor-dynamodb-sessions.git",
