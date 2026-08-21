@@ -24,7 +24,6 @@ import FoundationNetworking
 
 enum Constants {
     static let githubPackageListURL = URL(string: "https://raw.githubusercontent.com/SwiftPackageIndex/PackageList/main/packages.json")!
-    static let githubToken = ProcessInfo.processInfo.environment["GITHUB_TOKEN"]
 }
 
 // MARK: - Type declarations
@@ -101,7 +100,7 @@ func shell(_ args: [String], at path: URL, returnStdOut: Bool = false, returnStd
     task.arguments = args
     task.currentDirectoryURL = path
     task.environment = ProcessInfo.processInfo.environment
-        .filter { !["GITHUB_TOKEN", "SPI_API_TOKEN"].contains($0.key) }
+        .filter { !["SPI_API_TOKEN"].contains($0.key) }
         .merging(["SPI_PROCESSING": "1"], uniquingKeysWith: { $1 })
     let stdout = Pipe()
     let stderr = Pipe()
@@ -245,10 +244,6 @@ extension URL {
 
 func fetch(_ url: URL, timeout: TimeInterval = 10) async throws -> Data {
     var request = URLRequest(url: url, timeoutInterval: timeout)
-
-    if let token = Constants.githubToken {
-        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-    }
 
     let session = URLSession(configuration: .default)
     
@@ -522,10 +517,6 @@ func processPackageList() async throws {
 }
 
 func main(args: [String]) async throws {
-    if Constants.githubToken == nil {
-        print("Warning: Using anonymous authentication -- may run into rate limiting issues\n")
-    }
-
     switch try parseArgs(args) {
         case .processURL(let url):
             let resolvedURL = try await verifyURL(url)
