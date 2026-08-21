@@ -246,5 +246,13 @@
   {
     "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/14892.",
     "package_url" : "https://github.com/dankogai/swift-floatingpointmath.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/14949.",
+    "package_url" : "https://github.com/metaldragonxxx123/swift-helpers-lib.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/14949.",
+    "package_url" : "https://github.com/metaldragonxxx123/swift-utils-demo.git"
   }
 ]
