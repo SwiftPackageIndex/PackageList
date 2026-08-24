@@ -90,19 +90,17 @@ struct Package: Decodable {
 // Via Tim Condon
 
 @discardableResult
-func shell(_ args: String..., at path: URL, returnStdOut: Bool = false, returnStdErr: Bool = false, stdIn: Pipe? = nil) throws -> (status: Int32, stdout: String?, stderr: String?) {
-    return try shell(args, at: path, returnStdOut: returnStdOut, returnStdErr: returnStdErr, stdIn: stdIn)
+func shell(_ args: String..., at path: URL, returnStdOut: Bool = false, returnStdErr: Bool = false, stdIn: Pipe? = nil, environment: [String: String]) throws -> (status: Int32, stdout: String?, stderr: String?) {
+    return try shell(args, at: path, returnStdOut: returnStdOut, returnStdErr: returnStdErr, stdIn: stdIn, environment: environment)
 }
 
 @discardableResult
-func shell(_ args: [String], at path: URL, returnStdOut: Bool = false, returnStdErr: Bool = false, stdIn: Pipe? = nil) throws -> (status: Int32, stdout: String?, stderr: String?) {
+func shell(_ args: [String], at path: URL, returnStdOut: Bool = false, returnStdErr: Bool = false, stdIn: Pipe? = nil, environment: [String: String]) throws -> (status: Int32, stdout: String?, stderr: String?) {
     let task = Process()
     task.executableURL = URL(fileURLWithPath: "/usr/bin/env")
     task.arguments = args
     task.currentDirectoryURL = path
-    task.environment = ProcessInfo.processInfo.environment
-        .filter { !["GITHUB_TOKEN", "SPI_API_TOKEN"].contains($0.key) }
-        .merging(["SPI_PROCESSING": "1"], uniquingKeysWith: { $1 })
+    task.environment = environment
     let stdout = Pipe()
     let stderr = Pipe()
     if returnStdOut {
@@ -411,7 +409,7 @@ func createTempDir() throws -> URL {
 
 func runDumpPackage(at path: URL, timeout: TimeInterval = 20) throws -> Data {
     let (status, stdout, stderr) = try shell("swift", "package", "dump-package",
-                                             at: path, returnStdOut: true, returnStdErr: true)
+                                             at: path, returnStdOut: true, returnStdErr: true, environment: ["SPI_PROCESSING": "1"])
 
     switch status {
         case 0:
