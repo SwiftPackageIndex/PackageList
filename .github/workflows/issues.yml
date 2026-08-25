@@ -12,6 +12,7 @@ permissions: {}
 jobs:
   add:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     if: contains(github.event.issue.labels.*.name, 'Add Package')
     permissions:
       contents: write
@@ -29,11 +30,26 @@ jobs:
         env:
           GH_BODY: ${{ github.event.issue.body }}
 
+      # Fetches packages and hands them over to the next
+      # step where they are evaluated by .github/evaluate_manifests.sh.
       - name: Validate JSON
-        run: docker run --rm -e CI=true -e GITHUB_TOKEN=$GITHUB_TOKEN -v "$PWD:/host" -w /host $SWIFT_IMAGE swift validate.swift
+        run: |
+          mkdir -p "$RUNNER_TEMP/manifests"
+          docker run --rm \
+            -e CI=true \
+            -e GITHUB_TOKEN="$GITHUB_TOKEN" \
+            -e SPI_MANIFEST_DIR=/manifests \
+            -v "$RUNNER_TEMP/manifests:/manifests" \
+            -v "$PWD:/host" -w /host \
+            "$SWIFT_IMAGE" swift validate.swift
         id: validate
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Runs third party code, holds nothing and can reach nothing.
+      - name: Evaluate manifests
+        run: bash .github/evaluate_manifests.sh "$RUNNER_TEMP/manifests"
+        id: evaluate
 
       - name: Check for Changes
         run: bash .github/check_for_changes.sh
@@ -78,7 +94,7 @@ jobs:
         if: ${{ failure() || steps.check.outputs.changes != 'true' }}
         uses: actions/github-script@v9
         env:
-          VALIDATE_ERROR: ${{ steps.validate.outputs.validateError }}
+          VALIDATE_ERROR: ${{ steps.validate.outputs.validateError || steps.evaluate.outputs.validateError }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -91,6 +107,7 @@ jobs:
             })
   remove:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     if: contains(github.event.issue.labels.*.name, 'Remove Package')
     permissions:
       contents: write
@@ -109,11 +126,26 @@ jobs:
           GH_BODY: ${{ github.event.issue.body }}
           GH_ISSUE: ${{ github.event.issue.number }}
 
+      # Fetches packages and hands them over to the next
+      # step where they are evaluated by .github/evaluate_manifests.sh.
       - name: Validate JSON
-        run: docker run --rm -e CI=true -e GITHUB_TOKEN=$GITHUB_TOKEN -v "$PWD:/host" -w /host $SWIFT_IMAGE swift validate.swift
+        run: |
+          mkdir -p "$RUNNER_TEMP/manifests"
+          docker run --rm \
+            -e CI=true \
+            -e GITHUB_TOKEN="$GITHUB_TOKEN" \
+            -e SPI_MANIFEST_DIR=/manifests \
+            -v "$RUNNER_TEMP/manifests:/manifests" \
+            -v "$PWD:/host" -w /host \
+            "$SWIFT_IMAGE" swift validate.swift
         id: validate
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Runs third party code, holds nothing and can reach nothing.
+      - name: Evaluate manifests
+        run: bash .github/evaluate_manifests.sh "$RUNNER_TEMP/manifests"
+        id: evaluate
 
       - name: Check for Changes
         run: bash .github/check_for_changes.sh
@@ -159,7 +191,7 @@ jobs:
         if: ${{ failure() || steps.check.outputs.changes != 'true' }}
         uses: actions/github-script@v9
         env:
-          VALIDATE_ERROR: ${{ steps.validate.outputs.validateError }}
+          VALIDATE_ERROR: ${{ steps.validate.outputs.validateError || steps.evaluate.outputs.validateError }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |

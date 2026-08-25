@@ -19,6 +19,7 @@ jobs:
   validate:
     if: github.event_name == 'push' || contains(github.event.pull_request.labels.*.name, 'force-ci')
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
     steps:
@@ -28,4 +29,14 @@ jobs:
           persist-credentials: false
 
       - name: Validate JSON
-        run: docker run --rm --env GITHUB_TOKEN=$GITHUB_TOKEN -v "$PWD:/host" -w /host $SWIFT_IMAGE swift validate.swift
+        run: |
+          mkdir -p "$RUNNER_TEMP/manifests"
+          docker run --rm \
+            --env GITHUB_TOKEN="$GITHUB_TOKEN" \
+            --env SPI_MANIFEST_DIR=/manifests \
+            -v "$RUNNER_TEMP/manifests:/manifests" \
+            -v "$PWD:/host" -w /host \
+            "$SWIFT_IMAGE" swift validate.swift
+
+      - name: Evaluate manifests
+        run: bash .github/evaluate_manifests.sh "$RUNNER_TEMP/manifests"

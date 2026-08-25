@@ -25,29 +25,30 @@ import FoundationNetworking
 enum Constants {
     static let githubPackageListURL = URL(string: "https://raw.githubusercontent.com/SwiftPackageIndex/PackageList/main/packages.json")!
     static let githubToken = ProcessInfo.processInfo.environment["GITHUB_TOKEN"]
+    static let manifestDirectory = ProcessInfo.processInfo.environment["SPI_MANIFEST_DIR"]
+        .map { URL(fileURLWithPath: $0) }
 }
 
 // MARK: - Type declarations
 
 enum AppError: Error {
     case invalidURL(URL)
+    case manifestDirectoryNotSet
     case manifestNotFound(URL)
     case networkingError(Error)
     case notFound(URL)
     case outputIdentical
-    case packageDumpError(String)
-    case packageDumpTimeout
     case packageListChanged
     case packageMoved
     case rateLimitExceeded(URL, reportedLimit: Int)
-    case shellCommandFailed(command: String, terminationStatus: Int, errorMessage: String)
-    case shellCommandTimeout(command: String)
     case syntaxError(String)
 
     var localizedDescription: String {
         switch self {
             case .invalidURL(let url):
                 return "invalid url: \(url)"
+            case .manifestDirectoryNotSet:
+                return "SPI_MANIFEST_DIR is not set. Manifests are fetched there for .github/evaluate_manifests.sh to evaluate, so set it to a directory that already exists."
             case .manifestNotFound(let url):
                 return "no package manifest found at url: \(url)"
             case .networkingError(let error):
@@ -56,20 +57,12 @@ enum AppError: Error {
                 return "url not found (404): \(url)"
             case .outputIdentical:
                 return "resulting package.json is unchanged. This typically means the package is already in the index."
-            case .packageDumpError(let msg):
-                return "package dump failed: \(msg)"
-            case .packageDumpTimeout:
-                return "timeout while running `swift package dump-package`"
             case .packageListChanged:
                 return "package list was modified"
             case .packageMoved:
                 return "package moved"
             case let .rateLimitExceeded(url, limit):
                 return "rate limit of \(limit) exceeded while requesting url: \(url)"
-            case let .shellCommandFailed(command: cmd, terminationStatus: status, errorMessage: message):
-                return "command failed: \(cmd), status: \(status), error: \(message)"
-            case let .shellCommandTimeout(command: cmd):
-                return "command `\(cmd)` timed out"
             case .syntaxError(let msg):
                 return msg
         }
@@ -79,83 +72,6 @@ enum AppError: Error {
 enum RunMode {
     case processURL(URL)
     case processPackageList
-}
-
-struct Package: Decodable {
-    let name: String
-}
-
-// MARK: - Shell helpers
-
-// Via Tim Condon
-
-@discardableResult
-func shell(_ args: String..., at path: URL, returnStdOut: Bool = false, returnStdErr: Bool = false, stdIn: Pipe? = nil, environment: [String: String]) throws -> (status: Int32, stdout: String?, stderr: String?) {
-    return try shell(args, at: path, returnStdOut: returnStdOut, returnStdErr: returnStdErr, stdIn: stdIn, environment: environment)
-}
-
-@discardableResult
-func shell(_ args: [String], at path: URL, returnStdOut: Bool = false, returnStdErr: Bool = false, stdIn: Pipe? = nil, environment: [String: String]) throws -> (status: Int32, stdout: String?, stderr: String?) {
-    let task = Process()
-    task.executableURL = URL(fileURLWithPath: "/usr/bin/env")
-    task.arguments = args
-    task.currentDirectoryURL = path
-    task.environment = environment
-    let stdout = Pipe()
-    let stderr = Pipe()
-    if returnStdOut {
-        task.standardOutput = stdout
-    }
-    if returnStdErr {
-        task.standardError = stderr
-    }
-    if let stdIn = stdIn {
-        task.standardInput = stdIn
-    }
-    
-    // Workaround https://github.com/swiftlang/swift-corelibs-foundation/issues/5197
-    let group = DispatchGroup()
-    
-    try task.run()
-
-    let outputData = QueueIsolated<Data?>(nil)
-    let errorData = QueueIsolated<Data?>(nil)
-
-    group.enter()
-    Thread { // read full output in a separate thread
-        let data = try? stdout.fileHandleForReading.readToEnd()
-        outputData.withValue { $0 = data } 
-        group.leave()
-    }.start()
-    
-    group.enter()
-    Thread {  // read full error output in a separate thread
-        let data = try? stderr.fileHandleForReading.readToEnd()
-        errorData.withValue { $0 = data }
-        group.leave()
-    }.start()
-    
-    task.waitUntilExit()
-    
-    // wait until the reader threads complete
-    if .timedOut == group.wait(timeout: .now() + .seconds(30)) {
-        throw AppError.shellCommandTimeout(command: args.joined(separator: " "))
-    }
-    
-    guard task.terminationStatus == 0 else {
-        let message = errorData.withValue { $0.map(\.string)?.trimmingCharacters(in: .whitespacesAndNewlines) } ?? ""
-        throw AppError.shellCommandFailed(command: args.joined(separator: " "), terminationStatus: Int(task.terminationStatus), errorMessage: message)
-    }
-    
-    return (status: task.terminationStatus,
-            stdout: outputData.withValue { $0 }.map(\.string),
-            stderr: errorData.withValue { $0 }.map(\.string))
-}
-
-extension Data {
-    var string: String {
-        String(decoding: self, as: UTF8.self)
-    }
 }
 
 // Other helpers
@@ -400,51 +316,34 @@ func getManifestURLs(_ url: URL) async throws -> [URL] {
     }
 }
 
-func createTempDir() throws -> URL {
+// MARK: - Manifests
+
+// Once we've pulled the manifests we can hand them over to the evaluation step which can safely run 3rd party code. 
+func handOverManifests(of url: URL, to root: URL) async throws {
     let fm = FileManager.default
-    let tempDir = fm.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-    try fm.createDirectory(at: tempDir, withIntermediateDirectories: false, attributes: nil)
-    return tempDir
-}
+    let directory = root.appendingPathComponent(UUID().uuidString)
+    let manifests = directory.appendingPathComponent("manifests")
 
-func manifestEvaluationEnvironment() -> [String: String] {
-    let path = ProcessInfo.processInfo.environment["PATH"] ?? "/usr/local/bin:/usr/bin:/bin"
-    return ["SPI_PROCESSING": "1", "PATH": path]
-}
+    // Not creating intermediates, so a handover directory that was never mounted fails here
+    // rather than leaving the evaluation step with nothing to find and nothing to report.
+    try fm.createDirectory(at: directory, withIntermediateDirectories: false)
+    try fm.createDirectory(at: manifests, withIntermediateDirectories: false)
 
-func runDumpPackage(at path: URL, timeout: TimeInterval = 20) throws -> Data {
-    let (status, stdout, stderr) = try shell("swift", "package", "dump-package",
-                                             at: path, returnStdOut: true, returnStdErr: true, environment: manifestEvaluationEnvironment())
-
-    switch status {
-        case 0:
-            return stdout.map { Data($0.utf8) } ?? Data()
-        case 15:
-            throw AppError.packageDumpTimeout
-        default:
-            let error = stderr ?? "(nil)"
-            throw AppError.packageDumpError(error)
-    }
-}
-
-@discardableResult
-func dumpPackage(url: URL) async throws -> Package {
-    let tempDir = try createTempDir()
-    
     for manifestURL in try await getManifestURLs(url) {
         let manifest = try await fetch(manifestURL)
-        let fileURL = tempDir.appendingPathComponent(manifestURL.lastPathComponent)
-        try manifest.write(to: fileURL)
+        try manifest.write(to: manifests.appendingPathComponent(manifestURL.lastPathComponent))
     }
 
-    let json = try runDumpPackage(at: tempDir)
-    return try JSONDecoder().decode(Package.self, from: json)
+    // The url alongside the manifests rather than among them, so the evaluation step can name
+    // the package it could not evaluate while mounting nothing but manifests.
+    try Data(url.absoluteString.utf8).write(to: directory.appendingPathComponent("url"))
 }
 
 func verifyURL(_ url: URL) async throws -> URL {
     print("verifying", url)
     guard let resolvedURL = url.followingRedirects() else { throw AppError.invalidURL(url) }
-    try await dumpPackage(url: resolvedURL)
+    guard let handoverDirectory = Constants.manifestDirectory else { throw AppError.manifestDirectoryNotSet }
+    try await handOverManifests(of: resolvedURL, to: handoverDirectory)
     return resolvedURL
 }
 
