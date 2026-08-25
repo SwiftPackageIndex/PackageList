@@ -258,5 +258,25 @@
   {
     "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/14954.",
     "package_url" : "https://github.com/metaldragonxxx123/swift-string-ext.git"
+  },
+  {
+    "notes" : "Related to https://github.com/SwiftPackageIndex/PackageList/issues/14954.",
+    "package_url" : "https://github.com/metaldragonxxx123/swift-date-utils"
+  },
+  {
+    "notes" : "Related to https://github.com/SwiftPackageIndex/PackageList/issues/14954.",
+    "package_url" : "https://github.com/metaldragonxxx123/swift-collection-utils"
+  },
+  {
+    "notes" : "Related to https://github.com/SwiftPackageIndex/PackageList/issues/14954.",
+    "package_url" : "https://github.com/metaldragonxxx123/swift-app-alpha"
+  },
+  {
+    "notes" : "Related to https://github.com/SwiftPackageIndex/PackageList/issues/14954.",
+    "package_url" : "https://github.com/metaldragonxxx123/swift-app-beta"
+  },
+  {
+    "notes" : "Related to https://github.com/SwiftPackageIndex/PackageList/issues/14954.",
+    "package_url" : "https://github.com/metaldragonxxx123/swift-app-gamma"
   }
 ]

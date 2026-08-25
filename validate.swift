@@ -407,9 +407,14 @@ func createTempDir() throws -> URL {
     return tempDir
 }
 
+func manifestEvaluationEnvironment() -> [String: String] {
+    let path = ProcessInfo.processInfo.environment["PATH"] ?? "/usr/local/bin:/usr/bin:/bin"
+    return ["SPI_PROCESSING": "1", "PATH": path]
+}
+
 func runDumpPackage(at path: URL, timeout: TimeInterval = 20) throws -> Data {
     let (status, stdout, stderr) = try shell("swift", "package", "dump-package",
-                                             at: path, returnStdOut: true, returnStdErr: true, environment: ["SPI_PROCESSING": "1"])
+                                             at: path, returnStdOut: true, returnStdErr: true, environment: manifestEvaluationEnvironment())
 
     switch status {
         case 0:
