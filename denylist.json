@@ -261,22 +261,22 @@
   },
   {
     "notes" : "Related to https://github.com/SwiftPackageIndex/PackageList/issues/14954.",
-    "package_url" : "https://github.com/metaldragonxxx123/swift-date-utils"
+    "package_url" : "https://github.com/metaldragonxxx123/swift-date-utils.git"
   },
   {
     "notes" : "Related to https://github.com/SwiftPackageIndex/PackageList/issues/14954.",
-    "package_url" : "https://github.com/metaldragonxxx123/swift-collection-utils"
+    "package_url" : "https://github.com/metaldragonxxx123/swift-collection-utils.git"
   },
   {
     "notes" : "Related to https://github.com/SwiftPackageIndex/PackageList/issues/14954.",
-    "package_url" : "https://github.com/metaldragonxxx123/swift-app-alpha"
+    "package_url" : "https://github.com/metaldragonxxx123/swift-app-alpha.git"
   },
   {
     "notes" : "Related to https://github.com/SwiftPackageIndex/PackageList/issues/14954.",
-    "package_url" : "https://github.com/metaldragonxxx123/swift-app-beta"
+    "package_url" : "https://github.com/metaldragonxxx123/swift-app-beta.git"
   },
   {
     "notes" : "Related to https://github.com/SwiftPackageIndex/PackageList/issues/14954.",
-    "package_url" : "https://github.com/metaldragonxxx123/swift-app-gamma"
+    "package_url" : "https://github.com/metaldragonxxx123/swift-app-gamma.git"
   }
 ]
