@@ -7,10 +7,16 @@ on:
 env:
   SWIFT_IMAGE: swiftlang/swift@sha256:805c5f57d2cb73adfee6821813afbc411d414e885122dd13a741c5192e74ce57  # swift-6.4.x-DEVELOPMENT-SNAPSHOT-2026-07-23-a swiftlang/swift:nightly-6.4.x-jammy
 
+permissions: {}
+
 jobs:
   add:
     runs-on: ubuntu-latest
     if: contains(github.event.issue.labels.*.name, 'Add Package')
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
 
     steps:
       - name: Checkout
@@ -55,32 +61,41 @@ jobs:
 
       - name: Update Issue (Success)
         if: steps.check.outputs.changes == 'true'
-        uses: actions/github-script@v3
+        uses: actions/github-script@v9
+        env:
+          PR_NUMBER: ${{ steps.cpr.outputs.pull-request-number }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            github.issues.createComment({
+            await github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: 'Thank you! We will approve and add these packages with #${{ steps.cpr.outputs.pull-request-number }}.'
+              body: `Thank you! We will approve and add these packages with #${process.env.PR_NUMBER}.`
             })
 
       - name: Update Issue (Failure)
         if: ${{ failure() || steps.check.outputs.changes != 'true' }}
-        uses: actions/github-script@v3
+        uses: actions/github-script@v9
+        env:
+          VALIDATE_ERROR: ${{ steps.validate.outputs.validateError }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            github.issues.createComment({
+            const validateError = process.env.VALIDATE_ERROR || 'None'
+            await github.rest.issues.createComment({
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                body: 'It looks like there’s nothing to do here!\n\nThe package may [already be in the package list](https://github.com/SwiftPackageIndex/PackageList/blob/main/packages.json) or on the [denylist](https://github.com/SwiftPackageIndex/PackageList/blob/main/denylist.json). Or, if you submitted the wrong URL or there’s a typo, please close this issue and [start a new one](https://github.com/SwiftPackageIndex/PackageList/issues/new/choose).\n\n>Validate Error: ${{ steps.validate.outputs.validateError || 'None' }}'
+                body: `It looks like there’s nothing to do here!\n\nThe package may [already be in the package list](https://github.com/SwiftPackageIndex/PackageList/blob/main/packages.json) or on the [denylist](https://github.com/SwiftPackageIndex/PackageList/blob/main/denylist.json). Or, if you submitted the wrong URL or there’s a typo, please close this issue and [start a new one](https://github.com/SwiftPackageIndex/PackageList/issues/new/choose).\n\n>Validate Error: ${validateError}`
             })
   remove:
     runs-on: ubuntu-latest
     if: contains(github.event.issue.labels.*.name, 'Remove Package')
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
 
     steps:
       - name: Checkout
@@ -127,26 +142,31 @@ jobs:
 
       - name: Update Issue (Success)
         if: steps.check.outputs.changes == 'true'
-        uses: actions/github-script@v3
+        uses: actions/github-script@v9
+        env:
+          PR_NUMBER: ${{ steps.cpr.outputs.pull-request-number }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            github.issues.createComment({
+            await github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: 'Thank you! We will approve and remove these packages with #${{ steps.cpr.outputs.pull-request-number }}.'
+              body: `Thank you! We will approve and remove these packages with #${process.env.PR_NUMBER}.`
             })
 
       - name: Update Issue (Failure)
         if: ${{ failure() || steps.check.outputs.changes != 'true' }}
-        uses: actions/github-script@v3
+        uses: actions/github-script@v9
+        env:
+          VALIDATE_ERROR: ${{ steps.validate.outputs.validateError }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            github.issues.createComment({
+            const validateError = process.env.VALIDATE_ERROR || 'None'
+            await github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: 'Oh no! We were unable to detect any valid packages in your submission. If you submitted the wrong URL and would like to update it, please [open a new issue](https://github.com/SwiftPackageIndex/PackageList/issues/new/choose).\n\n>Validate Error: ${{ steps.validate.outputs.validateError || 'None' }}'
+              body: `Oh no! We were unable to detect any valid packages in your submission. If you submitted the wrong URL and would like to update it, please [open a new issue](https://github.com/SwiftPackageIndex/PackageList/issues/new/choose).\n\n>Validate Error: ${validateError}`
             })

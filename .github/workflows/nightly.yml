@@ -9,6 +9,8 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   SPI_API_TOKEN: ${{ secrets.SPI_API_TOKEN }}
 
+permissions: {}
+
 jobs:
 
   build_validator:
@@ -35,6 +37,8 @@ jobs:
     env:
       CONCURRENCY: "10"
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     container:
       image: swift:6.3-jammy
     steps:
@@ -68,6 +72,9 @@ jobs:
   check_dependencies:
     needs: check_redirects
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     container:
       image: swift:6.3-jammy
     steps:
