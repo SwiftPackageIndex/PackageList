@@ -1,13 +1,9 @@
 name: Nightly Audit
 
-on: 
+on:
   workflow_dispatch:
   schedule:
     - cron: '0 6 * * *'
-
-env:
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  SPI_API_TOKEN: ${{ secrets.SPI_API_TOKEN }}
 
 jobs:
 
@@ -39,7 +35,9 @@ jobs:
       image: swift:6.3-jammy
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Download validator
         uses: actions/download-artifact@v4
@@ -48,6 +46,8 @@ jobs:
 
       - name: Check redirect
         uses: nick-fields/retry@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           timeout_minutes: 60
           max_attempts: 1
@@ -73,7 +73,9 @@ jobs:
     steps:
       # we need to check out the repo in the last step in order to create a PR
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Download validator
         uses: actions/download-artifact@v4
@@ -87,6 +89,9 @@ jobs:
 
       - name: Check dependencies
         uses: nick-fields/retry@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SPI_API_TOKEN: ${{ secrets.SPI_API_TOKEN }}
         with:
           timeout_minutes: 60
           max_attempts: 1
