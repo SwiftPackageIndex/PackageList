@@ -2,3 +2,4 @@
 .nova/
 packages.backup.json
 *.playground
+.prettierignore
