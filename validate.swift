@@ -90,12 +90,12 @@ struct Package: Decodable {
 // Via Tim Condon
 
 @discardableResult
-func shell(_ args: String..., at path: URL, returnStdOut: Bool = false, returnStdErr: Bool = false, stdIn: Pipe? = nil, environment: [String: String]) throws -> (status: Int32, stdout: String?, stderr: String?) {
-    return try shell(args, at: path, returnStdOut: returnStdOut, returnStdErr: returnStdErr, stdIn: stdIn, environment: environment)
+func shell(_ args: String..., at path: URL, returnStdOut: Bool = false, returnStdErr: Bool = false, stdIn: Pipe? = nil, environment: [String: String], timeout: TimeInterval? = nil) throws -> (status: Int32, stdout: String?, stderr: String?) {
+    return try shell(args, at: path, returnStdOut: returnStdOut, returnStdErr: returnStdErr, stdIn: stdIn, environment: environment, timeout: timeout)
 }
 
 @discardableResult
-func shell(_ args: [String], at path: URL, returnStdOut: Bool = false, returnStdErr: Bool = false, stdIn: Pipe? = nil, environment: [String: String]) throws -> (status: Int32, stdout: String?, stderr: String?) {
+func shell(_ args: [String], at path: URL, returnStdOut: Bool = false, returnStdErr: Bool = false, stdIn: Pipe? = nil, environment: [String: String], timeout: TimeInterval? = nil) throws -> (status: Int32, stdout: String?, stderr: String?) {
     let task = Process()
     task.executableURL = URL(fileURLWithPath: "/usr/bin/env")
     task.arguments = args
@@ -120,28 +120,56 @@ func shell(_ args: [String], at path: URL, returnStdOut: Bool = false, returnStd
 
     let outputData = QueueIsolated<Data?>(nil)
     let errorData = QueueIsolated<Data?>(nil)
+    let timedOut = QueueIsolated(false)
+
+    let watchdog = DispatchWorkItem {
+        guard task.isRunning else { return }
+        timedOut.withValue { $0 = true }
+
+        // Kill the manifest, not the SwiftPM driver that launched it. SwiftPM traps SIGINT
+        // only, and its manifest subprocess is not registered with its Cancellator, so
+        // signalling the driver leaves the manifest running. Terminating the manifest
+        // instead lets the driver notice its child died and unwind on its own terms.
+        let tree = descendants(of: task.processIdentifier)
+        let manifest = tree.filter { $0 != task.processIdentifier }
+        manifest.forEach { kill($0, SIGKILL) }
+
+        // If the driver doesn't exit once its child is gone, escalate.
+        Thread.sleep(forTimeInterval: 5)
+        tree.forEach { kill($0, SIGTERM) }
+        Thread.sleep(forTimeInterval: 2)
+        tree.forEach { kill($0, SIGKILL) }
+    }
+    if let timeout {
+        DispatchQueue.global().asyncAfter(deadline: .now() + timeout, execute: watchdog)
+    }
 
     group.enter()
     Thread { // read full output in a separate thread
         let data = try? stdout.fileHandleForReading.readToEnd()
-        outputData.withValue { $0 = data } 
+        outputData.withValue { $0 = data }
         group.leave()
     }.start()
-    
+
     group.enter()
     Thread {  // read full error output in a separate thread
         let data = try? stderr.fileHandleForReading.readToEnd()
         errorData.withValue { $0 = data }
         group.leave()
     }.start()
-    
+
     task.waitUntilExit()
-    
+    watchdog.cancel()
+
     // wait until the reader threads complete
     if .timedOut == group.wait(timeout: .now() + .seconds(30)) {
         throw AppError.shellCommandTimeout(command: args.joined(separator: " "))
     }
-    
+
+    if timedOut.value {
+        throw AppError.packageDumpTimeout
+    }
+
     guard task.terminationStatus == 0 else {
         let message = errorData.withValue { $0.map(\.string)?.trimmingCharacters(in: .whitespacesAndNewlines) } ?? ""
         throw AppError.shellCommandFailed(command: args.joined(separator: " "), terminationStatus: Int(task.terminationStatus), errorMessage: message)
@@ -150,6 +178,33 @@ func shell(_ args: [String], at path: URL, returnStdOut: Bool = false, returnStd
     return (status: task.terminationStatus,
             stdout: outputData.withValue { $0 }.map(\.string),
             stderr: errorData.withValue { $0 }.map(\.string))
+}
+
+// SwiftPM runs a compiled manifest in a process group of its own, so signalling the
+// process group of `swift package dump-package` would reach the driver and not the manifest,
+// which survives and keeps holding the output pipes. Collect the descendants up front,
+// while the parent links still exist, and signal them individually if we need to.
+func descendants(of root: Int32) -> [Int32] {
+    var parents: [Int32: Int32] = [:]
+    let entries = (try? FileManager.default.contentsOfDirectory(atPath: "/proc")) ?? []
+    for pid in entries.compactMap(Int32.init) {
+        guard let stat = try? String(contentsOfFile: "/proc/\(pid)/stat", encoding: .utf8),
+              let commEnd = stat.lastIndex(of: ")") else { continue }
+        // Fields after the executable name are "state ppid ...". The name itself can
+        // contain spaces and brackets, so everything before the final ) is skipped.
+        let fields = stat[stat.index(after: commEnd)...].split(separator: " ")
+        guard fields.count > 1, let ppid = Int32(fields[1]) else { continue }
+        parents[pid] = ppid
+    }
+
+    var found = [root]
+    var index = 0
+    while index < found.count {
+        let parent = found[index]
+        found.append(contentsOf: parents.filter { $0.value == parent && !found.contains($0.key) }.map(\.key))
+        index += 1
+    }
+    return found
 }
 
 extension Data {
@@ -413,18 +468,10 @@ func manifestEvaluationEnvironment() -> [String: String] {
 }
 
 func runDumpPackage(at path: URL, timeout: TimeInterval = 20) throws -> Data {
-    let (status, stdout, stderr) = try shell("swift", "package", "dump-package",
-                                             at: path, returnStdOut: true, returnStdErr: true, environment: manifestEvaluationEnvironment())
-
-    switch status {
-        case 0:
-            return stdout.map { Data($0.utf8) } ?? Data()
-        case 15:
-            throw AppError.packageDumpTimeout
-        default:
-            let error = stderr ?? "(nil)"
-            throw AppError.packageDumpError(error)
-    }
+    let (_, stdout, _) = try shell("swift", "package", "dump-package",
+                                   at: path, returnStdOut: true, returnStdErr: true,
+                                   environment: manifestEvaluationEnvironment(), timeout: timeout)
+    return stdout.map { Data($0.utf8) } ?? Data()
 }
 
 @discardableResult
