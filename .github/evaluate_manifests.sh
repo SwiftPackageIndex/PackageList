@@ -51,7 +51,12 @@ evaluate() {
         --workdir /pkg \
         "$SWIFT_IMAGE" \
         timeout --signal=KILL "$timeout_seconds" \
-        swift package --scratch-path /tmp/scratch dump-package > /dev/null
+        swift package \
+            --scratch-path /tmp/scratch \
+            --cache-path /tmp/cache \
+            --config-path /tmp/config \
+            --security-path /tmp/security \
+            dump-package > /dev/null
 }
 
 sanitized() {
