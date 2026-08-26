@@ -118,8 +118,9 @@ jobs:
             ./validator check-dependencies \
               --spi-api-token "$SPI_API_TOKEN" \
               --input redirect-checked.json \
+              --deny-list denylist.json \
               --manifest-dir /manifests \
-              --limit 20
+              --limit 40
 
       # Runs third party code, holds nothing and can reach nothing. `report` because a candidate
       # dependency that does not build is simply not added, rather than a failed audit.
