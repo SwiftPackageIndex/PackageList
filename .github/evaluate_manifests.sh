@@ -1,18 +1,33 @@
 #!/usr/bin/env bash
 
-# Evaluates every manifest set that validate.swift fetched, each in its own restricted
-# container. validate.swift writes one directory per package into SPI_MANIFEST_DIR.
-# `manifests/` for the Package*.swift files, `url` for the package they came from.
+# Evaluates every manifest set that was fetched for it, each in its own restricted container.
+# The fetching step - validate.swift for a submission, `validator check-dependencies` for the
+# nightly audit - writes one directory per package into the handover directory. `manifests/` for
+# the Package*.swift files, `url` for the package they came from.
 #
 # The container is where third party manifest code runs, so it has no network, no token, an
 # unprivileged uid, nothing writable and a wall clock. All that comes back out of it is an
 # exit status per package.
+#
+# SPI_EVALUATION_MODE picks what a manifest that does not load means:
+#
+#   fail   (default) the run fails. A submitted package that does not build is the submitter's
+#          problem and they need to hear about it.
+#   report the package is marked `failed` and the run continues. A candidate dependency that does
+#          not build is simply not added, and one bad package on the index must not stop the
+#          nightly audit.
 
 set -uo pipefail
 
-manifest_root="${1:?usage: evaluate_manifests.sh <directory written by validate.swift>}"
+manifest_root="${1:?usage: evaluate_manifests.sh <directory the manifests were fetched into>}"
 timeout_seconds="${SPI_MANIFEST_TIMEOUT:-120}"
+mode="${SPI_EVALUATION_MODE:-fail}"
 : "${SWIFT_IMAGE:?SWIFT_IMAGE must be set to the image CI evaluates manifests with}"
+
+case "$mode" in
+    fail|report) ;;
+    *) echo "SPI_EVALUATION_MODE must be 'fail' or 'report', not '$mode'"; exit 1 ;;
+esac
 
 # A manifest can simply refuse to finish, and SwiftPM runs it in a process group of its own,
 # so signalling the process group we started does not reach it. The termination of the container's
@@ -64,8 +79,19 @@ for directory in "$manifest_root"/*/; do
     evaluated+=("$package")
     if ! evaluate "$directory/manifests"; then
         failed+=("$package")
+        # The marker goes beside `manifests`, never inside it, so nothing the container could
+        # reach can forge it.
+        [ "$mode" = report ] && touch "$directory/failed"
     fi
 done
+
+if [ "$mode" = report ]; then
+    # Signing off so the next step can tell "nothing failed" apart from "this never ran".
+    touch "$manifest_root/evaluated"
+    [ "${#failed[@]}" != 0 ] && printf 'could not evaluate: %s\n' "${failed[@]}"
+    echo "evaluated ${#evaluated[@]} package(s), ${#failed[@]} did not load"
+    exit 0
+fi
 
 if [ "${#failed[@]}" != 0 ]; then
     printf 'manifest evaluation failed: %s\n' "${failed[@]}"
