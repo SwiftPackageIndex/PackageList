@@ -48,6 +48,8 @@ jobs:
 
       # Runs third party code, holds nothing and can reach nothing.
       - name: Evaluate manifests
+        env:
+          SPI_EVALUATION_MODE: fail
         run: bash .github/evaluate_manifests.sh "$RUNNER_TEMP/manifests"
         id: evaluate
 
@@ -144,6 +146,8 @@ jobs:
 
       # Runs third party code, holds nothing and can reach nothing.
       - name: Evaluate manifests
+        env:
+          SPI_EVALUATION_MODE: fail
         run: bash .github/evaluate_manifests.sh "$RUNNER_TEMP/manifests"
         id: evaluate
 

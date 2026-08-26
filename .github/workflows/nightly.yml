@@ -6,8 +6,9 @@ on:
     - cron: '0 6 * * *'
 
 env:
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  SPI_API_TOKEN: ${{ secrets.SPI_API_TOKEN }}
+  # Keep in step with the `container:` images below. Those cannot reference `env`, so the value is
+  # repeated rather than shared. This one is what the manifest evaluation containers run.
+  SWIFT_IMAGE: swift:6.3-jammy
 
 permissions: {}
 
@@ -76,11 +77,12 @@ jobs:
   check_dependencies:
     needs: check_redirects
     runs-on: ubuntu-latest
+    timeout-minutes: 90
     permissions:
       contents: write
       pull-requests: write
-    container:
-      image: swift:6.3-jammy
+    # No `container:` here, unlike the jobs above: evaluating manifests means running third party
+    # code in a container of its own, and the runner's docker is not reachable from inside one.
     steps:
       # we need to check out the repo in the last step in order to create a PR
       - name: Checkout
@@ -98,24 +100,54 @@ jobs:
         with:
           name: redirect-checked.json
 
-      - name: Check dependencies
-        uses: nick-fields/retry@v2
+      # Fetches candidate manifests and hands them over to the next step, which is where they are
+      # evaluated. This holds the tokens but runs nothing it downloads.
+      - name: Fetch dependency manifests
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SPI_API_TOKEN: ${{ secrets.SPI_API_TOKEN }}
-        with:
-          timeout_minutes: 60
-          max_attempts: 1
-          retry_on: error
-          command: |
-            chmod +x ./validator
+        run: |
+          chmod +x ./validator
+          mkdir -p "$RUNNER_TEMP/manifests"
+          docker run --rm \
+            --user "$(id -u):$(id -g)" \
+            --env GITHUB_TOKEN="$GITHUB_TOKEN" \
+            -v "$RUNNER_TEMP/manifests:/manifests" \
+            -v "$PWD:/host" -w /host \
+            "$SWIFT_IMAGE" \
             ./validator check-dependencies \
-                --spi-api-token $SPI_API_TOKEN \
-                --input redirect-checked.json --output packages.json \
-                --limit 20
+              --spi-api-token "$SPI_API_TOKEN" \
+              --input redirect-checked.json \
+              --manifest-dir /manifests \
+              --limit 20
+
+      # Runs third party code, holds nothing and can reach nothing. `report` because a candidate
+      # dependency that does not build is simply not added, rather than a failed audit.
+      - name: Evaluate manifests
+        env:
+          SPI_EVALUATION_MODE: report
+        run: bash .github/evaluate_manifests.sh "$RUNNER_TEMP/manifests"
+
+      # Both write into the checkout that the pull request is raised from, so they run as the
+      # runner's own uid rather than leaving root owned files behind.
+      - name: Add validated dependencies
+        run: |
+          docker run --rm \
+            --user "$(id -u):$(id -g)" \
+            -v "$RUNNER_TEMP/manifests:/manifests" \
+            -v "$PWD:/host" -w /host \
+            "$SWIFT_IMAGE" \
+            ./validator add-validated-dependencies \
+              --manifest-dir /manifests \
+              --input redirect-checked.json --output packages.json
+          docker run --rm \
+            --user "$(id -u):$(id -g)" \
+            -v "$PWD:/host" -w /host \
+            "$SWIFT_IMAGE" \
             ./validator apply-deny-list -p packages.json -d denylist.json
-            # Stop artifacts from appearing in the PR
-            rm -f redirect-checked.json validator
+          # Stop artifacts from appearing in the PR
+          rm -f redirect-checked.json validator
+
       - name: Create pull request
         id: cpr
         uses: peter-evans/create-pull-request@v5
