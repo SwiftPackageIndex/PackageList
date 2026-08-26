@@ -9,8 +9,6 @@ env:
   # Keep in step with the `container:` images below. Those cannot reference `env`, so the value is
   # repeated rather than shared. This one is what the manifest evaluation containers run.
   SWIFT_IMAGE: swift:6.3-jammy
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  SPI_API_TOKEN: ${{ secrets.SPI_API_TOKEN }}
 
 permissions: {}
 
