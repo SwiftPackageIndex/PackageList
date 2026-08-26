@@ -27,7 +27,7 @@ jobs:
           cp $(swift build --show-bin-path)/validator $GITHUB_WORKSPACE/
 
       - name: Upload validator
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: validator
           path: validator
@@ -49,7 +49,7 @@ jobs:
           persist-credentials: false
 
       - name: Download validator
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: validator
 
@@ -68,7 +68,7 @@ jobs:
             diff packages.json redirect-checked.json || true
 
       - name: Upload redirect-checked.json
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: redirect-checked.json
           path: redirect-checked.json
@@ -91,12 +91,12 @@ jobs:
           persist-credentials: false
 
       - name: Download validator
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: validator
 
       - name: Download redirect-checked.json
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: redirect-checked.json
 
