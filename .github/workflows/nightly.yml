@@ -2,8 +2,9 @@ name: Nightly Audit
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '0 6 * * *'
+  # 2026-08-28 sas: pause nightly job for now
+  # schedule:
+  #   - cron: '0 6 * * *'
 
 env:
   # Keep in step with the `container:` images below. Those cannot reference `env`, so the value is

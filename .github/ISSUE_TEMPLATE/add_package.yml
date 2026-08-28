@@ -6,6 +6,8 @@ body:
   - type: markdown
     attributes:
       value: |
+        ⚠️ New package ingestion is temporarily paused while we update backend infrastructure. New package requests are queued in the meantime.
+        
         Anyone can add a package to the Swift Package Index. Please feel free to submit any package repository to the index, whether it's a package written by you or someone else. There's also no quality threshold. As long as the packages are valid and meet the requirements below, we will accept them. If you're unsure about any of the requirements, please submit the package(s), and we'll happily provide help.
 
         There are a few requirements for inclusion in the index, but they aren't onerous:
