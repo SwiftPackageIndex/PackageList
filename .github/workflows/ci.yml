@@ -5,7 +5,10 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
-    types: [ opened, synchronize, reopened, labeled ]
+  # Re-runs validation when a maintainer reviews a package-addition PR, so the
+  # checks reflect a merge ref recomputed against current main.
+  # This event checks out refs/pull/N/merge, so the job runs PR-controlled code.
+  # Fork PRs get a read-only GITHUB_TOKEN; base-branch PRs get a write one.
   pull_request_review:
     types: [submitted]
 
@@ -17,7 +20,6 @@ permissions: {}
 
 jobs:
   validate:
-    if: github.event_name == 'push' || contains(github.event.pull_request.labels.*.name, 'force-ci')
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -26,6 +28,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
         with:
+          ref: ${{ github.event.pull_request.number && format('refs/pull/{0}/merge', github.event.pull_request.number) || github.sha }}
           persist-credentials: false
 
       - name: Validate JSON
