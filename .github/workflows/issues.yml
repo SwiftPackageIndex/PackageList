@@ -5,7 +5,7 @@ on:
     types: [opened, reopened]
 
 env:
-  SWIFT_IMAGE: swiftlang/swift@sha256:805c5f57d2cb73adfee6821813afbc411d414e885122dd13a741c5192e74ce57  # swift-6.4.x-DEVELOPMENT-SNAPSHOT-2026-07-23-a swiftlang/swift:nightly-6.4.x-jammy
+  SWIFT_IMAGE: swiftlang/swift@sha256:7b6609a04f6973727f50aeea6e492708814f76a002d3dab3d4ce061bffa8a384  # swiftlang/swift:nightly-6.4.x-jammy - swift-6.4.x-DEVELOPMENT-SNAPSHOT-2026-09-04-a
 
 permissions: {}
 
