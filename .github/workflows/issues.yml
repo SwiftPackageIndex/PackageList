@@ -351,14 +351,19 @@ jobs:
         uses: actions/github-script@v9
         env:
           PR_NUMBER: ${{ steps.cpr.outputs.pull-request-number || steps.existing-pr.outputs.number }}
+          EXISTING_PR: ${{ steps.existing-pr.outputs.exists }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            const body = process.env.EXISTING_PR === 'true'
+              ? `Initial validation has passed. Your package is already being processed in #${process.env.PR_NUMBER}.`
+              : `Initial validation has passed. Your package will be added to the SwiftPackageIndex in #${process.env.PR_NUMBER}.`
+
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
-              body: `Initial validation has passed. Your package will be added to the SwiftPackageIndex in #${process.env.PR_NUMBER}.`
+              body
             })
 
       - name: Update Issue (Failure)
