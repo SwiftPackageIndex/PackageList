@@ -3,6 +3,8 @@ name: Automatic Pull Request
 on:
   issues:
     types: [opened, reopened]
+  issue_comment:
+    types: [created]
 
 env:
   SWIFT_IMAGE: swift:6.4-jammy
