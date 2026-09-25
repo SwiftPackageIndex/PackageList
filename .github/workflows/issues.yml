@@ -30,6 +30,28 @@ jobs:
                 repo: context.repo.repo,
                 body: `Thank for your package submission. The package is now undergoing an automated assessment. Please monitor this issue for updates.`
               })
+
+  retrigger-acknowledgement:
+    if: >-
+      github.event_name == 'issue_comment' &&
+      github.event.comment.body == '/retrigger' &&
+      !github.event.issue.pull_request
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+
+    steps:
+      - name: Retrigger acknowledgement
+        uses: actions/github-script@v9
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `Package validation has been retriggerd.`
+              })
   add:
     runs-on: ubuntu-latest
     timeout-minutes: 30
