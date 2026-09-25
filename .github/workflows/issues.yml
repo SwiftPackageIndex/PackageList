@@ -233,7 +233,7 @@ jobs:
                 body: body.join('\n')
               })
 
-              core.setFailed('Submitted packagese either exist or are denied.'
+              core.setFailed('Submitted packages either exist or are denied.');
 
 
   add:
