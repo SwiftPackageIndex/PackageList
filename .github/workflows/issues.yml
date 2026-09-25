@@ -374,9 +374,19 @@ jobs:
                 body: `Unfortunately the package couldn't be added. Please review the below error to understand why.\n\n> [!TIP]\n>You can retrigger package validation by commenting  \`/retrigger\`.\n\n---\n\n### Validation Error\n\n\`\`\`\n${validateError}\n\`\`\``
             })
   remove:
+    needs: precheck
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    if: contains(github.event.issue.labels.*.name, 'Remove Package')
+    if: >-
+      always() &&
+      needs['precheck'].result == 'success' &&
+      contains(github.event.issue.labels.*.name, 'Remove Package') &&
+      (
+        github.event_name == 'issues' ||
+        (
+          github.event.comment.body == '/retrigger' && !github.event.issue.pull_request
+        )
+      )
     permissions:
       contents: write
       pull-requests: write
@@ -421,9 +431,26 @@ jobs:
         run: bash .github/check_for_changes.sh
         id: check
 
+      - name: Find Existing Pull Request
+        id: existing-pr
+        uses: actions/github-script@v9
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const prs = await github.paginate(github.rest.pulls.list, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'all',
+              head: `${context.repo.owner}:spi-auto-${context.issue.number}`
+            })
+            core.setOutput('exists', String(prs.length > 0))
+            core.setOutput('number', prs[0]?.number ?? '')
+
       - name: Create Pull Request
         id: cpr
-        if: steps.check.outputs.changes == 'true'
+        if: >-
+          steps.check.outputs.changes == 'true' &&
+          steps.existing-pr.outputs.exists != 'true'
         uses: peter-evans/create-pull-request@v8
         with:
           add-paths: |
@@ -443,7 +470,7 @@ jobs:
           author: GitHub <noreply@github.com>
 
       - name: Update Issue (Success)
-        if: steps.check.outputs.changes == 'true'
+        if: steps.cpr.outputs.pull-request-number != ''
         uses: actions/github-script@v9
         env:
           PR_NUMBER: ${{ steps.cpr.outputs.pull-request-number }}
