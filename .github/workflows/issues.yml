@@ -316,7 +316,7 @@ jobs:
             const prs = await github.paginate(github.rest.pulls.list, {
               owner: context.repo.owner,
               repo: context.repo.repo,
-              state: 'all',
+              state: 'open',
               head: `${context.repo.owner}:spi-auto-${context.issue.number}`
             })
             core.setOutput('exists', String(prs.length > 0))
