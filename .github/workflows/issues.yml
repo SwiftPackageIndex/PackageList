@@ -12,6 +12,24 @@ env:
 permissions: {}
 
 jobs:
+  acknowledgement:
+    if: github.event_name == 'issues' && github.event.action == 'opened'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+
+    steps:
+      - name: Acknowledgement
+        uses: actions/github-script@9
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `Thank for your package submission. The package is now undergoing an automated assessment. Please monitor this issue for updates.`
+              })
   add:
     runs-on: ubuntu-latest
     timeout-minutes: 30
