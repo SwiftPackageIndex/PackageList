@@ -237,9 +237,20 @@ jobs:
 
 
   add:
+    needs: precheck
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    if: contains(github.event.issue.labels.*.name, 'Add Package')
+    if: >-
+      always() &&
+      needs['precheck'].result == 'success' &&
+      contains(github.event.issue.labels.*.name, 'Add Package') &&
+      (
+        github.event_name == 'issues' ||
+        (
+          github.event.comment.body == '/retrigger' &&
+          !github.event.issue.pull_request
+        )
+      )
     permissions:
       contents: write
       pull-requests: write
@@ -261,13 +272,25 @@ jobs:
       - name: Validate JSON
         run: |
           mkdir -p "$RUNNER_TEMP/manifests"
+          log_file="$RUNNER_TEMP/validation.log"
+
+          set +e
           docker run --rm \
             -e CI=true \
             -e GITHUB_TOKEN="$GITHUB_TOKEN" \
             -e SPI_MANIFEST_DIR=/manifests \
             -v "$RUNNER_TEMP/manifests:/manifests" \
             -v "$PWD:/host" -w /host \
-            "$SWIFT_IMAGE" swift validate.swift
+            "$SWIFT_IMAGE" swift validate.swift 2>&1 | tee "$log_file" status${PIPESTATUS[0]}
+          set -e
+
+          validate_error="$(sed -n 's/^validateError=//p' "$log_file")"
+
+          if [ -n "$validate_error" ]; then
+            printf 'validateError=%s\n' "$validate_error" >> "$GITHUB_OUTPUT"
+          fi
+
+          exit $status
         id: validate
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -283,9 +306,26 @@ jobs:
         run: bash .github/check_for_changes.sh
         id: check
 
+      - name: Find Existing Pull Request
+        id: existing-pr
+        uses: actions/github-script@v9
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const prs = await github.paginate(github.rest.pulls.list, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'all',
+              head: `${context.repo.owner}:spi-auto-${context.issue.number}`
+            })
+            core.setOutput('exists', String(prs.length > 0))
+            core.setOutput('number', prs[0]?.number ?? '')
+
       - name: Create Pull Request
         id: cpr
-        if: steps.check.outputs.changes == 'true'
+        if: >-
+          steps.check.outputs.changes == 'true' &&
+          steps.existing-pr.outputs.exists != 'true'
         uses: peter-evans/create-pull-request@v8
         with:
           add-paths: |
@@ -304,7 +344,7 @@ jobs:
           author: GitHub <noreply@github.com>
 
       - name: Update Issue (Success)
-        if: steps.check.outputs.changes == 'true'
+        if: steps.cpr.outputs.pull-request-number != ''
         uses: actions/github-script@v9
         env:
           PR_NUMBER: ${{ steps.cpr.outputs.pull-request-number }}
@@ -312,10 +352,10 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             await github.rest.issues.createComment({
-              issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `Thank you! We will approve and add these packages with #${process.env.PR_NUMBER}.`
+              issue_number: context.issue.number,
+              body: `Initial validation has passed. Your package will be added to the SwiftPackageIndex in #${process.env.PR_NUMBER}.`
             })
 
       - name: Update Issue (Failure)
@@ -328,10 +368,10 @@ jobs:
           script: |
             const validateError = process.env.VALIDATE_ERROR || 'None'
             await github.rest.issues.createComment({
-                issue_number: context.issue.number,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                body: `It looks like there’s nothing to do here!\n\nThe package may [already be in the package list](https://github.com/SwiftPackageIndex/PackageList/blob/main/packages.json) or on the [denylist](https://github.com/SwiftPackageIndex/PackageList/blob/main/denylist.json). Or, if you submitted the wrong URL or there’s a typo, please close this issue and [start a new one](https://github.com/SwiftPackageIndex/PackageList/issues/new/choose).\n\n>Validate Error: ${validateError}`
+                issue_number: context.issue.number,
+                body: `Unfortunately the package couldn't be added. Please review the below error to understand why.\n\n> [!TIP]\n>You can retrigger package validation by commenting  \`/retrigger\`.\n\n---\n\n### Validation Error\n\n\`\`\`\n${validateError}\n\`\`\``
             })
   remove:
     runs-on: ubuntu-latest
