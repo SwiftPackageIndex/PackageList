@@ -108,7 +108,7 @@ jobs:
                 ... new Set(urls.map(normaliseURL)),
                 ].sort();
 
-              core.setOutput("url", normalisedURLs.join("\n"));
+              core.setOutput("urls", normalisedURLs.join("\n"));
       - name: Check deny list
         id: denylist
         uses: actions/github-script@v9
