@@ -52,6 +52,188 @@ jobs:
                 repo: context.repo.repo,
                 body: `Package validation has been retriggerd.`
               })
+
+  precheck:
+    needs: acknowledgement
+    if: >-
+      always() &&
+      (
+        github.event_name == 'issues' ||
+        (
+          github.event_name == 'issue_comment' &&
+          github.event.comment.body == '/retrigger' &&
+          !github.event.issue.pull_request
+        )
+      ) &&
+      (
+        contains(github.event.issue.labels.*.name, 'Add Package') ||
+        contains(github.event.issue.labels.*.name, 'Remove Package')
+      )
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Parse issue body
+        id: parse
+        uses: actions/github-script@v9
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        with:
+          script: |
+              const normaliseURL = (url) => {
+                if (url.endsWith("/")) {
+                  url = url.slice(0, -1);
+                }
+
+                if (!url.endsWith(".git")) {
+                  url += ".git";
+                }
+
+                return url.toLowerCase();
+              };
+
+              const urls = process.env.ISSUE_BODY?.match(
+                /https:\/\/github.com\/[A-Za-z0-9._/-]+/g
+              ) ?? [];
+
+              const normalisedURLs = [
+                ... new Set(urls.map(normaliseURL)),
+                ].sort();
+
+              core.setOutput("url", normalisedURLs.join("\n"));
+      - name: Check deny list
+        id: denylist
+        uses: actions/github-script@v9
+        env:
+          URLS: ${{ steps.parse.outputs.urls }}
+        with:
+          script: |
+            const fs = require("fs");
+
+            const normaliseURL = (url) => {
+              if (url.endsWith("/")) {
+                url = url.slice(0, -1);
+              }
+
+              if (!url.endsWith(".git")) {
+                url += ".git";
+              }
+
+              return url.toLowerCase();
+            };
+
+            const deniedPackages = JSON.parse(
+              fs.readFileSync("denylist.json", "utf8")
+            );
+
+            const indexedDeniedPackages = new Set(
+              deniedPackages.map(({ package_url }) => normaliseURL(package_url))
+            );
+
+            const matches = [
+              ...new Set(
+                (process.env.URLS ?? "")
+                  .split(/\r?\n/)
+                  .filter(Boolean)
+              ),
+            ]
+            .filter((url) => indexedDeniedPackages.has(url))
+            .sort();
+
+            core.setOutput("matches", matches.join("\n"));
+
+      - name: Check package list
+        id: packagelist
+        uses: actions/github-script@v9
+        env:
+          URLS: ${{ steps.parse.outputs.urls }}
+        with:
+          script: |
+            const fs = require("fs");
+
+            const normaliseURL = (url) => {
+              if (url.endsWith("/")) {
+                url = url.slice(0, -1);
+              }
+
+              if (!url.endsWith(".git")) {
+                url += ".git";
+              }
+
+              return url.toLowerCase();
+            };
+
+            const packages = JSON.parse(
+              fs.readFileSync("packages.json", "utf8")
+            );
+
+            const indexedPackages = new Set(
+              packages.map(normaliseURL)
+            );
+
+            const matches = [
+              ...new Set(
+                (process.env.URLS ?? "")
+                  .split(/\r?\n/)
+                  .filter(Boolean)
+              ),
+            ]
+            .filter((url) => indexedPackages.has(url))
+            .sort();
+
+            core.setOutput("matches", matches.join("\n"));
+      - name: Report packages
+        if: >-
+          steps.denylist.outputs.matches != '' ||
+          steps.packagelist.outputs.matches != ''
+        uses: actions/github-script@v9
+        env:
+          DENYLIST_PACKAGES: ${{ steps.denylist.outputs.matches }}
+          PACKAGELIST_PACKAGES: ${{ steps.packagelist.outputs.matches }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+              const denylistPackages = (process.env.DENYLIST_PACKAGES || '')
+                .split(/\r?\n/)
+                .filter(Boolean)
+              const packgelistPackages = (process.env.PACKAGELIST_PACKAGES || '')
+                .split(/\r?\n/)
+                .filter(Boolean)
+
+              const body = ['The following packages already exist or are explicitly denied:']
+
+              if (denylistPackages.length > 0) {
+                body.push(
+                  '',
+                  '### Deny List',
+                  ...denylistPackages.map(packageURL => `- \`${packageURL}\``)
+                )
+              }
+
+              if (packagelistPackages.length > 0) {
+                body.push(
+                  '',
+                  '### Package List',
+                  ...packagelistPackages.map(packageURL => `- \`${packageURL}\``)
+                )
+              }
+
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: body.join('\n')
+              })
+
+              core.setFailed('Submitted packagese either exist or are denied.'
+
+
   add:
     runs-on: ubuntu-latest
     timeout-minutes: 30
