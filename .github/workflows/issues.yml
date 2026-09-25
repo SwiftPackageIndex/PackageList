@@ -30,7 +30,7 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: context.issue.number,
-                body: `Thank for your package submission. The package is now undergoing an automated assessment. Please monitor this issue for updates.`
+                body: `Thank you for your package submission. The package is now undergoing an automated assessment. Please monitor this issue for updates.`
               })
 
   retrigger-acknowledgement:
@@ -52,7 +52,7 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: context.issue.number,
-                body: `Package validation has been retriggerd.`
+                body: `Package validation has been retriggered.`
               })
 
   precheck:
