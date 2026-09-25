@@ -13,7 +13,9 @@ permissions: {}
 
 jobs:
   acknowledgement:
-    if: github.event_name == 'issues' && github.event.action == 'opened'
+    if: >-
+      github.event_name == 'issues' &&
+      github.event.action == 'opened'
     runs-on: ubuntu-latest
     permissions:
       issues: write
