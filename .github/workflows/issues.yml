@@ -20,7 +20,7 @@ jobs:
 
     steps:
       - name: Acknowledgement
-        uses: actions/github-script@9
+        uses: actions/github-script@v9
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
