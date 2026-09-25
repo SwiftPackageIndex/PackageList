@@ -278,5 +278,21 @@
   {
     "notes" : "Related to https://github.com/SwiftPackageIndex/PackageList/issues/14954.",
     "package_url" : "https://github.com/metaldragonxxx123/swift-app-gamma.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/15344.",
+    "package_url" : "https://github.com/FelixHerrmann/FHConstraints.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/15344.",
+    "package_url" : "https://github.com/FelixHerrmann/FHDiffableViewControllers.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/15344.",
+    "package_url" : "https://github.com/FelixHerrmann/FHExtensions.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/15344.",
+    "package_url" : "https://github.com/FelixHerrmann/FHPropertyWrappers.git"
   }
 ]
