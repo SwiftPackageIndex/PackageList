@@ -345,10 +345,12 @@ jobs:
           author: GitHub <noreply@github.com>
 
       - name: Update Issue (Success)
-        if: steps.cpr.outputs.pull-request-number != ''
+        if: >-
+          steps.cpr.outputs.pull-request-number != '' ||
+          steps.existing-pr.outputs.exists == 'true'
         uses: actions/github-script@v9
         env:
-          PR_NUMBER: ${{ steps.cpr.outputs.pull-request-number }}
+          PR_NUMBER: ${{ steps.cpr.outputs.pull-request-number || steps.existing-pr.outputs.number }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
