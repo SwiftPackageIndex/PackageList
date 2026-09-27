@@ -7042,6 +7042,7 @@
   "https://github.com/moreSwift/swift-bundler.git",
   "https://github.com/moreSwift/swift-cross-ui.git",
   "https://github.com/moreSwift/swift-cwinrt.git",
+  "https://github.com/moreSwift/swift-observation-polyfill.git",
   "https://github.com/moreSwift/swift-uwp.git",
   "https://github.com/moreSwift/swift-webview2core.git",
   "https://github.com/moreSwift/swift-windowsappsdk.git",
