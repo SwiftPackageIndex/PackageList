@@ -10300,6 +10300,7 @@
   "https://github.com/swift-microservices/swift-authentication-jwt.git",
   "https://github.com/swift-microservices/swift-authentication-vapor.git",
   "https://github.com/swift-microservices/swift-authentication.git",
+  "https://github.com/swift-microservices/swift-openapi-token-authentication.git",
   "https://github.com/swift-microservices/swift-persistence-postgres.git",
   "https://github.com/swift-microservices/swift-persistence.git",
   "https://github.com/swift-molecules/swift-builder.git",
