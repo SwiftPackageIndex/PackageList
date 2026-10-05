@@ -13,7 +13,7 @@ on:
     types: [submitted]
 
 env:
-  SWIFT_IMAGE: swift:6.4-resolute
+  SWIFT_IMAGE: swift:6.4-jammy
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 permissions: {}

@@ -5,7 +5,7 @@ on:
     types: [opened, reopened]
 
 env:
-  SWIFT_IMAGE: swift:6.4-resolute
+  SWIFT_IMAGE: swift:6.4-jammy
 
 permissions: {}
 
