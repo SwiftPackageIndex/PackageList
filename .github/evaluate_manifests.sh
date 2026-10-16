@@ -75,6 +75,8 @@ report_failure() {
 shopt -s nullglob
 evaluated=()
 failed=()
+failure_reasons=()
+tools_version_pattern='is using Swift tools version ([0-9]+\.[0-9]+\.[0-9]+) but the installed version is ([0-9]+\.[0-9]+\.[0-9]+)'
 
 for directory in "$manifest_root"/*/; do
     [ -d "$directory/manifests" ] || continue
@@ -82,8 +84,17 @@ for directory in "$manifest_root"/*/; do
     package="${package:-$directory}"
     echo "evaluating manifests for $package"
     evaluated+=("$package")
-    if ! evaluate "$directory/manifests"; then
+    if evaluation_output="$(evaluate "$directory/manifests" 2>&1)"; then
+        [ -z "$evaluation_output" ] || printf '%s\n' "$evaluation_output"
+    else
+        [ -z "$evaluation_output" ] || printf '%s\n' "$evaluation_output"
         failed+=("$package")
+        # Only numeric versions from the diagnostic may enter the workflow output.
+        if [[ "$evaluation_output" =~ $tools_version_pattern ]]; then
+            failure_reasons+=("toolchain supplied=${BASH_REMATCH[1]}, required latest=${BASH_REMATCH[2]}")
+        else
+            failure_reasons+=("$package")
+        fi
         # The marker goes beside `manifests`, never inside it, so nothing the container could
         # reach can forge it.
         [ "$mode" = report ] && touch "$directory/failed"
@@ -99,8 +110,8 @@ if [ "$mode" = report ]; then
 fi
 
 if [ "${#failed[@]}" != 0 ]; then
-    printf 'manifest evaluation failed: %s\n' "${failed[@]}"
-    report_failure "manifest evaluation failed: ${failed[0]}"
+    printf 'manifest evaluation failed: %s\n' "${failure_reasons[@]}"
+    report_failure "manifest evaluation failed: ${failure_reasons[0]}"
     exit 1
 fi
 
