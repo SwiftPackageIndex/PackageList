@@ -3,6 +3,8 @@ name: Automatic Pull Request
 on:
   issues:
     types: [opened, reopened]
+  issue_comment:
+    types: [created]
 
 env:
   SWIFT_IMAGE: swift:6.4-jammy
@@ -10,10 +12,245 @@ env:
 permissions: {}
 
 jobs:
+  acknowledgement:
+    if: >-
+      github.event_name == 'issues' &&
+      github.event.action == 'opened'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+
+    steps:
+      - name: Acknowledgement
+        uses: actions/github-script@v9
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: `Thank you for your package submission. The package is now undergoing an automated assessment. Please monitor this issue for updates.`
+              })
+
+  retrigger-acknowledgement:
+    if: >-
+      github.event_name == 'issue_comment' &&
+      github.event.comment.body == '/retrigger' &&
+      !github.event.issue.pull_request
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+
+    steps:
+      - name: Retrigger acknowledgement
+        uses: actions/github-script@v9
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: `Package validation has been retriggered.`
+              })
+
+  precheck:
+    needs: acknowledgement
+    if: >-
+      always() &&
+      (
+        github.event_name == 'issues' ||
+        (
+          github.event_name == 'issue_comment' &&
+          github.event.comment.body == '/retrigger' &&
+          !github.event.issue.pull_request
+        )
+      ) &&
+      (
+        contains(github.event.issue.labels.*.name, 'Add Package') ||
+        contains(github.event.issue.labels.*.name, 'Remove Package')
+      )
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Parse issue body
+        id: parse
+        uses: actions/github-script@v9
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        with:
+          script: |
+              const normaliseURL = (url) => {
+                if (url.endsWith("/")) {
+                  url = url.slice(0, -1);
+                }
+
+                if (!url.endsWith(".git")) {
+                  url += ".git";
+                }
+
+                return url.toLowerCase();
+              };
+
+              const urls = process.env.ISSUE_BODY?.match(
+                /https:\/\/github.com\/[A-Za-z0-9._/-]+/g
+              ) ?? [];
+
+              const normalisedURLs = [
+                ... new Set(urls.map(normaliseURL)),
+                ].sort();
+
+              core.setOutput("urls", normalisedURLs.join("\n"));
+      - name: Check deny list
+        id: denylist
+        uses: actions/github-script@v9
+        env:
+          URLS: ${{ steps.parse.outputs.urls }}
+        with:
+          script: |
+            const fs = require("fs");
+
+            const normaliseURL = (url) => {
+              if (url.endsWith("/")) {
+                url = url.slice(0, -1);
+              }
+
+              if (!url.endsWith(".git")) {
+                url += ".git";
+              }
+
+              return url.toLowerCase();
+            };
+
+            const deniedPackages = JSON.parse(
+              fs.readFileSync("denylist.json", "utf8")
+            );
+
+            const indexedDeniedPackages = new Set(
+              deniedPackages.map(({ package_url }) => normaliseURL(package_url))
+            );
+
+            const matches = [
+              ...new Set(
+                (process.env.URLS ?? "")
+                  .split(/\r?\n/)
+                  .filter(Boolean)
+              ),
+            ]
+            .filter((url) => indexedDeniedPackages.has(url))
+            .sort();
+
+            core.setOutput("matches", matches.join("\n"));
+
+      - name: Check package list
+        id: packagelist
+        uses: actions/github-script@v9
+        env:
+          URLS: ${{ steps.parse.outputs.urls }}
+        with:
+          script: |
+            const fs = require("fs");
+
+            const normaliseURL = (url) => {
+              if (url.endsWith("/")) {
+                url = url.slice(0, -1);
+              }
+
+              if (!url.endsWith(".git")) {
+                url += ".git";
+              }
+
+              return url.toLowerCase();
+            };
+
+            const packages = JSON.parse(
+              fs.readFileSync("packages.json", "utf8")
+            );
+
+            const indexedPackages = new Set(
+              packages.map(normaliseURL)
+            );
+
+            const matches = [
+              ...new Set(
+                (process.env.URLS ?? "")
+                  .split(/\r?\n/)
+                  .filter(Boolean)
+              ),
+            ]
+            .filter((url) => indexedPackages.has(url))
+            .sort();
+
+            core.setOutput("matches", matches.join("\n"));
+      - name: Report packages
+        if: >-
+          steps.denylist.outputs.matches != '' ||
+          steps.packagelist.outputs.matches != ''
+        uses: actions/github-script@v9
+        env:
+          DENYLIST_PACKAGES: ${{ steps.denylist.outputs.matches }}
+          PACKAGELIST_PACKAGES: ${{ steps.packagelist.outputs.matches }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+              const denylistPackages = (process.env.DENYLIST_PACKAGES || '')
+                .split(/\r?\n/)
+                .filter(Boolean)
+              const packgelistPackages = (process.env.PACKAGELIST_PACKAGES || '')
+                .split(/\r?\n/)
+                .filter(Boolean)
+
+              const body = ['The following packages already exist or are explicitly denied:']
+
+              if (denylistPackages.length > 0) {
+                body.push(
+                  '',
+                  '### Deny List',
+                  ...denylistPackages.map(packageURL => `- \`${packageURL}\``)
+                )
+              }
+
+              if (packagelistPackages.length > 0) {
+                body.push(
+                  '',
+                  '### Package List',
+                  ...packagelistPackages.map(packageURL => `- \`${packageURL}\``)
+                )
+              }
+
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: body.join('\n')
+              })
+
+              core.setFailed('Submitted packages either exist or are denied.');
+
+
   add:
+    needs: precheck
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    if: contains(github.event.issue.labels.*.name, 'Add Package')
+    if: >-
+      always() &&
+      needs['precheck'].result == 'success' &&
+      contains(github.event.issue.labels.*.name, 'Add Package') &&
+      (
+        github.event_name == 'issues' ||
+        (
+          github.event.comment.body == '/retrigger' &&
+          !github.event.issue.pull_request
+        )
+      )
     permissions:
       contents: write
       pull-requests: write
@@ -35,13 +272,26 @@ jobs:
       - name: Validate JSON
         run: |
           mkdir -p "$RUNNER_TEMP/manifests"
+          log_file="$RUNNER_TEMP/validation.log"
+
+          set +e
           docker run --rm \
             -e CI=true \
             -e GITHUB_TOKEN="$GITHUB_TOKEN" \
             -e SPI_MANIFEST_DIR=/manifests \
             -v "$RUNNER_TEMP/manifests:/manifests" \
             -v "$PWD:/host" -w /host \
-            "$SWIFT_IMAGE" swift validate.swift
+            "$SWIFT_IMAGE" swift validate.swift 2>&1 | tee "$log_file"
+          status=${PIPESTATUS[0]}
+          set -e
+
+          validate_error="$(sed -n 's/^validateError=//p' "$log_file")"
+
+          if [ -n "$validate_error" ]; then
+            printf 'validateError=%s\n' "$validate_error" >> "$GITHUB_OUTPUT"
+          fi
+
+          exit $status
         id: validate
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -57,9 +307,26 @@ jobs:
         run: bash .github/check_for_changes.sh
         id: check
 
+      - name: Find Existing Pull Request
+        id: existing-pr
+        uses: actions/github-script@v9
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const prs = await github.paginate(github.rest.pulls.list, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              head: `${context.repo.owner}:spi-auto-${context.issue.number}`
+            })
+            core.setOutput('exists', String(prs.length > 0))
+            core.setOutput('number', prs[0]?.number ?? '')
+
       - name: Create Pull Request
         id: cpr
-        if: steps.check.outputs.changes == 'true'
+        if: >-
+          steps.check.outputs.changes == 'true' &&
+          steps.existing-pr.outputs.exists != 'true'
         uses: peter-evans/create-pull-request@v8
         with:
           add-paths: |
@@ -78,18 +345,25 @@ jobs:
           author: GitHub <noreply@github.com>
 
       - name: Update Issue (Success)
-        if: steps.check.outputs.changes == 'true'
+        if: >-
+          steps.cpr.outputs.pull-request-number != '' ||
+          steps.existing-pr.outputs.exists == 'true'
         uses: actions/github-script@v9
         env:
-          PR_NUMBER: ${{ steps.cpr.outputs.pull-request-number }}
+          PR_NUMBER: ${{ steps.cpr.outputs.pull-request-number || steps.existing-pr.outputs.number }}
+          EXISTING_PR: ${{ steps.existing-pr.outputs.exists }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            const body = process.env.EXISTING_PR === 'true'
+              ? `Initial validation has passed. Your package is already being processed in #${process.env.PR_NUMBER}.`
+              : `Initial validation has passed. Your package will be added to the SwiftPackageIndex in #${process.env.PR_NUMBER}.`
+
             await github.rest.issues.createComment({
-              issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `Thank you! We will approve and add these packages with #${process.env.PR_NUMBER}.`
+              issue_number: context.issue.number,
+              body
             })
 
       - name: Update Issue (Failure)
@@ -102,15 +376,27 @@ jobs:
           script: |
             const validateError = process.env.VALIDATE_ERROR || 'None'
             await github.rest.issues.createComment({
-                issue_number: context.issue.number,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                body: `It looks like there’s nothing to do here!\n\nThe package may [already be in the package list](https://github.com/SwiftPackageIndex/PackageList/blob/main/packages.json) or on the [denylist](https://github.com/SwiftPackageIndex/PackageList/blob/main/denylist.json). Or, if you submitted the wrong URL or there’s a typo, please close this issue and [start a new one](https://github.com/SwiftPackageIndex/PackageList/issues/new/choose).\n\n>Validate Error: ${validateError}`
+                issue_number: context.issue.number,
+                body: `Unfortunately the package couldn't be added. Please review the below error to understand why.\n\n> [!TIP]\n>You can retrigger package validation by commenting  \`/retrigger\`.\n\n---\n\n### Validation Error\n\n\`\`\`\n${validateError}\n\`\`\``
             })
   remove:
+    needs: precheck
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    if: contains(github.event.issue.labels.*.name, 'Remove Package')
+    if: >-
+      always() &&
+      needs['precheck'].result == 'success' &&
+      contains(github.event.issue.labels.*.name, 'Remove Package') &&
+      (
+        github.event_name == 'issues' ||
+        (
+          github.event_name == 'issue_comment' &&
+          github.event.comment.body == '/retrigger' &&
+          !github.event.issue.pull_request
+        )
+      )
     permissions:
       contents: write
       pull-requests: write
@@ -155,9 +441,26 @@ jobs:
         run: bash .github/check_for_changes.sh
         id: check
 
+      - name: Find Existing Pull Request
+        id: existing-pr
+        uses: actions/github-script@v9
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const prs = await github.paginate(github.rest.pulls.list, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'all',
+              head: `${context.repo.owner}:spi-auto-${context.issue.number}`
+            })
+            core.setOutput('exists', String(prs.length > 0))
+            core.setOutput('number', prs[0]?.number ?? '')
+
       - name: Create Pull Request
         id: cpr
-        if: steps.check.outputs.changes == 'true'
+        if: >-
+          steps.check.outputs.changes == 'true' &&
+          steps.existing-pr.outputs.exists != 'true'
         uses: peter-evans/create-pull-request@v8
         with:
           add-paths: |
@@ -177,7 +480,7 @@ jobs:
           author: GitHub <noreply@github.com>
 
       - name: Update Issue (Success)
-        if: steps.check.outputs.changes == 'true'
+        if: steps.cpr.outputs.pull-request-number != ''
         uses: actions/github-script@v9
         env:
           PR_NUMBER: ${{ steps.cpr.outputs.pull-request-number }}
