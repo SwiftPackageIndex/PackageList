@@ -6429,6 +6429,8 @@
   "https://github.com/mackoj/PackageGeneratorCLI.git",
   "https://github.com/mackoj/PackageGeneratorPlugin.git",
   "https://github.com/mackoj/SchemeGeneratorPlugin.git",
+  "https://github.com/mackoj/swift-arazzo.git",
+  "https://github.com/mackoj/swift-jsonpath.git",
   "https://github.com/mackoj/swift-snapshot.git",
   "https://github.com/MacPaw/ComposablePipelines.git",
   "https://github.com/MacPaw/Gliner2Swift.git",
