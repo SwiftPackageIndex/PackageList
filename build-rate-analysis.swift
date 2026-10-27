@@ -71,16 +71,16 @@ func checkoutPackages(in list: String) throws {
     let data = try Data(contentsOf: URL(fileURLWithPath: fname(list)))
     let packages = try JSONDecoder().decode([String].self, from: data)
     print("Packages: ", packages.count)
-    for p in packages {
+    for (idx, p) in packages.enumerated() {
         guard let dirname = p.directoryName else {
             print("Invalid directory name for package \(p)")
             continue
         }
         let targetdir = "\(checkoutDir)/\(dirname)"
         if FileManager.default.fileExists(atPath: targetdir) {
-            print("Skipping \(targetdir), already exists...")
+            print("Skipping [\(idx)] \(targetdir), already exists...")
         } else {
-            print("Cloning \(p) intp \(targetdir)...")
+            print("Cloning [\(idx)] \(p) intp \(targetdir)...")
             do {
                 try shellOut(to: "git clone \(p) \(targetdir)")
             } catch {
