@@ -6,3 +6,4 @@ packages.backup.json
 checkouts/
 packages-2025-10-01.json
 packages-2026-10-01.json
+checkouts-*/

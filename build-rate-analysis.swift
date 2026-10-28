@@ -80,7 +80,7 @@ func checkoutPackages(in list: String) throws {
         if FileManager.default.fileExists(atPath: targetdir) {
             print("Skipping [\(idx)] \(targetdir), already exists...")
         } else {
-            print("Cloning [\(idx)] \(p) intp \(targetdir)...")
+            print("Cloning [\(idx)] \(p) into \(targetdir)...")
             do {
                 try shellOut(to: "git clone \(p) \(targetdir)")
             } catch {
@@ -90,5 +90,39 @@ func checkoutPackages(in list: String) throws {
     }
 }
 
+func setupCheckouts(for list: String) throws {
+    let data = try Data(contentsOf: URL(fileURLWithPath: fname(list)))
+    let packages = try JSONDecoder().decode([String].self, from: data)
+    print("Packages: ", packages.count)
+    
+    let listCheckoutDir = "checkouts-\(list)"
+    if !FileManager.default.fileExists(atPath: checkoutDir) {
+        try FileManager.default.createDirectory(at: URL(fileURLWithPath: listCheckoutDir), withIntermediateDirectories: true)
+    }
+    
+    for (idx, p) in packages.prefix(10).enumerated() {
+        guard let dirname = p.directoryName else {
+            print("Invalid directory name for package \(p)")
+            continue
+        }
+        let sourcedir = "\(checkoutDir)/\(dirname)"
+        let targetdir = "\(listCheckoutDir)/\(dirname)"
+        if FileManager.default.fileExists(atPath: targetdir) {
+            print("Skipping [\(idx)] \(targetdir), already exists...")
+        } else {
+            print("Linking [\(idx)] \(sourcedir) to \(targetdir)...")
+            do {
+                try shellOut(to: "ln -s \(sourcedir) \(targetdir)")
+            } catch {
+                print("Linking failed: \(error)")
+            }
+        }
+    }
+}
+
 try copyLists()
-try checkoutPackages(in: oct25)
+// try checkoutPackages(in: oct25)
+try checkoutPackages(in: oct26)
+
+try setupCheckouts(for: oct25)
+// try setupCheckouts(for: oct26)
