@@ -30,7 +30,7 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: context.issue.number,
-                body: `Thank you for your package submission. The package is now undergoing an automated assessment. Please monitor this issue for updates.`
+                body: `Thank you for your submission. An automated check is validating it and will open a pull request if everything passes.`
               })
 
   retrigger-acknowledgement:
@@ -52,7 +52,7 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: context.issue.number,
-                body: `Package validation has been retriggered.`
+                body: `Retriggering package validation.`
               })
 
   precheck:
@@ -208,7 +208,7 @@ jobs:
                 .split(/\r?\n/)
                 .filter(Boolean)
 
-              const body = ['The following packages already exist or are explicitly denied:']
+              const body = ['The package list already contains these packages, or the deny list blocks them:']
 
               if (denylistPackages.length > 0) {
                 body.push(
@@ -233,7 +233,7 @@ jobs:
                 body: body.join('\n')
               })
 
-              core.setFailed('Submitted packages either exist or are denied.');
+              core.setFailed('The package list already contains the submitted packages, or the deny list blocks them.');
 
 
   add:
@@ -356,8 +356,8 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const body = process.env.EXISTING_PR === 'true'
-              ? `Initial validation has passed. Your package is already being processed in #${process.env.PR_NUMBER}.`
-              : `Initial validation has passed. Your package will be added to the SwiftPackageIndex in #${process.env.PR_NUMBER}.`
+              ? `Initial validation passed. Pull request #${process.env.PR_NUMBER} is already processing the submitted packages.`
+              : `Initial validation passed. Pull request #${process.env.PR_NUMBER} will add the submitted packages to the Swift Package Index.`
 
             await github.rest.issues.createComment({
               owner: context.repo.owner,
@@ -379,7 +379,7 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: context.issue.number,
-                body: `Unfortunately the package couldn't be added. Please review the below error to understand why.\n\n> [!TIP]\n>You can retrigger package validation by commenting  \`/retrigger\`.\n\n---\n\n### Validation Error\n\n\`\`\`\n${validateError}\n\`\`\``
+                body: `Package validation failed. Review the error below to find out why.\n\n> [!TIP]\n> Comment \`/retrigger\` on this issue to run package validation again.\n\n---\n\n### Validation Error\n\n\`\`\`\n${validateError}\n\`\`\``
             })
   remove:
     needs: precheck

@@ -91,9 +91,9 @@ for directory in "$manifest_root"/*/; do
         failed+=("$package")
         # Only numeric versions from the diagnostic may enter the workflow output.
         if [[ "$evaluation_output" =~ $tools_version_pattern ]]; then
-            failure_reasons+=("toolchain supplied=${BASH_REMATCH[1]}, required latest=${BASH_REMATCH[2]}")
+            failure_reasons+=("Manifest evaluation failed: the package uses Swift tools version ${BASH_REMATCH[1]}, but the latest installed version is ${BASH_REMATCH[2]}.")
         else
-            failure_reasons+=("$package")
+            failure_reasons+=("Manifest evaluation failed for $package.")
         fi
         # The marker goes beside `manifests`, never inside it, so nothing the container could
         # reach can forge it.
@@ -110,8 +110,8 @@ if [ "$mode" = report ]; then
 fi
 
 if [ "${#failed[@]}" != 0 ]; then
-    printf 'manifest evaluation failed: %s\n' "${failure_reasons[@]}"
-    report_failure "manifest evaluation failed: ${failure_reasons[0]}"
+    printf '%s\n' "${failure_reasons[@]}"
+    report_failure "${failure_reasons[0]}"
     exit 1
 fi
 
