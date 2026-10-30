@@ -96,23 +96,23 @@ func setupCheckouts(for list: String) throws {
     print("Packages: ", packages.count)
     
     let listCheckoutDir = "checkouts-\(list)"
-    if !FileManager.default.fileExists(atPath: checkoutDir) {
+    if !FileManager.default.fileExists(atPath: listCheckoutDir) {
         try FileManager.default.createDirectory(at: URL(fileURLWithPath: listCheckoutDir), withIntermediateDirectories: true)
     }
     
-    for (idx, p) in packages.prefix(10).enumerated() {
+    for (idx, p) in packages.enumerated() {
         guard let dirname = p.directoryName else {
             print("Invalid directory name for package \(p)")
             continue
         }
-        let sourcedir = "\(checkoutDir)/\(dirname)"
+        let sourcedir = "../\(checkoutDir)/\(dirname)"
         let targetdir = "\(listCheckoutDir)/\(dirname)"
         if FileManager.default.fileExists(atPath: targetdir) {
             print("Skipping [\(idx)] \(targetdir), already exists...")
         } else {
             print("Linking [\(idx)] \(sourcedir) to \(targetdir)...")
             do {
-                try shellOut(to: "ln -s \(sourcedir) \(targetdir)")
+                try shellOut(to: "ln -s \(sourcedir) \(dirname)", at: listCheckoutDir)
             } catch {
                 print("Linking failed: \(error)")
             }
@@ -122,7 +122,7 @@ func setupCheckouts(for list: String) throws {
 
 try copyLists()
 // try checkoutPackages(in: oct25)
-try checkoutPackages(in: oct26)
+// try checkoutPackages(in: oct26)
 
 try setupCheckouts(for: oct25)
-// try setupCheckouts(for: oct26)
+try setupCheckouts(for: oct26)
