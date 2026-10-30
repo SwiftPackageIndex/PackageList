@@ -204,7 +204,7 @@ jobs:
               const denylistPackages = (process.env.DENYLIST_PACKAGES || '')
                 .split(/\r?\n/)
                 .filter(Boolean)
-              const packgelistPackages = (process.env.PACKAGELIST_PACKAGES || '')
+              const packagelistPackages = (process.env.PACKAGELIST_PACKAGES || '')
                 .split(/\r?\n/)
                 .filter(Boolean)
 
