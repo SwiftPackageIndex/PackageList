@@ -120,9 +120,31 @@ func setupCheckouts(for list: String) throws {
     }
 }
 
-try copyLists()
+
+func reportCommitCount(for list: String, dates: (String, String)) throws {
+    let listCheckoutDir = "checkouts-\(list)"
+    var counts = [String: Int]()
+    for url in try FileManager.default.contentsOfDirectory(at: URL(fileURLWithPath: listCheckoutDir), includingPropertiesForKeys: nil) {
+        let dirname = url.lastPathComponent
+        let path = "\(listCheckoutDir)/\(dirname)"
+        do {
+            let count = Int(try shellOut(to: "git rev-list --count HEAD --since=\(dates.0) --before=\(dates.1)", at: path))
+            if let count {
+                print(dirname, count)
+                counts[dirname] = count
+            }
+        } catch { }
+    }
+    for key in counts.keys.sorted() {
+        print(key, counts[key])
+    }
+}
+
+// try copyLists()
 // try checkoutPackages(in: oct25)
 // try checkoutPackages(in: oct26)
 
-try setupCheckouts(for: oct25)
-try setupCheckouts(for: oct26)
+// try setupCheckouts(for: oct25)
+// try setupCheckouts(for: oct26)
+
+try reportCommitCount(for: oct25, dates: ("2025-09-01", "2025-10-01"))
