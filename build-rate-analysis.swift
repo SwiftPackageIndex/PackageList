@@ -121,6 +121,13 @@ func setupCheckouts(for list: String) throws {
 }
 
 
+func printResults(for label: String, list: String, counts: [Int]) {
+    let total = counts.reduce(0, +)
+    print("\(label) sum     \(list):", total)
+    print("\(label) average \(list):", Double(total) / Double(counts.count))
+}
+
+
 func reportCommitCount(for list: String, dates: (String, String)) throws {
     let listCheckoutDir = "checkouts-\(list)"
     let results = "commits-\(list).json"
@@ -145,9 +152,49 @@ func reportCommitCount(for list: String, dates: (String, String)) throws {
             }
         } catch { }
     }
-    // for key in counts.keys.sorted() {
-    //     print(key, counts[key])
-    // }
+    printResults(for: "Commits", list: list, counts: Array(counts.values))
+}
+
+
+func parseReleaseDate(for line: String) -> Date? {
+    // refs/tags/release.985070 2026-08-12 15:53:26 +0200
+    // refs/tags/5.0.2 2026-08-17 16:03:35 +0200
+    let parts = line.split(separator: " ")
+    guard parts.count >= 2 else { return nil }
+    return fmt.date(from: String(parts[1]))
+}
+
+
+func reportReleaseCount(for list: String, dates: (String, String)) throws {
+    let listCheckoutDir = "checkouts-\(list)"
+    let results = "releases-\(list).json"
+    let startDate = fmt.date(from: dates.0)!
+    let endDate = fmt.date(from: dates.1)!
+    var counts = [String: Int]()
+    if FileManager.default.fileExists(atPath: results) {
+        let data = try Data(contentsOf: URL(fileURLWithPath: results))
+        counts = try JSONDecoder().decode([String: Int].self, from: data)
+    }
+    for (idx, url) in try FileManager.default.contentsOfDirectory(at: URL(fileURLWithPath: listCheckoutDir), includingPropertiesForKeys: nil).enumerated() {
+        let dirname = url.lastPathComponent
+        if counts[dirname] != nil { continue }
+        let path = "\(listCheckoutDir)/\(dirname)"
+        do {
+            let releases = try shellOut(to: "git for-each-ref --sort=creatordate --format '%(refname) %(creatordate:iso-local)' refs/tags", at: path)
+                .split(separator: "\n")
+            let releaseDates = releases.map(String.init).compactMap(parseReleaseDate)
+                .filter { startDate <= $0 && $0 < endDate }
+
+            let count = releaseDates.count
+            print(idx, dirname, count)
+            counts[dirname] = count
+            if idx % 100 == 0 {
+                let data = try JSONEncoder().encode(counts)
+                try data.write(to: URL(fileURLWithPath: results))
+            }
+        } catch { }
+    }
+    printResults(for: "Releases", list: list, counts: Array(counts.values))
 }
 
 // try copyLists()
@@ -157,5 +204,8 @@ func reportCommitCount(for list: String, dates: (String, String)) throws {
 // try setupCheckouts(for: oct25)
 // try setupCheckouts(for: oct26)
 
-// try reportCommitCount(for: oct25, dates: ("2025-09-01", "2025-10-01"))
+try reportCommitCount(for: oct25, dates: ("2025-09-01", "2025-10-01"))
 try reportCommitCount(for: oct26, dates: ("2026-09-01", "2026-10-01"))
+
+try reportReleaseCount(for: oct25, dates: ("2025-09-01", "2025-10-01"))
+try reportReleaseCount(for: oct26, dates: ("2026-09-01", "2026-10-01"))
