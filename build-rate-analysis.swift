@@ -123,21 +123,31 @@ func setupCheckouts(for list: String) throws {
 
 func reportCommitCount(for list: String, dates: (String, String)) throws {
     let listCheckoutDir = "checkouts-\(list)"
+    let results = "commits-\(list).json"
     var counts = [String: Int]()
-    for url in try FileManager.default.contentsOfDirectory(at: URL(fileURLWithPath: listCheckoutDir), includingPropertiesForKeys: nil) {
+    if FileManager.default.fileExists(atPath: results) {
+        let data = try Data(contentsOf: URL(fileURLWithPath: results))
+        counts = try JSONDecoder().decode([String: Int].self, from: data)
+    }
+    for (idx, url) in try FileManager.default.contentsOfDirectory(at: URL(fileURLWithPath: listCheckoutDir), includingPropertiesForKeys: nil).enumerated() {
         let dirname = url.lastPathComponent
+        if counts[dirname] != nil { continue }
         let path = "\(listCheckoutDir)/\(dirname)"
         do {
             let count = Int(try shellOut(to: "git rev-list --count HEAD --since=\(dates.0) --before=\(dates.1)", at: path))
             if let count {
-                print(dirname, count)
+                print(idx, dirname, count)
                 counts[dirname] = count
+                if idx % 100 == 0 {
+                    let data = try JSONEncoder().encode(counts)
+                    try data.write(to: URL(fileURLWithPath: results))
+                }
             }
         } catch { }
     }
-    for key in counts.keys.sorted() {
-        print(key, counts[key])
-    }
+    // for key in counts.keys.sorted() {
+    //     print(key, counts[key])
+    // }
 }
 
 // try copyLists()
@@ -147,4 +157,5 @@ func reportCommitCount(for list: String, dates: (String, String)) throws {
 // try setupCheckouts(for: oct25)
 // try setupCheckouts(for: oct26)
 
-try reportCommitCount(for: oct25, dates: ("2025-09-01", "2025-10-01"))
+// try reportCommitCount(for: oct25, dates: ("2025-09-01", "2025-10-01"))
+try reportCommitCount(for: oct26, dates: ("2026-09-01", "2026-10-01"))
