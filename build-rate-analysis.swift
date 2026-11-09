@@ -9,33 +9,33 @@ let fmt = DateFormatter()
 fmt.dateFormat = "yyyy-MM-dd"
 fmt.timeZone = .init(abbreviation: "UTC")
 
+let oct24 = "2024-10-01"
 let oct25 = "2025-10-01"
 let oct26 = "2026-10-01"
 
 func fname(_ date: String) -> String { "packages-\(date).json" }
 
-func copyLists() throws {
-    for dateString in [oct25, oct26] {
-        if FileManager.default.fileExists(atPath: fname(dateString)) { continue }
-        
-        try shellOut(to: "git checkout main")
-        print("Updating to latest main...")
-        try shellOut(to: "git pull")
-        
-        let date = fmt.date(from: dateString)!
-        let rev = try shellOut(to: #"git rev-list -n 1 --before="\#(date)" main"#)
-        guard !rev.isEmpty else {
-            print("no rev for \(date)")
-            continue
-        }
-        
-        try shellOut(to: "git checkout \(rev)")
-        print("Copying \(packageList) -> \(fname(dateString))...")
-        try FileManager.default.copyItem(
-            at: URL(fileURLWithPath: packageList),
-            to: URL(fileURLWithPath: fname(dateString))
-        )
+func copy(list: String) throws {
+    let path = fname(list)
+    if FileManager.default.fileExists(atPath: path) { return }
+    
+    try shellOut(to: "git checkout main")
+    print("Updating to latest main...")
+    try shellOut(to: "git pull")
+    
+    let date = fmt.date(from: list)!
+    let rev = try shellOut(to: #"git rev-list -n 1 --before="\#(date)" main"#)
+    guard !rev.isEmpty else {
+        print("no rev for \(date)")
+        return
     }
+    
+    try shellOut(to: "git checkout \(rev)")
+    print("Copying \(packageList) -> \(path)...")
+    try FileManager.default.copyItem(
+        at: URL(fileURLWithPath: packageList),
+        to: URL(fileURLWithPath: path)
+    )
 }
 
 extension String {
@@ -197,15 +197,20 @@ func reportReleaseCount(for list: String, dates: (String, String)) throws {
     printResults(for: "Releases", list: list, counts: Array(counts.values))
 }
 
-// try copyLists()
+try copy(list: oct24)
+try copy(list: oct25)
+try copy(list: oct26)
+
+// try checkoutPackages(in: oct24)
 // try checkoutPackages(in: oct25)
 // try checkoutPackages(in: oct26)
 
+// try setupCheckouts(for: oct24)
 // try setupCheckouts(for: oct25)
 // try setupCheckouts(for: oct26)
 
-try reportCommitCount(for: oct25, dates: ("2025-09-01", "2025-10-01"))
-try reportCommitCount(for: oct26, dates: ("2026-09-01", "2026-10-01"))
+// try reportCommitCount(for: oct25, dates: ("2025-09-01", "2025-10-01"))
+// try reportCommitCount(for: oct26, dates: ("2026-09-01", "2026-10-01"))
 
-try reportReleaseCount(for: oct25, dates: ("2025-09-01", "2025-10-01"))
-try reportReleaseCount(for: oct26, dates: ("2026-09-01", "2026-10-01"))
+// try reportReleaseCount(for: oct25, dates: ("2025-09-01", "2025-10-01"))
+// try reportReleaseCount(for: oct26, dates: ("2026-09-01", "2026-10-01"))
