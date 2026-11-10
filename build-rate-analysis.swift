@@ -197,11 +197,11 @@ func reportReleaseCount(for list: String, dates: (String, String)) throws {
     printResults(for: "Releases", list: list, counts: Array(counts.values))
 }
 
-try copy(list: oct24)
-try copy(list: oct25)
-try copy(list: oct26)
+// try copy(list: oct24)
+// try copy(list: oct25)
+// try copy(list: oct26)
 
-// try checkoutPackages(in: oct24)
+try checkoutPackages(in: oct24)
 // try checkoutPackages(in: oct25)
 // try checkoutPackages(in: oct26)
 
