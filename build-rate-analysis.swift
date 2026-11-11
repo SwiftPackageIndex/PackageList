@@ -201,7 +201,7 @@ func reportReleaseCount(for list: String, dates: (String, String)) throws {
 // try copy(list: oct25)
 // try copy(list: oct26)
 
-try checkoutPackages(in: oct24)
+// try checkoutPackages(in: oct24)
 // try checkoutPackages(in: oct25)
 // try checkoutPackages(in: oct26)
 
@@ -209,8 +209,10 @@ try checkoutPackages(in: oct24)
 // try setupCheckouts(for: oct25)
 // try setupCheckouts(for: oct26)
 
+// try reportCommitCount(for: oct24, dates: ("2024-09-01", "2024-10-01"))
 // try reportCommitCount(for: oct25, dates: ("2025-09-01", "2025-10-01"))
 // try reportCommitCount(for: oct26, dates: ("2026-09-01", "2026-10-01"))
 
+// try reportReleaseCount(for: oct24, dates: ("2024-09-01", "2024-10-01"))
 // try reportReleaseCount(for: oct25, dates: ("2025-09-01", "2025-10-01"))
 // try reportReleaseCount(for: oct26, dates: ("2026-09-01", "2026-10-01"))
