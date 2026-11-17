@@ -2,30 +2,29 @@
 
 # The Swift Package Index
 
-Anyone can add a package to the [Swift Package Index](https://swiftpackageindex.com). Every package indexed by the site comes from a list of package repository URLs, stored in a [publicly available JSON file](https://github.com/SwiftPackageIndex/PackageList/blob/main/packages.json). To add a package to the index, add a URL to a package repository to that file.
+Anyone can add a package to the Swift Package Index. Please feel free to submit any package repository to the index, whether it's a package written by you or someone else. There's also no quality threshold. As long as the packages are valid and meet the requirements below, we will accept them. If you're unsure about any of the requirements, please submit the package(s), and we'll happily provide help.
 
-Please feel free to submit your own, or other people's repositories to this list. There are a few requirements, but they aren't onerous.
+There are a few requirements for inclusion in the index, but they aren't onerous:
 
-The easiest way to validate that packages meet the requirements is to run the validation tool included in this repository. Fork [this repository](https://github.com/SwiftPackageIndex/PackageList/) and clone your fork locally. Then edit `packages.json` and add the package URL(s) to the JSON. Finally, in the directory where you have the clone of your fork of this repository, run the following command:
+- The package repositories must all be publicly accessible.
+- The packages must all contain a valid `Package.swift` file in the root folder.
+- The packages must be written in Swift 5.0 or later.
+- The packages should have at least one release tagged as a [semantic version](https://semver.org/).
+- The packages must all output valid JSON when running `swift package dump-package` with the latest Swift toolchain.
+- The package URLs must include the protocol (usually `https`) and the `.git` extension.
+- The packages must all compile without errors.
+- All package content must comply with our [code of conduct](https://github.com/SwiftPackageIndex/SwiftPackageIndex-Server/blob/main/CODE_OF_CONDUCT.md).
 
-```shell
-swift ./validate.swift
-```
+<a href="https://github.com/SwiftPackageIndex/PackageList/issues/new/choose"><img src="https://user-images.githubusercontent.com/5180/156020907-8bebd0ca-c1ca-4a6f-9771-11a4037002a3.png" width="170" alt="Add Packages Button"></a>
 
-When validation succeeds, commit your changes and submit your pull request! Your package(s) will appear in the index within a few minutes.
+> **Note:** Our build system can now generate and host DocC documentation and make it available from your package’s page in the index. All we need is a little configuration data so that we know how best to build your docs.
+>
+> [More information here](https://swiftpackageindex.com/SwiftPackageIndex/SPIManifest/documentation/spimanifest/commonusecases).
 
----
+> **Note:** If submitting your own packages, don't forget to add shields.io badges to your package's README to always have up to date swift version and platform compatibility information readily available. Once your package appears in the index, use the "Do you maintain this package?" link in the right-hand sidebar of your package page and use the provided markdown.
+>
+> For example: [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fdaveverwer%2FLeftPad%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/daveverwer/LeftPad) [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fdaveverwer%2FLeftPad%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/daveverwer/LeftPad)
 
-If you would prefer to validate the requirements manually, please verify that:
+### Removing a Package
 
-* The package repositories are all publicly accessible.
-* The packages all contain a `Package.swift` file in the root folder.
-* The packages are written in Swift 5.0 or later.
-* The packages all contain at least one product (either library or executable), and at least one product must be usable in other Swift apps.
-* The packages all have at least one release tagged as a [semantic version](https://semver.org/).
-* The packages all output valid JSON from `swift package dump-package` with the latest Swift toolchain.
-* The package URLs are all fully specified including the protocol (usually `https`) and the `.git` extension.
-* The packages all compile without errors.
-* The packages JSON file is sorted alphabetically.
-
-**Note:** There's no gatekeeping or quality threshold to be included in the [Swift Package Index](https://swiftpackageindex.com). As long as packages are valid, and meet the requirements above, we will accept them.
+You can request to have a package removed from the index with [this GitHub workflow](https://github.com/SwiftPackageIndex/PackageList/issues/new/choose).

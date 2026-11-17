@@ -5,17 +5,44 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  # Re-runs validation when a maintainer reviews a package-addition PR, so the
+  # checks reflect a merge ref recomputed against current main.
+  # This event checks out refs/pull/N/merge, so the job runs PR-controlled code.
+  # Fork PRs get a read-only GITHUB_TOKEN; base-branch PRs get a write one.
+  pull_request_review:
+    types: [submitted]
 
 env:
-  SWIFT_IMAGE: swiftlang/swift@sha256:a0d75888a49938175bb4da3a3d6e3ab5cdf3095fe71ed427ee4a03a05a78336d  # swift 5.5 nightly
+  SWIFT_IMAGE: swift:6.4-jammy
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+permissions: {}
 
 jobs:
   validate:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-    - name: Validate JSON
-      run: docker run --rm -v "$PWD:/host" -w /host $SWIFT_IMAGE swift validate.swift
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.number && format('refs/pull/{0}/merge', github.event.pull_request.number) || github.sha }}
+          persist-credentials: false
+
+      - name: Validate JSON
+        run: |
+          mkdir -p "$RUNNER_TEMP/manifests"
+          docker run --rm \
+            --env GITHUB_TOKEN="$GITHUB_TOKEN" \
+            --env SPI_MANIFEST_DIR=/manifests \
+            -v "$RUNNER_TEMP/manifests:/manifests" \
+            -v "$PWD:/host" -w /host \
+            "$SWIFT_IMAGE" swift validate.swift
+
+      # Runs third party code, holds nothing and can reach nothing.
+      - name: Evaluate manifests
+        env:
+          SPI_EVALUATION_MODE: fail
+        run: bash .github/evaluate_manifests.sh "$RUNNER_TEMP/manifests"

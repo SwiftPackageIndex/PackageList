@@ -1,0 +1,39 @@
+name: Remove Package(s)
+description: Permanently remove one or more packages from the Swift Package Index.
+title: "Remove <Package>"
+labels: ["Remove Package"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This form is for permanently removing a package from the Swift Package Index.
+
+        However, there **may be no need to use this form** as we cope with multiple scenarios automatically through a nightly CI job:
+
+        * **Renamed repositories**: The nightly job discovers renamed repositories and matches the rename in the Swift Package Index.
+        * **Account transfers**: The nightly job also copes with this situation automatically by removing the package from the original account and adding it to the new one.
+        * **Combination rename and account transfer**: Yep, we cope with this situation, too!
+        * **Deleted repositories**: The nightly job will automatically remove any package where the repository has been made private or deleted.
+        * **Archived repositories**: We don’t usually remove archived repositories from the package list but clearly mark them as archived on their package page.
+
+        Please only use this form when the package you would like to remove will continue to exist, but as the package author, you would prefer it never to appear on the Swift Package Index.
+  - type: textarea
+    id: list
+    attributes:
+      label: Packages to Remove
+      description: Please list the URLs to all of the packages you wish to remove. One package URL per line.
+      placeholder: https://github.com/daveverwer/LeftPad.git
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+    validations:
+      required: false
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Ownership
+      options:
+        - label: I am the author or core maintainer of the package(s) listed for removal.

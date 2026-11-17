@@ -1,0 +1,302 @@
+[
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/3540.",
+    "package_url" : "https://github.com/firebase/abseil-cpp-SwiftPM.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/3540.",
+    "package_url" : "https://github.com/firebase/boringSSL-SwiftPM.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/3540.",
+    "package_url" : "https://github.com/firebase/grpc-SwiftPM.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/3556.",
+    "package_url" : "https://github.com/sloik/Major.Minor.Patch.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/3757.",
+    "package_url" : "https://github.com/DedicatedDev/aes.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/3791.",
+    "package_url" : "https://github.com/sajjon/ForkHyugitEllipticCurve.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/3974.",
+    "package_url" : "https://github.com/DevYeom/StackUI.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/4040.",
+    "package_url" : "https://github.com/mkaulfers/iconoir-swift.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/4152.",
+    "package_url" : "https://github.com/proxyco/swift-jwe.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/4728.",
+    "package_url" : "https://github.com/FelixHerrmann/intercom-ios.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/5026.",
+    "package_url" : "https://github.com/ordo-one/package-histogram.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/5228.",
+    "package_url" : "https://github.com/skaik-mo/MSSPhoneNumber.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/5387.",
+    "package_url" : "https://github.com/lvnkmn/zoomy.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/5460.",
+    "package_url" : "https://github.com/jectivex/JXKit.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/5470.",
+    "package_url" : "https://github.com/insub4067/MVIKit.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/5980.",
+    "package_url" : "https://github.com/William-Weng/WWExpandView.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/6005.",
+    "package_url" : "https://github.com/insub4067/UINavigator.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/6837.",
+    "package_url" : "https://github.com/siundu254/Printer.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/7142.",
+    "package_url" : "https://github.com/Devbrail/trc_ios_sdk.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/7300.",
+    "package_url" : "https://github.com/slashmo/swift-otel-jaeger.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/7300.",
+    "package_url" : "https://github.com/slashmo/gsoc-swift-baggage-context.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/7859.",
+    "package_url" : "https://github.com/rezojoglidze/RJSwiftMacros.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/8076.",
+    "package_url" : "https://github.com/FlineDev/HandyUIKit.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/8076.",
+    "package_url" : "https://github.com/FlineDev/Microya.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/8076.",
+    "package_url" : "https://github.com/FlineDev/MungoHealer.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/8208.",
+    "package_url" : "https://github.com/Fleuronic/ReactiveSwift.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/8244.",
+    "package_url" : "https://github.com/Fleuronic/AsyncExtensions.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/8246.",
+    "package_url" : "https://github.com/Fleuronic/Emissary.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/8322.",
+    "package_url" : "https://github.com/Fleuronic/Identity.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/8334.",
+    "package_url" : "https://github.com/Fleuronic/workflow-swift.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/8343.",
+    "package_url" : "https://github.com/Fleuronic/PersistDB.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/8344.",
+    "package_url" : "https://github.com/Fleuronic/Schemata.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/8714.",
+    "package_url" : "https://github.com/LinBowen9656/ChainableUIKit.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/8716.",
+    "package_url" : "https://github.com/LinBowen9656/LooseTypingJSONDecoder.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/8937.",
+    "package_url" : "https://github.com/fborelli/OfflineStoreKit2.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/9275.",
+    "package_url" : "https://github.com/StanfordSpezi/SpeziFHIRtoFirestoreAdapter.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/9275.",
+    "package_url" : "https://github.com/StanfordSpezi/SpeziHealthKitToFHIRAdapter.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/9277.",
+    "package_url" : "https://github.com/lfroms/fluid-menu-bar-extra.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/9359.",
+    "package_url" : "https://github.com/dongjoon-hyun/spark-connect-swift.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/9398.",
+    "package_url" : "https://github.com/William-Weng/WWSimpleChatGPT.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/9398.",
+    "package_url" : "https://github.com/William-Weng/WWSimpleDeepSeekAI.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/9398.",
+    "package_url" : "https://github.com/William-Weng/WWSimpleGeminiAI.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/9398.",
+    "package_url" : "https://github.com/William-Weng/WWSimpleOllamaAI.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/9450.",
+    "package_url" : "https://github.com/meraj-lt/smartui-xcui-swift.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/9492.",
+    "package_url" : "https://github.com/sergeipritula/ChingariRaceSDK.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/9807.",
+    "package_url" : "https://github.com/valeriyvan/jpeg.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/9952.",
+    "package_url" : "https://github.com/xtool-org/xtool.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/9954.",
+    "package_url" : "https://github.com/xtool-org/xtool-core.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/10127.",
+    "package_url" : "https://github.com/finestructure/swift-package-manager.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/10220.",
+    "package_url" : "https://github.com/nashysolutions/logging.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/10345.",
+    "package_url" : "https://github.com/nashysolutions/error-presentation.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/10969.",
+    "package_url" : "https://github.com/yordgenome03/SwiftUIFlutterLikeForm.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/11023.",
+    "package_url" : "https://github.com/nashysolutions/Directory.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/11023.",
+    "package_url" : "https://github.com/nashysolutions/json-support.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/11584.",
+    "package_url" : "https://github.com/alexey1312/Swiftlane.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/11622.",
+    "package_url" : "https://github.com/edgeengineer/cbor.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/12965.",
+    "package_url" : "https://github.com/harshil-gandhi-us/tryPod.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/13166.",
+    "package_url" : "https://github.com/skiptools/swift-android-native.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/13396.",
+    "package_url" : "https://github.com/hummingbird-project/hummingbird-redis.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/13686.",
+    "package_url" : "https://github.com/nashysolutions/feature-flags.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/14464.",
+    "package_url" : "https://github.com/CassetteLab/crate-digger.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/14892.",
+    "package_url" : "https://github.com/dankogai/swift-floatingpointmath.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/14949.",
+    "package_url" : "https://github.com/metaldragonxxx123/swift-helpers-lib.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/14949.",
+    "package_url" : "https://github.com/metaldragonxxx123/swift-utils-demo.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/14954.",
+    "package_url" : "https://github.com/metaldragonxxx123/swift-string-ext.git"
+  },
+  {
+    "notes" : "Related to https://github.com/SwiftPackageIndex/PackageList/issues/14954.",
+    "package_url" : "https://github.com/metaldragonxxx123/swift-date-utils.git"
+  },
+  {
+    "notes" : "Related to https://github.com/SwiftPackageIndex/PackageList/issues/14954.",
+    "package_url" : "https://github.com/metaldragonxxx123/swift-collection-utils.git"
+  },
+  {
+    "notes" : "Related to https://github.com/SwiftPackageIndex/PackageList/issues/14954.",
+    "package_url" : "https://github.com/metaldragonxxx123/swift-app-alpha.git"
+  },
+  {
+    "notes" : "Related to https://github.com/SwiftPackageIndex/PackageList/issues/14954.",
+    "package_url" : "https://github.com/metaldragonxxx123/swift-app-beta.git"
+  },
+  {
+    "notes" : "Related to https://github.com/SwiftPackageIndex/PackageList/issues/14954.",
+    "package_url" : "https://github.com/metaldragonxxx123/swift-app-gamma.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/15344.",
+    "package_url" : "https://github.com/FelixHerrmann/FHConstraints.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/15344.",
+    "package_url" : "https://github.com/FelixHerrmann/FHDiffableViewControllers.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/15344.",
+    "package_url" : "https://github.com/FelixHerrmann/FHExtensions.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/15344.",
+    "package_url" : "https://github.com/FelixHerrmann/FHPropertyWrappers.git"
+  },
+  {
+    "notes" : "Requested in https://github.com/SwiftPackageIndex/PackageList/issues/15442.",
+    "package_url" : "https://github.com/sriprakash-atatus/ios-testing.git"
+  }
+]

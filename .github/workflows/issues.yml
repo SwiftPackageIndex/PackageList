@@ -1,0 +1,208 @@
+name: Automatic Pull Request
+
+on:
+  issues:
+    types: [opened, reopened]
+
+env:
+  SWIFT_IMAGE: swift:6.4-jammy
+
+permissions: {}
+
+jobs:
+  add:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    if: contains(github.event.issue.labels.*.name, 'Add Package')
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Add Package to JSON
+        run: docker run --rm -e CI=true -e GH_BODY="$GH_BODY" -v "$PWD:/host" -w /host $SWIFT_IMAGE swift .github/add_package.swift
+        env:
+          GH_BODY: ${{ github.event.issue.body }}
+
+      # Fetches packages and hands them over to the next
+      # step where they are evaluated by .github/evaluate_manifests.sh.
+      - name: Validate JSON
+        run: |
+          mkdir -p "$RUNNER_TEMP/manifests"
+          docker run --rm \
+            -e CI=true \
+            -e GITHUB_TOKEN="$GITHUB_TOKEN" \
+            -e SPI_MANIFEST_DIR=/manifests \
+            -v "$RUNNER_TEMP/manifests:/manifests" \
+            -v "$PWD:/host" -w /host \
+            "$SWIFT_IMAGE" swift validate.swift
+        id: validate
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Runs third party code, holds nothing and can reach nothing.
+      - name: Evaluate manifests
+        env:
+          SPI_EVALUATION_MODE: fail
+        run: bash .github/evaluate_manifests.sh "$RUNNER_TEMP/manifests"
+        id: evaluate
+
+      - name: Check for Changes
+        run: bash .github/check_for_changes.sh
+        id: check
+
+      - name: Create Pull Request
+        id: cpr
+        if: steps.check.outputs.changes == 'true'
+        uses: peter-evans/create-pull-request@v8
+        with:
+          add-paths: |
+            packages.json
+          commit-message: ${{ github.event.issue.title }}
+          title: ${{ github.event.issue.title }}
+          branch: spi-auto-${{ github.event.issue.number }}
+          delete-branch: true
+          body: |
+            Closes #${{ github.event.issue.number }}
+
+            ## Original Message
+
+            ${{ github.event.issue.body }}
+          committer: GitHub <noreply@github.com>
+          author: GitHub <noreply@github.com>
+
+      - name: Update Issue (Success)
+        if: steps.check.outputs.changes == 'true'
+        uses: actions/github-script@v9
+        env:
+          PR_NUMBER: ${{ steps.cpr.outputs.pull-request-number }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `Thank you! We will approve and add these packages with #${process.env.PR_NUMBER}.`
+            })
+
+      - name: Update Issue (Failure)
+        if: ${{ failure() || steps.check.outputs.changes != 'true' }}
+        uses: actions/github-script@v9
+        env:
+          VALIDATE_ERROR: ${{ steps.validate.outputs.validateError || steps.evaluate.outputs.validateError }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const validateError = process.env.VALIDATE_ERROR || 'None'
+            await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `It looks like there’s nothing to do here!\n\nThe package may [already be in the package list](https://github.com/SwiftPackageIndex/PackageList/blob/main/packages.json) or on the [denylist](https://github.com/SwiftPackageIndex/PackageList/blob/main/denylist.json). Or, if you submitted the wrong URL or there’s a typo, please close this issue and [start a new one](https://github.com/SwiftPackageIndex/PackageList/issues/new/choose).\n\n>Validate Error: ${validateError}`
+            })
+  remove:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    if: contains(github.event.issue.labels.*.name, 'Remove Package')
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Remove Package from JSON
+        run: docker run --rm -e CI=true -e GH_BODY="$GH_BODY" -e GH_ISSUE="$GH_ISSUE" -v "$PWD:/host" -w /host $SWIFT_IMAGE swift .github/remove_package.swift
+        env:
+          GH_BODY: ${{ github.event.issue.body }}
+          GH_ISSUE: ${{ github.event.issue.number }}
+
+      # Fetches packages and hands them over to the next
+      # step where they are evaluated by .github/evaluate_manifests.sh.
+      - name: Validate JSON
+        run: |
+          mkdir -p "$RUNNER_TEMP/manifests"
+          docker run --rm \
+            -e CI=true \
+            -e GITHUB_TOKEN="$GITHUB_TOKEN" \
+            -e SPI_MANIFEST_DIR=/manifests \
+            -v "$RUNNER_TEMP/manifests:/manifests" \
+            -v "$PWD:/host" -w /host \
+            "$SWIFT_IMAGE" swift validate.swift
+        id: validate
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Runs third party code, holds nothing and can reach nothing.
+      - name: Evaluate manifests
+        env:
+          SPI_EVALUATION_MODE: fail
+        run: bash .github/evaluate_manifests.sh "$RUNNER_TEMP/manifests"
+        id: evaluate
+
+      - name: Check for Changes
+        run: bash .github/check_for_changes.sh
+        id: check
+
+      - name: Create Pull Request
+        id: cpr
+        if: steps.check.outputs.changes == 'true'
+        uses: peter-evans/create-pull-request@v8
+        with:
+          add-paths: |
+            packages.json
+            denylist.json
+          commit-message: ${{ github.event.issue.title }}
+          title: ${{ github.event.issue.title }}
+          branch: spi-auto-${{ github.event.issue.number }}
+          delete-branch: true
+          body: |
+            Closes #${{ github.event.issue.number }}
+
+            ## Original Message
+
+            ${{ github.event.issue.body }}
+          committer: GitHub <noreply@github.com>
+          author: GitHub <noreply@github.com>
+
+      - name: Update Issue (Success)
+        if: steps.check.outputs.changes == 'true'
+        uses: actions/github-script@v9
+        env:
+          PR_NUMBER: ${{ steps.cpr.outputs.pull-request-number }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `Thank you! We will approve and remove these packages with #${process.env.PR_NUMBER}.`
+            })
+
+      - name: Update Issue (Failure)
+        if: ${{ failure() || steps.check.outputs.changes != 'true' }}
+        uses: actions/github-script@v9
+        env:
+          VALIDATE_ERROR: ${{ steps.validate.outputs.validateError || steps.evaluate.outputs.validateError }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const validateError = process.env.VALIDATE_ERROR || 'None'
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `Oh no! We were unable to detect any valid packages in your submission. If you submitted the wrong URL and would like to update it, please [open a new issue](https://github.com/SwiftPackageIndex/PackageList/issues/new/choose).\n\n>Validate Error: ${validateError}`
+            })

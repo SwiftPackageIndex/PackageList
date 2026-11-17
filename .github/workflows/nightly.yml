@@ -1,48 +1,168 @@
 name: Nightly Audit
 
-on: 
+on:
   workflow_dispatch:
   schedule:
-    - cron: '0 2 * * *'
+    - cron: '0 6 * * *'
+
+env:
+  # Keep in step with the `container:` images below. Those cannot reference `env`, so the value is
+  # repeated rather than shared. This one is what the manifest evaluation containers run.
+  SWIFT_IMAGE: swift:6.3-jammy
+
+permissions: {}
 
 jobs:
-  run_nightly:
-    runs-on: macos-latest
+
+  build_validator:
+    runs-on: ubuntu-latest
+    container:
+      image: swift:6.3-jammy
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
+      - name: Build validator
+        run: |
+          git clone https://github.com/SwiftPackageIndex/PackageList-Validator.git --depth 1
+          cd PackageList-Validator
+          swift build
+          cp $(swift build --show-bin-path)/validator $GITHUB_WORKSPACE/
 
-    - name: Run checks
-      env:
-        DEVELOPER_DIR: /Applications/Xcode_12.5.app
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        rm -f ./validator
-        curl -s -O "https://raw.githubusercontent.com/SwiftPackageIndex/PackageList-Validator/main/validator"
-        chmod +x ./validator
-        ./validator --version
-        ./validator check-redirects -i packages.json -o packages.json
-        echo
-        echo packages.json diff:
-        git diff packages.json
-        echo
-        ./validator check-dependencies -i packages.json -o packages.json
-        rm validator  # prevent binary from appearing in the PR
+      - name: Upload validator
+        uses: actions/upload-artifact@v7
+        with:
+          name: validator
+          path: validator
 
-    - name: Create Pull Request
-      id: cpr
-      uses: peter-evans/create-pull-request@v3
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        commit-message: Updated Packages
-        title: '[Nightly] Updated Packages'
-        body: |
-          :robot: This is an automated change
-          
-          - Removed any redirects
-          - Removed any duplicates
-          - Removed any deleted repositories
-          - Added any unknown dependencies
 
-    - name: Check outputs
-      run: echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
+  check_redirects:
+    needs: build_validator
+    env:
+      CONCURRENCY: "10"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    container:
+      image: swift:6.3-jammy
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Download validator
+        uses: actions/download-artifact@v8
+        with:
+          name: validator
+
+      - name: Check redirect
+        uses: nick-fields/retry@v4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          timeout_minutes: 60
+          max_attempts: 1
+          retry_on: error
+          command: |
+            chmod +x ./validator
+            ./validator check-redirects -i packages.json -o redirect-checked.json --concurrency $CONCURRENCY
+            echo "diff packages.json redirect-checked.json"
+            diff packages.json redirect-checked.json || true
+
+      - name: Upload redirect-checked.json
+        uses: actions/upload-artifact@v7
+        with:
+          name: redirect-checked.json
+          path: redirect-checked.json
+
+
+  check_dependencies:
+    needs: check_redirects
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      contents: write
+      pull-requests: write
+    # No `container:` here, unlike the jobs above: evaluating manifests means running third party
+    # code in a container of its own, and the runner's docker is not reachable from inside one.
+    steps:
+      # we need to check out the repo in the last step in order to create a PR
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Download validator
+        uses: actions/download-artifact@v8
+        with:
+          name: validator
+
+      - name: Download redirect-checked.json
+        uses: actions/download-artifact@v8
+        with:
+          name: redirect-checked.json
+
+      # Fetches candidate manifests and hands them over to the next step, which is where they are
+      # evaluated. This holds the tokens but runs nothing it downloads.
+      - name: Fetch dependency manifests
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SPI_API_TOKEN: ${{ secrets.SPI_API_TOKEN }}
+        run: |
+          chmod +x ./validator
+          mkdir -p "$RUNNER_TEMP/manifests"
+          docker run --rm \
+            --user "$(id -u):$(id -g)" \
+            --env GITHUB_TOKEN="$GITHUB_TOKEN" \
+            -v "$RUNNER_TEMP/manifests:/manifests" \
+            -v "$PWD:/host" -w /host \
+            "$SWIFT_IMAGE" \
+            ./validator check-dependencies \
+              --spi-api-token "$SPI_API_TOKEN" \
+              --input redirect-checked.json \
+              --deny-list denylist.json \
+              --manifest-dir /manifests \
+              --limit 40
+
+      # Runs third party code, holds nothing and can reach nothing. `report` because a candidate
+      # dependency that does not build is simply not added, rather than a failed audit.
+      - name: Evaluate manifests
+        env:
+          SPI_EVALUATION_MODE: report
+        run: bash .github/evaluate_manifests.sh "$RUNNER_TEMP/manifests"
+
+      # Both write into the checkout that the pull request is raised from, so they run as the
+      # runner's own uid rather than leaving root owned files behind.
+      - name: Add validated dependencies
+        run: |
+          docker run --rm \
+            --user "$(id -u):$(id -g)" \
+            -v "$RUNNER_TEMP/manifests:/manifests" \
+            -v "$PWD:/host" -w /host \
+            "$SWIFT_IMAGE" \
+            ./validator add-validated-dependencies \
+              --manifest-dir /manifests \
+              --input redirect-checked.json --output packages.json
+          docker run --rm \
+            --user "$(id -u):$(id -g)" \
+            -v "$PWD:/host" -w /host \
+            "$SWIFT_IMAGE" \
+            ./validator apply-deny-list -p packages.json -d denylist.json
+          # Stop artifacts from appearing in the PR
+          rm -f redirect-checked.json validator
+
+      - name: Create pull request
+        id: cpr
+        uses: peter-evans/create-pull-request@v8
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: Updated Packages
+          title: '[Nightly] Updated Packages'
+          body: |
+            :robot: This is an automated change
+            
+            - Removed any redirects
+            - Removed any duplicates
+            - Removed any deleted repositories
+            - Added any unknown dependencies
+
+      - name: Check outputs
+        run: echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"

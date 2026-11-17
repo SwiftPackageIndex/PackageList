@@ -1,4 +1,5 @@
 .DS_Store
-
+.nova/
 packages.backup.json
 *.playground
+.prettierignore

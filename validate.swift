@@ -1,28 +1,43 @@
 #!/usr/bin/env swift
 
+// Copyright 2018-2021 Dave Verwer, Sven A. Schmidt, and other contributors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 import Foundation
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
+
 
 // MARK: - Constants
 
 enum Constants {
     static let githubPackageListURL = URL(string: "https://raw.githubusercontent.com/SwiftPackageIndex/PackageList/main/packages.json")!
     static let githubToken = ProcessInfo.processInfo.environment["GITHUB_TOKEN"]
+    static let manifestDirectory = ProcessInfo.processInfo.environment["SPI_MANIFEST_DIR"]
+        .map { URL(fileURLWithPath: $0) }
 }
 
 // MARK: - Type declarations
 
 enum AppError: Error {
     case invalidURL(URL)
-    case fetchTimeout(URL)
+    case manifestDirectoryNotSet
+    case manifestNotFound(URL)
     case networkingError(Error)
-    case noData(URL)
-    case noProducts(URL)
     case notFound(URL)
-    case packageDumpError(String)
-    case packageDumpTimeout
+    case outputIdentical
     case packageListChanged
     case packageMoved
     case rateLimitExceeded(URL, reportedLimit: Int)
@@ -31,27 +46,23 @@ enum AppError: Error {
     var localizedDescription: String {
         switch self {
             case .invalidURL(let url):
-                return "invalid url: \(url.absoluteString)"
-            case .fetchTimeout(let url):
-                return "timeout while fetching url: \(url.absoluteString)"
+                return "invalid url: \(url)"
+            case .manifestDirectoryNotSet:
+                return "SPI_MANIFEST_DIR is not set. Manifests are fetched there for .github/evaluate_manifests.sh to evaluate, so set it to a directory that already exists."
+            case .manifestNotFound(let url):
+                return "no package manifest found at url: \(url)"
             case .networkingError(let error):
                 return "networking error: \(error.localizedDescription)"
-            case .noData(let url):
-                return "no data returned from url: \(url.absoluteString)"
-            case .noProducts(let url):
-                return "package has not products: \(url.absoluteString)"
             case .notFound(let url):
-                return "url not found (404): \(url.absoluteString)"
-            case .packageDumpError(let msg):
-                return "package dump failed: \(msg)"
-            case .packageDumpTimeout:
-                return "timeout while running `swift package dump-package`"
+                return "url not found (404): \(url)"
+            case .outputIdentical:
+                return "resulting package.json is unchanged. This typically means the package is already in the index."
             case .packageListChanged:
                 return "package list was modified"
             case .packageMoved:
                 return "package moved"
             case let .rateLimitExceeded(url, limit):
-                return "rate limit of \(limit) exceeded while requesting url: \(url.absoluteString)"
+                return "rate limit of \(limit) exceeded while requesting url: \(url)"
             case .syntaxError(let msg):
                 return msg
         }
@@ -63,34 +74,64 @@ enum RunMode {
     case processPackageList
 }
 
-struct Product: Decodable {
-    let name: String
+// Other helpers
+
+extension Sequence {
+    func mapAsync<T>(_ transform: (Element) async throws -> T) async rethrows -> [T] {
+        var results = [T]()
+        for element in self {
+            try await results.append(transform(element))
+        }
+        return results
+    }
 }
 
-struct Package: Decodable {
-    let name: String
-    let products: [Product]
-}
+// Ideally we'd be using Mutex from the Synchronization framework but it's causing
+// JIT session error: Symbols not found: [ __tlsdesc_resolver, __aarch64_cas4_rel, __aarch64_cas4_acq ]
+// errors on arm64 Linux (6.0.3-jammy).
+@dynamicMemberLookup
+public final class QueueIsolated<Value: Sendable>: @unchecked Sendable {
+    private let _queue = DispatchQueue(label: "queue-isolated")
 
-// MARK: - Generic helpers
+    private var _value: Value
 
-extension Pipe {
-    convenience init(readabilityHandler: ((FileHandle) -> Void)?) {
-        self.init()
-        self.fileHandleForReading.readabilityHandler = readabilityHandler
+    public init(_ value: Value) {
+        self._value = value
+    }
+
+    public var value: Value {
+        get { _queue.sync { self._value } }
+    }
+
+    public subscript<Subject>(dynamicMember keyPath: KeyPath<Value, Subject>) -> Subject {
+        _queue.sync { self._value[keyPath: keyPath] }
+    }
+
+    public func withValue<T>(_ operation: (inout Value) throws -> T) rethrows -> T {
+        try _queue.sync {
+            var value = self._value
+            defer { self._value = value }
+            return try operation(&value)
+        }
+    }
+
+    public func setValue(_ newValue: Value) {
+        _queue.async { self._value = newValue }
     }
 }
 
 // MARK: - Redirect handling
 
-class RedirectFollower: NSObject, URLSessionDataDelegate {
-    var lastURL: URL?
+final class RedirectFollower: NSObject, URLSessionDataDelegate {
+    let lastURL: QueueIsolated<URL?> = .init(nil)
     init(initialURL: URL) {
-        self.lastURL = initialURL
+        self.lastURL.setValue(initialURL)
     }
 
     func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
-        lastURL = request.url ?? lastURL
+        if let url = request.url {
+            lastURL.setValue(url)
+        }
         // FIXME: port 404 and 429 handling from PackageList/Validator
         completionHandler(request)
     }
@@ -99,63 +140,46 @@ class RedirectFollower: NSObject, URLSessionDataDelegate {
 extension URL {
     func followingRedirects(timeout: TimeInterval = 30) -> URL? {
         let semaphore = DispatchSemaphore(value: 0)
-        
+
         let follower = RedirectFollower(initialURL: self)
         let session = URLSession(configuration: .default, delegate: follower, delegateQueue: nil)
-        
+
         let task = session.dataTask(with: self) { (_, response, error) in
             semaphore.signal()
         }
-        
+
         task.resume()
         _ = semaphore.wait(timeout: .now() + timeout)
-        
-        return follower.lastURL
+
+        return follower.lastURL.value
     }
 }
 
 // MARK: - Networking
 
-func fetch(_ url: URL, timeout: Int = 10) throws -> Data {
-    var request = URLRequest(url: url)
-    
+func fetch(_ url: URL, timeout: TimeInterval = 10) async throws -> Data {
+    var request = URLRequest(url: url, timeoutInterval: timeout)
+
     if let token = Constants.githubToken {
         request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
     }
-    
-    let semaphore = DispatchSemaphore(value: 0)
-    
-    var payload: Data?
-    var taskError: AppError?
-    
+
     let session = URLSession(configuration: .default)
-    let task = session.dataTask(with: request) { (data, response, error) in
+    
+    do {
+        let (data, response) = try await session.data(for: request)
         let httpResponse = response as? HTTPURLResponse
-        
+    
         if let limit = httpResponse?.value(forHTTPHeaderField: "X-RateLimit-Limit").flatMap(Int.init),
-           let remaining = httpResponse?.value(forHTTPHeaderField: "X-RateLimit-Remaining").flatMap(Int.init),
-           remaining == 0 {
-            taskError = .rateLimitExceeded(url, reportedLimit: limit)
+        let remaining = httpResponse?.value(forHTTPHeaderField: "X-RateLimit-Remaining").flatMap(Int.init),
+        remaining == 0 {
+            throw AppError.rateLimitExceeded(url, reportedLimit: limit)
         } else if httpResponse?.statusCode == 404 {
-            taskError = .notFound(url)
-        } else if let error = error {
-            taskError = .networkingError(error)
+            throw AppError.notFound(url)
         }
-        
-        payload = data
-        semaphore.signal()
-    }
-    
-    task.resume()
-    
-    switch semaphore.wait(timeout: .now() + .seconds(timeout)) {
-    case .timedOut:
-        throw AppError.fetchTimeout(url)
-    case .success where taskError != nil:
-        throw taskError!
-    case .success:
-        guard let payload = payload else { throw AppError.noData(url) }
-        return payload
+        return data
+    } catch {
+        throw AppError.networkingError(error)
     }
 }
 
@@ -174,8 +198,20 @@ extension String {
         return self
     }
 
+    func rtrim(_ characterSet: CharacterSet = .whitespacesAndNewlines) -> String {
+        String(
+            reversed()
+                .drop(while: { char in
+                    CharacterSet(charactersIn: String(char)).isSubset(of: characterSet)
+                })
+                .reversed()
+        )
+    }
+
     func normalized() -> String {
-        lowercased().addingGitExtension()
+        lowercased()
+            .rtrim(.init(charactersIn: "/"))
+            .addingGitExtension()
     }
 }
 
@@ -189,7 +225,10 @@ extension URL {
     }
 
     func normalized() -> String {
-        absoluteString.lowercased().addingGitExtension()
+        absoluteString
+            .lowercased()
+            .rtrim(.init(charactersIn: "/"))
+            .addingGitExtension()
     }
 }
 
@@ -223,9 +262,9 @@ func parseArgs(_ args: [String]) throws -> RunMode {
     return .processURL(url)
 }
 
-func getDefaultBranch(owner: String, repository: String) throws -> String {
+func getDefaultBranch(owner: String, repository: String) async throws -> String {
     let url = URL(string: "https://api.github.com/repos/\(owner)/\(repository)")!
-    let json = try fetch(url)
+    let json = try await fetch(url)
 
     struct Repository: Decodable {
         let default_branch: String
@@ -234,91 +273,88 @@ func getDefaultBranch(owner: String, repository: String) throws -> String {
     return try JSONDecoder().decode(Repository.self, from: json).default_branch
 }
 
-func getManifestURL(_ url: URL) throws -> URL {
+struct RepoFile: Codable {
+    var type: String
+    var path: String
+}
+
+func parseOwnerRepo(from url: URL) -> (owner: String, repository: String) {
     let repository = (url.pathExtension.lowercased() == "git")
         ? url.deletingPathExtension().lastPathComponent
         : url.lastPathComponent
-    let owner = url.deletingLastPathComponent().lastPathComponent    
-    let defaultBranch = try getDefaultBranch(owner: owner, repository: repository)
-    return URL(string: "https://raw.githubusercontent.com/\(owner)/\(repository)/\(defaultBranch)/Package.swift")!
+    let owner = url.deletingLastPathComponent().lastPathComponent
+    return (owner, repository)
 }
 
-func createTempDir() throws -> URL {
+func listFilesInRepo(owner: String, repository: String, branch: String) async throws -> [RepoFile] {
+    let apiURL = URL(string: "https://api.github.com/repos/\(owner)/\(repository)/git/trees/\(branch)")!
+    let json = try await fetch(apiURL)
+    struct Response: Codable {
+        var tree: [RepoFile]
+    }
+    do {
+        return try JSONDecoder().decode(Response.self, from: json).tree
+    } catch {
+        print("failed to parse listFilesInRepo response:")
+        print(String(decoding: json, as: UTF8.self))
+        throw error
+    }
+}
+
+func getManifestURLs(_ url: URL) async throws -> [URL] {
+    let (owner, repository) = parseOwnerRepo(from: url)
+    let branch = try await getDefaultBranch(owner: owner, repository: repository)
+    let manifestFiles = try await listFilesInRepo(owner: owner, repository: repository, branch: branch)
+      .filter { $0.type == "blob" }
+      .filter { $0.path.hasPrefix("Package") }
+      .filter { $0.path.hasSuffix(".swift") }
+      .map(\.path)
+      .sorted()
+    guard !manifestFiles.isEmpty else { throw AppError.manifestNotFound(url) }
+    return manifestFiles.map {
+        URL(string: "https://raw.githubusercontent.com/\(owner)/\(repository)/\(branch)/\($0)")!
+    }
+}
+
+// MARK: - Manifests
+
+// Once we've pulled the manifests we can hand them over to the evaluation step which can safely run 3rd party code. 
+func handOverManifests(of url: URL, to root: URL) async throws {
     let fm = FileManager.default
-    let tempDir = fm.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-    try fm.createDirectory(at: tempDir, withIntermediateDirectories: false, attributes: nil)
-    return tempDir
-}
+    let directory = root.appendingPathComponent(UUID().uuidString)
+    let manifests = directory.appendingPathComponent("manifests")
 
-func createDumpPackageProcess(at path: URL, standardOutput: Pipe, standardError: Pipe) -> Process {
-    let process = Process()
-    process.executableURL = URL(fileURLWithPath: "/usr/bin/swift")
-    process.arguments = ["package", "dump-package"]
-    process.currentDirectoryURL = path
-    process.standardOutput = standardOutput
-    process.standardError = standardError
-    return process
-}
+    // Not creating intermediates, so a handover directory that was never mounted fails here
+    // rather than leaving the evaluation step with nothing to find and nothing to report.
+    try fm.createDirectory(at: directory, withIntermediateDirectories: false)
+    try fm.createDirectory(at: manifests, withIntermediateDirectories: false)
 
-func runDumpPackage(at path: URL, timeout: TimeInterval = 20) throws -> Data {
-    let queue = DispatchQueue(label: "process-pipe-read-queue")
-    var stdout = Data()
-    var stderr = Data()
-    let stdoutPipe = Pipe { handler in
-        queue.async { stdout.append(handler.availableData) }
-    }
-    let stderrPipe = Pipe { handler in
-        queue.async { stderr.append(handler.availableData) }
+    for manifestURL in try await getManifestURLs(url) {
+        let manifest = try await fetch(manifestURL)
+        try manifest.write(to: manifests.appendingPathComponent(manifestURL.lastPathComponent))
     }
 
-    let process = createDumpPackageProcess(at: path, standardOutput: stdoutPipe, standardError: stderrPipe)
-    
-    DispatchQueue.main.asyncAfter(deadline: .now() + timeout) {
-        if process.isRunning { process.terminate() }
-    }
-    try process.run()
-    process.waitUntilExit()
-    
-    switch process.terminationStatus {
-        case 0:
-            return stdout
-        case 15:
-            throw AppError.packageDumpTimeout
-        default:
-            let error = String(data: stderr, encoding: .utf8) ?? "(nil)"
-            throw AppError.packageDumpError(error)
-    }
+    // The url alongside the manifests rather than among them, so the evaluation step can name
+    // the package it could not evaluate while mounting nothing but manifests.
+    try Data(url.absoluteString.utf8).write(to: directory.appendingPathComponent("url"))
 }
 
-func dumpPackage(url: URL) throws -> Package {
-    let manifestURL = try getManifestURL(url)
-    let manifest = try fetch(manifestURL)
-    
-    let tempDir = try createTempDir()
-    let fileURL = tempDir.appendingPathComponent("Package.swift")
-    try manifest.write(to: fileURL)
-
-    let json = try runDumpPackage(at: tempDir)
-    return try JSONDecoder().decode(Package.self, from: json)
-}
-
-func verifyURL(_ url: URL) throws -> URL {
+func verifyURL(_ url: URL) async throws -> URL {
+    print("verifying", url)
     guard let resolvedURL = url.followingRedirects() else { throw AppError.invalidURL(url) }
-    let pkg = try dumpPackage(url: resolvedURL)
-    guard !pkg.products.isEmpty else {
-        throw AppError.noProducts(url)
-    }
+    guard let handoverDirectory = Constants.manifestDirectory else { throw AppError.manifestDirectoryNotSet }
+    try await handOverManifests(of: resolvedURL, to: handoverDirectory)
     return resolvedURL
 }
 
-func fetchGithubPackageList() throws -> [URL] {
-    let json = try fetch(Constants.githubPackageListURL)
+func fetchGithubPackageList() async throws -> [URL] {
+    let json = try await fetch(Constants.githubPackageListURL)
     return try JSONDecoder().decode([URL].self, from: json)
 }
 
-func processPackageList() throws {
+func processPackageList() async throws {
     print("Processing package list ...")
-    let onlinePackageList = try fetchGithubPackageList()
+    let onlinePackageList = try await fetchGithubPackageList()
         .map { url -> URL in
             let updated = url.appendingGitExtension()
             if updated != url {
@@ -337,9 +373,9 @@ func processPackageList() throws {
         print("The packages.json file contained duplicate rows")
     }
 
-    let additions = try localPackageList // use localPackageList to preserve original casing
+    let additions = try await localPackageList // use localPackageList to preserve original casing
         .filter { !normalizedOnlineList.contains($0.normalized()) }
-        .map { try verifyURL($0).appendingGitExtension() }
+        .mapAsync { try await verifyURL($0).appendingGitExtension() }
         .filter {
             // filter again, in case a redirect happens to be in the list already
             !normalizedOnlineList.contains($0.normalized())
@@ -368,31 +404,39 @@ func processPackageList() throws {
         return try encoder.encode(newList)
     }()
 
-    if packageListData != newListData {
-        print("⚠️  Changes have been made to 'packages.json'. Your original version has been")
-        print("⚠️  copied to 'package.backup.json'. Please commit the updated file.")
-        let backupURL = packageListFileURL.deletingLastPathComponent()
-            .appendingPathComponent("packages.backup.json")
-        try packageListData.write(to: backupURL)
-        try newListData.write(to: packageListFileURL)
-        throw AppError.packageListChanged
+    do {
+        let original = String(decoding: packageListData, as: UTF8.self).trimmingCharacters(in: .whitespacesAndNewlines)
+        let new = String(decoding: newListData, as: UTF8.self).trimmingCharacters(in: .whitespacesAndNewlines)
+        if original != new {
+            if newList == onlinePackageList.map(\.absoluteString) {
+                throw AppError.outputIdentical
+            } else {
+                print("⚠️  Changes have been made to 'packages.json'. Your original version has been")
+                print("⚠️  copied to 'package.backup.json'. Please commit the updated file.")
+                let backupURL = packageListFileURL.deletingLastPathComponent()
+                    .appendingPathComponent("packages.backup.json")
+                try packageListData.write(to: backupURL)
+                try newListData.write(to: packageListFileURL)
+                throw AppError.packageListChanged
+            }
+        }
     }
 }
 
-func main(args: [String]) throws {
+func main(args: [String]) async throws {
     if Constants.githubToken == nil {
         print("Warning: Using anonymous authentication -- may run into rate limiting issues\n")
     }
 
     switch try parseArgs(args) {
         case .processURL(let url):
-            let resolvedURL = try verifyURL(url)
+            let resolvedURL = try await verifyURL(url)
             if resolvedURL.absoluteString != url.absoluteString {
                 print("ℹ️  package moved: \(url) -> \(resolvedURL)")
                 throw AppError.packageMoved
             }
         case .processPackageList:
-            try processPackageList()
+            try await processPackageList()
     }
     print("✅ validation succeeded")
     exit(EXIT_SUCCESS)
@@ -401,13 +445,35 @@ func main(args: [String]) throws {
 // MARK: - main
 
 do {
-    try main(args: CommandLine.arguments)
+    try await main(args: CommandLine.arguments)
 } catch {
     if let appError = error as? AppError {
         print("ERROR: \(appError.localizedDescription)")
+
+        if ProcessInfo.processInfo.environment["CI"] == "true" {
+            let output = "validateError=\(appError.localizedDescription)\n"
+            if let githubOutput = ProcessInfo.processInfo.environment["GITHUB_OUTPUT"] {
+                try? output.write(toFile: githubOutput, atomically: true, encoding: .utf8)
+            } else {
+                print(output)
+            }
+
+            if case .packageListChanged = appError {
+                // For CI it's acceptable for the package list to change as we'll simply take the output of this script
+                exit(EXIT_SUCCESS)
+            }
+        }
     } else {
-        print(error)
+        if ProcessInfo.processInfo.environment["CI"] == "true" {
+            let output = "validateError=\(error)\n"
+            if let githubOutput = ProcessInfo.processInfo.environment["GITHUB_OUTPUT"] {
+                try? output.write(toFile: githubOutput, atomically: true, encoding: .utf8)
+            } else {
+                print(output)
+            }
+        }
+
+        print("ERROR: \(error)")
     }
     exit(EXIT_FAILURE)
 }
-RunLoop.main.run()

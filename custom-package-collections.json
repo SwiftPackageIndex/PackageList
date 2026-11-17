@@ -1,0 +1,23 @@
+[
+    {
+        "key": "sswg-graduated",
+        "name": "Graduated",
+        "description": "SSWG packages that are in 'graduated' state",
+        "badge": "SSWG",
+        "url": "https://swift.org/api/v1/sswg/incubation/graduated.json"
+    },
+    {
+        "key": "sswg-incubating",
+        "name": "Incubating",
+        "description": "SSWG packages that are in 'incubating' state",
+        "badge": "SSWG",
+        "url": "https://swift.org/api/v1/sswg/incubation/incubating.json"
+    },
+    {
+        "key": "sswg-sandbox",
+        "name": "Sandbox",
+        "description": "SSWG packages that are in 'sandbox' state",
+        "badge": "SSWG",
+        "url": "https://swift.org/api/v1/sswg/incubation/sandbox.json"
+    }
+]
