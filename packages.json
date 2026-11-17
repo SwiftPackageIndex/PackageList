@@ -857,6 +857,7 @@
   "https://github.com/apple/swift-http-structured-headers.git",
   "https://github.com/apple/swift-http-types.git",
   "https://github.com/apple/swift-llbuild2.git",
+  "https://github.com/apple/swift-log-oslog.git",
   "https://github.com/apple/swift-log.git",
   "https://github.com/apple/swift-metrics.git",
   "https://github.com/apple/swift-mmio.git",
