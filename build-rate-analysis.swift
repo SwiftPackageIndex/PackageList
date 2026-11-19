@@ -152,6 +152,10 @@ func reportCommitCount(for list: String, dates: (String, String)) throws {
             }
         } catch { }
     }
+    do {
+        let data = try JSONEncoder().encode(counts)
+        try data.write(to: URL(fileURLWithPath: results))
+    }
     printResults(for: "Commits", list: list, counts: Array(counts.values))
 }
 
@@ -194,6 +198,10 @@ func reportReleaseCount(for list: String, dates: (String, String)) throws {
             }
         } catch { }
     }
+    do {
+        let data = try JSONEncoder().encode(counts)
+        try data.write(to: URL(fileURLWithPath: results))
+    }
     printResults(for: "Releases", list: list, counts: Array(counts.values))
 }
 
@@ -211,8 +219,8 @@ func reportReleaseCount(for list: String, dates: (String, String)) throws {
 
 // try reportCommitCount(for: oct24, dates: ("2024-09-01", "2024-10-01"))
 // try reportCommitCount(for: oct25, dates: ("2025-09-01", "2025-10-01"))
-// try reportCommitCount(for: oct26, dates: ("2026-09-01", "2026-10-01"))
+try reportCommitCount(for: oct26, dates: ("2026-09-01", "2026-10-01"))
 
 // try reportReleaseCount(for: oct24, dates: ("2024-09-01", "2024-10-01"))
 // try reportReleaseCount(for: oct25, dates: ("2025-09-01", "2025-10-01"))
-// try reportReleaseCount(for: oct26, dates: ("2026-09-01", "2026-10-01"))
+try reportReleaseCount(for: oct26, dates: ("2026-09-01", "2026-10-01"))
