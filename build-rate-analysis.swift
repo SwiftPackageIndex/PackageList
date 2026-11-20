@@ -128,6 +128,14 @@ func printResults(for label: String, list: String, counts: [Int]) {
 }
 
 
+extension [String: Int] {
+    func write(to path: String) throws {
+        let data = try JSONEncoder().encode(self)
+        try data.write(to: URL(fileURLWithPath: path))
+    }
+}
+
+
 func reportCommitCount(for list: String, dates: (String, String)) throws {
     let listCheckoutDir = "checkouts-\(list)"
     let results = "commits-\(list).json"
@@ -146,17 +154,58 @@ func reportCommitCount(for list: String, dates: (String, String)) throws {
                 print(idx, dirname, count)
                 counts[dirname] = count
                 if idx % 100 == 0 {
-                    let data = try JSONEncoder().encode(counts)
-                    try data.write(to: URL(fileURLWithPath: results))
+                    try counts.write(to: results)
                 }
             }
         } catch { }
     }
-    do {
-        let data = try JSONEncoder().encode(counts)
-        try data.write(to: URL(fileURLWithPath: results))
-    }
+    try counts.write(to: results)
     printResults(for: "Commits", list: list, counts: Array(counts.values))
+}
+
+
+func reportCommitBuildCount(for list: String, dates: (String, String)) throws {
+    let isoFormatter = ISO8601DateFormatter()
+    isoFormatter.formatOptions = [.withInternetDateTime]
+
+    let listCheckoutDir = "checkouts-\(list)"
+    let results = "commit-builds-\(list).json"
+    var counts = [String: Int]()
+    if FileManager.default.fileExists(atPath: results) {
+        let data = try Data(contentsOf: URL(fileURLWithPath: results))
+        counts = try JSONDecoder().decode([String: Int].self, from: data)
+    }
+    for (idx, url) in try FileManager.default.contentsOfDirectory(at: URL(fileURLWithPath: listCheckoutDir), includingPropertiesForKeys: nil).enumerated() {
+        let dirname = url.lastPathComponent
+        if counts[dirname] != nil { continue }
+        let path = "\(listCheckoutDir)/\(dirname)"
+        do {
+            let dates = try shellOut(to: "git log --since=\(dates.0) --before=\(dates.1) --pretty=format:'%cI'", at: path)
+                .split(separator: "\n")
+                .compactMap { isoFormatter.date(from: String($0)) }
+                .sorted()
+
+            if idx % 100 == 0 {
+                print("Index:", idx, dirname)
+                try counts.write(to: results)
+            }
+            if dates.count < 2 {
+                counts[dirname] = dates.count
+            } else {
+                var count = 0
+                var cooldownPeriod = 48
+                for (d1, d2) in zip(dates, dates.dropFirst()) {
+                    let deltaHours = Calendar.current.dateComponents([.hour], from: d1, to: d2).hour ?? 0
+                    if deltaHours >= cooldownPeriod {
+                        count += 1
+                    }
+                }
+                counts[dirname] = count
+            }
+        } catch { }
+    }
+    try counts.write(to: results)
+    printResults(for: "Commit builds", list: list, counts: Array(counts.values))
 }
 
 
@@ -193,15 +242,11 @@ func reportReleaseCount(for list: String, dates: (String, String)) throws {
             print(idx, dirname, count)
             counts[dirname] = count
             if idx % 100 == 0 {
-                let data = try JSONEncoder().encode(counts)
-                try data.write(to: URL(fileURLWithPath: results))
+                try counts.write(to: results)
             }
         } catch { }
     }
-    do {
-        let data = try JSONEncoder().encode(counts)
-        try data.write(to: URL(fileURLWithPath: results))
-    }
+    try counts.write(to: results)
     printResults(for: "Releases", list: list, counts: Array(counts.values))
 }
 
@@ -219,8 +264,10 @@ func reportReleaseCount(for list: String, dates: (String, String)) throws {
 
 // try reportCommitCount(for: oct24, dates: ("2024-09-01", "2024-10-01"))
 // try reportCommitCount(for: oct25, dates: ("2025-09-01", "2025-10-01"))
-try reportCommitCount(for: oct26, dates: ("2026-09-01", "2026-10-01"))
+// try reportCommitCount(for: oct26, dates: ("2026-09-01", "2026-10-01"))
+
+try reportCommitBuildCount(for: oct26, dates: ("2026-09-01", "2026-10-01"))
 
 // try reportReleaseCount(for: oct24, dates: ("2024-09-01", "2024-10-01"))
 // try reportReleaseCount(for: oct25, dates: ("2025-09-01", "2025-10-01"))
-try reportReleaseCount(for: oct26, dates: ("2026-09-01", "2026-10-01"))
+// try reportReleaseCount(for: oct26, dates: ("2026-09-01", "2026-10-01"))

@@ -8,3 +8,4 @@ checkouts/
 commits-*.json
 packages-*.json
 releases-*.json
+commit-builds-*.json
