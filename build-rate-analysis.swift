@@ -165,6 +165,7 @@ func reportCommitCount(for list: String, dates: (String, String)) throws {
 
 
 func reportCommitBuildCount(for list: String, dates: (String, String)) throws {
+    let cooldownPeriod = 24
     let isoFormatter = ISO8601DateFormatter()
     isoFormatter.formatOptions = [.withInternetDateTime]
 
@@ -193,7 +194,6 @@ func reportCommitBuildCount(for list: String, dates: (String, String)) throws {
                 counts[dirname] = dates.count
             } else {
                 var count = 0
-                var cooldownPeriod = 48
                 for (d1, d2) in zip(dates, dates.dropFirst()) {
                     let deltaHours = Calendar.current.dateComponents([.hour], from: d1, to: d2).hour ?? 0
                     if deltaHours >= cooldownPeriod {
@@ -205,7 +205,7 @@ func reportCommitBuildCount(for list: String, dates: (String, String)) throws {
         } catch { }
     }
     try counts.write(to: results)
-    printResults(for: "Commit builds", list: list, counts: Array(counts.values))
+    printResults(for: "Commit builds (\(cooldownPeriod)h)", list: list, counts: Array(counts.values))
 }
 
 
@@ -264,10 +264,10 @@ func reportReleaseCount(for list: String, dates: (String, String)) throws {
 
 // try reportCommitCount(for: oct24, dates: ("2024-09-01", "2024-10-01"))
 // try reportCommitCount(for: oct25, dates: ("2025-09-01", "2025-10-01"))
-// try reportCommitCount(for: oct26, dates: ("2026-09-01", "2026-10-01"))
+try reportCommitCount(for: oct26, dates: ("2026-09-01", "2026-10-01"))
 
 try reportCommitBuildCount(for: oct26, dates: ("2026-09-01", "2026-10-01"))
 
 // try reportReleaseCount(for: oct24, dates: ("2024-09-01", "2024-10-01"))
 // try reportReleaseCount(for: oct25, dates: ("2025-09-01", "2025-10-01"))
-// try reportReleaseCount(for: oct26, dates: ("2026-09-01", "2026-10-01"))
+try reportReleaseCount(for: oct26, dates: ("2026-09-01", "2026-10-01"))
